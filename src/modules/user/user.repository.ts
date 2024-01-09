@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './entity/user.entity';
 
 @Injectable()
 export class UserRepository extends Repository<User>{
@@ -15,11 +15,14 @@ export class UserRepository extends Repository<User>{
         return this.userRepository.findOne({
             where: {
                 username: username
-            },
+            }
+        });
+    }
+
+    async findMany(): Promise<User[]> {
+        return this.userRepository.find({
             relations: {
-                role: {
-                    access_path: true
-                }
+                role: true
             }
         });
     }
@@ -29,13 +32,8 @@ export class UserRepository extends Repository<User>{
             where: {
                 id: id
             },
-            select: {
-                password: false
-            },
             relations: {
-                role: {
-                    access_path: true
-                }
+                role: true
             }
         });
     }
@@ -52,12 +50,7 @@ export class UserRepository extends Repository<User>{
                     id: true,
                     name: true,
                     major: true,
-                    user: { id: true },
-                    access_path: {
-                        id: true,
-                        path: true,
-                        role: { id: true}
-                    }
+                    user: { id: true }
                 }
             }
         })

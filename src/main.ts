@@ -4,8 +4,8 @@ import { AppModule } from './app.module';
 import { initializeTransactionalContext } from 'typeorm-transactional/dist/common';
 import { TypeormStore } from 'connect-typeorm';
 import { DataSource } from 'typeorm';
-import { Session } from './modules/session/session.entity';
-import config, { passportConfig, pipesRegistrar } from "./config/security.config";
+import { Session } from './modules/auth/session/session.entity';
+import config, { passportConfig, pipesRegistrar, setupSwagger } from "./config/application.config";
 import * as session from 'express-session';
 import * as dotenv from "dotenv";
 
@@ -15,6 +15,8 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, {cors: config.corsOption});
   const sessionRepository = app.get(DataSource).getRepository(Session);
+
+  setupSwagger(app);
 
   app.setGlobalPrefix(config.globalPrefix);
   app.use(
@@ -40,6 +42,7 @@ async function bootstrap() {
   try{
     await app.listen(process.env.APP_PORT);
     Logger.log(`Nest running on port ${process.env.APP_PORT}`, "Application")
+    Logger.log(`Swagger available at ${process.env.APP_URL}/api`, "Swagger")
   } catch(error) {
     Logger.log(`Error starting Nest application: ${error}`, "","Application", false);
     process.exit(1);

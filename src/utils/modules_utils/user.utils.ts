@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { EntityClassOrSchema } from "@nestjs/typeorm/dist/interfaces/entity-class-or-schema.type";
 import { DataNotFoundException } from "src/exceptions/data_not_found.exception";
 import { DuplicateDataException } from "src/exceptions/duplicate_data.exception";
-import { User } from "src/modules/user/user.entity";
+import { User } from "src/modules/user/entity/user.entity";
 import { Repository } from "typeorm";
 
 @Injectable()

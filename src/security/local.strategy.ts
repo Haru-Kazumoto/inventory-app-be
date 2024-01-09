@@ -4,7 +4,7 @@ import { Strategy } from "passport-local";
 import { AuthService } from "../modules/auth/auth.service";
 import { AuthRequest } from "../modules/auth/interfaces/auth.request.interface";
 import { RoleRepository } from "src/modules/role/role.repository";
-import { User } from "src/modules/user/user.entity";
+import { User } from "src/modules/user/entity/user.entity";
 import { Roles } from "src/modules/role/roles.entity";
 import { DataNotFoundException } from "src/exceptions/data_not_found.exception";
 

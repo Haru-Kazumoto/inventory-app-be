@@ -1,18 +1,15 @@
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Exclude, instanceToPlain } from "class-transformer";
-import { Timestamps } from "../../utils/base.timestamps.utils";
-import { Roles } from "../role/roles.entity";
+import { BaseEntity } from "../../../utils/base.entity";
+import { Roles } from "../../role/roles.entity";
 
 @Entity({name: "users"})
-export class User extends Timestamps{
-
-    @PrimaryGeneratedColumn("increment")
-    public id: number;
+export class User extends BaseEntity{
 
     @Column()
     public name: string;
 
-    @Column()
+    @Column({unique: true})
     public username: string;
 
     @Column()

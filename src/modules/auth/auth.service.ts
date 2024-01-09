@@ -1,7 +1,7 @@
 import { UserService } from 'src/modules/user/user.service';
 import { ForbiddenException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IAuthService } from './auth.service.interface';
-import { User } from '../user/user.entity';
+import { User } from '../user/entity/user.entity';
 import * as bcrypt from "bcrypt";
 import { Request } from 'express';
 import { AuthRequest } from './auth.dto';
@@ -35,9 +35,13 @@ export class AuthService implements IAuthService {
 
     public async login(request: Request): Promise<any> {
         return {
-            message: `Hello, ${request.body.username}`,
-            statusCode: HttpStatus.OK
+            statusCode: HttpStatus.ACCEPTED,
+            message: `Hello, ${request.body.username}`
         };
+    }
+
+    public async getSession(idAccount: number): Promise<User> {
+        return await this.userRepsitory.findById(idAccount);
     }
 
     public async logout(request: Request): Promise<any> {

@@ -12,18 +12,21 @@ import {
     SetMetadata, 
     UseGuards, 
     UsePipes, 
-    ValidationPipe 
+    ValidationPipe,
+    Res
 } from '@nestjs/common';
 import { AuthenticatedGuard } from '../../security/guards/authenticated.guard';
 import { LocalGuard } from '../../security/guards/localguard.guard';
 import { AuthService } from './auth.service';
-import { Request as ExpressRequest} from 'express';
-import { AuthRequest } from './auth.dto';
-import { Session as ExpressSession } from 'express-session';
-import { User } from '../user/user.entity';
+import { Request as ExpressRequest, Response as ExpressResponse} from 'express';
+import { AuthLogin, AuthRequest } from './auth.dto';
+import { Session as ExpressSession, SessionData } from 'express-session';
+import { User } from '../user/entity/user.entity';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { Roles } from 'src/security/decorator/roles.decorator';
+import { ApiBody, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
+@ApiTags("Auth")
 @Controller('auth')
 export class AuthController {
 
@@ -35,13 +38,34 @@ export class AuthController {
     @UseGuards(LocalGuard)
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    login(@Req() request: ExpressRequest, @Session() session: ExpressSession){
-        console.log(session);
-        return this.authService.login(request);
+    @ApiOkResponse({
+        description: "Login success",
+        schema: {
+            type: "object",
+            properties: {
+                statusCode: {type: "number", example: 202},
+                message: {type: "string", example: "Hello Admin TJKT"}
+            }
+        }
+    })
+    @ApiUnauthorizedResponse({
+        description: "Unauthorized or invalid credentials",
+        schema: {
+            type: "object",
+            properties: {
+                statusCode: {type: "number", example: 401},
+                message: {type: "string", example: "Unauthorized"}
+            }
+        }
+    })
+    @ApiBody({type: AuthLogin, description: "Login credential requirements field"})
+    async login(@Req() request: ExpressRequest){
+        return await this.authService.login(request);
     }
 
     @HttpCode(HttpStatus.OK)
     @UsePipes(new ValidationPipe())
+    @ApiBody({type: AuthRequest, description: "Request requirements for registration user"})
     @Post('register')
     async register(@Body() request: AuthRequest, @Req() req: ExpressRequest){
         return await this.authService.register(request);
@@ -65,17 +89,10 @@ export class AuthController {
         return this.authService.logout(request);
     }
 
-    @UseGuards(AuthenticatedGuard, RolesGuard)
-    @Roles('ADMIN_AKL')
-    @Get('get-session')
-    async getSession(@Session() session: any): Promise<User>{
-        return session;
-    }
-
     @UseGuards(AuthenticatedGuard)
-    @HttpCode(HttpStatus.OK)
-    @Get('hello')
-    hello(): string{
-        return "Yey, u've already authenticated by passport session authentication!";
+    @Get('get-session')
+    async getSession(@Session() session: any, @Res() response: ExpressResponse): Promise<any>{
+        const user: User = session.passport.user;
+        return response.status(200).json({user: await this.authService.getSession(user.id)})
     }
 }
