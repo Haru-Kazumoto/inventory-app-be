@@ -5,7 +5,7 @@ import { User } from '../user/entity/user.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserService } from '../user/user.service';
-import { UserRepository } from '../user/user.repository';
+import { UserRepository } from '../user/repository/user.repository';
 import { LocalStrategy } from '../../security/local.strategy';
 import { SessionSerializer } from '../../security/session.serializer';
 import { UserModule } from '../user/user.module';

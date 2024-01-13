@@ -6,7 +6,7 @@ import * as bcrypt from "bcrypt";
 import { Request } from 'express';
 import { AuthRequest } from './auth.dto';
 import { Transactional } from 'typeorm-transactional';
-import { UserRepository } from '../user/user.repository';
+import { UserRepository } from '../user/repository/user.repository';
 import { comparePassword } from 'src/utils/password.utils';
 import { RoleRepository } from '../role/role.repository';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';

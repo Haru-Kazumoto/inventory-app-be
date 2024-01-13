@@ -3,16 +3,18 @@ import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entity/user.entity';
 import { ResponseHttp } from 'src/utils/response.http.utils';
-import { UserRepository } from './user.repository';
+import { UserRepository } from './repository/user.repository';
 import { UserService } from './user.service';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
 import { Roles } from 'src/security/decorator/roles.decorator';
 import { RoleModule } from '../role/role.module';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Roles]),
-    RoleModule
+    RoleModule,
+    NotificationModule
   ],
   controllers: [UserController],
   providers: [

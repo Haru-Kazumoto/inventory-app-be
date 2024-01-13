@@ -5,7 +5,12 @@ import { initializeTransactionalContext } from 'typeorm-transactional/dist/commo
 import { TypeormStore } from 'connect-typeorm';
 import { DataSource } from 'typeorm';
 import { Session } from './modules/auth/session/session.entity';
-import config, { passportConfig, pipesRegistrar, setupSwagger } from "./config/application.config";
+import config, { 
+  passportConfig, 
+  globalPipesRegistrar,
+  globalInterceptorRegistrar,
+  setupSwagger 
+} from "./config/application.config";
 import * as session from 'express-session';
 import * as dotenv from "dotenv";
 
@@ -16,8 +21,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {cors: config.corsOption});
   const sessionRepository = app.get(DataSource).getRepository(Session);
 
-  setupSwagger(app);
-
+  
   app.setGlobalPrefix(config.globalPrefix);
   app.use(
     session(
@@ -35,9 +39,12 @@ async function bootstrap() {
       }
     )
   );
-  
+
+  setupSwagger(app);
   passportConfig(app);
-  pipesRegistrar(app);
+  
+  globalPipesRegistrar(app);
+  // globalInterceptorRegistrar(app);
   
   try{
     await app.listen(process.env.APP_PORT);

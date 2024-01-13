@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { User } from './entity/user.entity';
+import { User } from '../entity/user.entity';
+import { PageDto, PageMetaDto, PageOptionsDto } from 'src/utils/pagination.utils';
+import { pagination } from 'src/utils/modules_utils/pagination.utils';
 
 @Injectable()
 export class UserRepository extends Repository<User>{
@@ -19,12 +21,8 @@ export class UserRepository extends Repository<User>{
         });
     }
 
-    async findMany(): Promise<User[]> {
-        return this.userRepository.find({
-            relations: {
-                role: true
-            }
-        });
+    async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
+        return pagination<User>(this, pageOptionsDto, "user");
     }
 
     public async findById(id: number): Promise<User | undefined>{

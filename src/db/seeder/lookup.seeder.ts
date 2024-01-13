@@ -12,30 +12,62 @@ export class LookupSeeder implements Seeder {
     ){}
 
     async seed(): Promise<any> {
-        const lookupData = [
-            {
-               name: "Barang Rusak Ringan",
-               type: LookupType.RUSAK_RINGAN,
-               value: "RUSAK_RINGAN"
-            },
-            {
-                name: "Barang Rusak Berat",
-                type: LookupType.RUSAK_BERAT,
-                value: "RUSAK_BERAT"
-            },
-            {
-                name: "Barang Baik",
-                type: LookupType.BAIK,
-                value: "BAIK"
-             }
-        ];
-
-        await Promise.all(lookupData.map((lookups) => this.lookupRepository.save(
-            this.lookupRepository.create(lookups)
-        )));
+        this.seedCategory();
+        this.seedStatus();
 
         Logger.log(`[LOOKUP] Seeder succcess with data : ${await this.lookupRepository.count()}`, "SEEDER")
     }
+
+    async seedStatus(): Promise<any>{
+        const statusData = [
+            {
+                name: "Barang Rusak Ringan",
+                type: "ITEM_STATUS",
+                value: "RUSAK_RINGAN"
+             },
+             {
+                 name: "Barang Rusak Berat",
+                 type: "ITEM_STATUS",
+                 value: "RUSAK_BERAT"
+             },
+             {
+                 name: "Barang Baik",
+                 type: "ITEM_STATUS",
+                 value: "BAIK"
+             },
+             {
+                 name: "Barang Hilang",
+                 type: "ITEM_STATUS",
+                 value: "BARANG_HILANG"
+             }
+        ];
+        
+        await this.createMany(statusData);
+    }
+
+    async seedCategory(){
+        const categoryData = [
+            {
+                name: "Alat Tulis Kantor",
+                type: "CATEGORY",
+                value: "ATK"
+            },
+            {
+                name: "Barang biasa",
+                type: "CATEGORY",
+                value: "NON_ATK"
+            }
+        ];
+
+        await this.createMany(categoryData);
+    }
+
+    async createMany(data: [] | any){
+        await Promise.all(data.map((lookups: Lookup) => this.lookupRepository.save(
+            this.lookupRepository.create(lookups)
+        )));
+    }
+
     async drop(): Promise<any> {
         await this.lookupRepository.delete({});
 

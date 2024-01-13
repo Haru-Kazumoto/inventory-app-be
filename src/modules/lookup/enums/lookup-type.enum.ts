@@ -1,9 +1,9 @@
 export enum LookupType {
     //-------------STATUS ITEM--------------//
 
-    BAIK="BAIK",
-    RUSAK_RINGAN="RUSAK RINGAN",
-    RUSAK_BERAT="RUSAK BERAT"
-
+    GOOD="BAIK",
+    SLIGHT_DAMAGE="RUSAK RINGAN",
+    BAD_DAMAGE="RUSAK BERAT",
+    GONE="HILANG"
     
 }

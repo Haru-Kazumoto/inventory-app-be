@@ -2,16 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { User } from './entity/user.entity';
 import { UserCreateDto } from './dto/user.dto';
 import { IUserService } from './user.service.interface';
-import { IPaginationOptions, IPaginationMeta } from 'nestjs-typeorm-paginate/dist/interfaces';
-import { Pagination, paginate } from 'nestjs-typeorm-paginate';
 import { Transactional } from 'typeorm-transactional/dist/decorators/transactional';
 import { DataNotFoundException } from '../../exceptions/data_not_found.exception';
-import { UserRepository } from './user.repository';
+import { UserRepository } from './repository/user.repository';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
 import { RoleRepository } from '../role/role.repository';
-import * as bcrypt from "bcrypt";
 import { UnauthorizedException } from 'src/exceptions/unauthorized.exception';
-import { PageDto, PageMetaDto, PageOptionsDto } from 'src/utils/pagination.utils';
+import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
+import { NotificationService } from '../notification/notification.service';
+import { userCreateContent } from '../notification/notification.constant';
 
 @Injectable()
 export class UserService implements IUserService{
@@ -19,11 +18,12 @@ export class UserService implements IUserService{
     constructor(
         private readonly userRepository: UserRepository,
         private readonly roleRepository: RoleRepository,
+        private readonly notificationService: NotificationService,
         private userUtils: UserUtils
     ){}
 
     @Transactional()
-    public async createUser(body: UserCreateDto): Promise<User>{
+    public async createUser(body: UserCreateDto): Promise<User> {
         await this.userUtils.checkField('username', body.username, 'Username telah terpakai').isExists();
 
         const role = await this.roleRepository.findRoleById(body.role_id);
@@ -31,46 +31,32 @@ export class UserService implements IUserService{
 
         const createObject = this.userRepository.create({
             ...body,
-            role: role,
-            password: await bcrypt.hash(body.password, 15)
+            role: role
+        });
+
+        //SEND NOTIFICATION
+        await this.notificationService.sendNotification({
+            title: "Pengguna baru",
+            content: userCreateContent,
+            color: "clay",
+            user_id: createObject.id
         });
 
         return await this.userRepository.save(createObject);
     }
 
-    public async index(option: IPaginationOptions<IPaginationMeta>): Promise<Pagination<User>> {
-        const queryBuilder = this.userRepository.createQueryBuilder('user')
-            .leftJoinAndSelect('user.posts', 'posts')
-            .orderBy('user.id', 'ASC');
-
-        return await paginate<User>(queryBuilder, option);
-    }
-
     public async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
-        const queryBuilder = this.userRepository.createQueryBuilder("user");
-
-        queryBuilder
-            .orderBy("user.created_at", pageOptionsDto.order)
-            .skip(pageOptionsDto.skip)
-            .take(pageOptionsDto.take);
-
-        const itemCount = await queryBuilder.getCount();
-        const {entities} = await queryBuilder.getRawAndEntities();
-
-        const pageMetaDto = new PageMetaDto({itemCount, pageOptionsDto});
-
-        return new PageDto(entities, pageMetaDto);
+        return this.userRepository.findMany(pageOptionsDto);
     }
 
     @Transactional()
     public async update(id: number, body: UserCreateDto): Promise<User> {
-        const user = await this.userRepository.findOne({where: {id: id}});
-        if(!user) throw new DataNotFoundException("Id user not found", 404);
+        const user = await this.userRepository.findById(id);
+        if(!user) throw new DataNotFoundException("Id user not found", 400);
 
-        this.userUtils.checkField('username', body.username, "Username already exists").isExists();
+        this.userUtils.checkField('username', body.username, "Username sudah ada").isExists();
 
         user.username = body.username;
-        user.password = await bcrypt.hash(body.password, 10);
 
         Object.assign(user, body);
 
@@ -79,7 +65,7 @@ export class UserService implements IUserService{
 
     public async delete(id: number) {
         const data = await this.userRepository.findOne({where: {id: id}});
-        if(!data) throw new DataNotFoundException("ID not found", 404);
+        if(!data) throw new DataNotFoundException("ID not found", 400);
         
         await this.userRepository.remove(data);
     }

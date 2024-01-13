@@ -1,11 +1,9 @@
-import { IPaginationOptions, Pagination } from "nestjs-typeorm-paginate";
 import { UserCreateDto } from "./dto/user.dto";
 import { User } from "./entity/user.entity";
 import { PageDto, PageOptionsDto } from "src/utils/pagination.utils";
 
-export interface IUserService {    
+export interface IUserService {
     createUser(body: UserCreateDto): Promise<User>;
-    index(option: IPaginationOptions): Promise<Pagination<User>>;
     findMany(pageOptions: PageOptionsDto): Promise<PageDto<User>>;
     update(id: number, body: UserCreateDto): Promise<User>;
     delete(id: number): any;

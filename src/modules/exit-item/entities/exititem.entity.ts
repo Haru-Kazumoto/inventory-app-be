@@ -1,3 +1,27 @@
+import { ExitLog } from "src/modules/exit-log/entities/exitlog.entity";
 import { BaseEntity } from "src/utils/base.entity";
+import { Column, Entity } from "typeorm";
 
-export class Exititem extends BaseEntity {}
+@Entity({name: "exit-items"})
+export class ExitItem extends BaseEntity {
+    @Column()
+    public borrowers_name: string;
+    @Column()
+    public item_name: string;
+    @Column({default: 0})
+    public total_exit: number;
+    @Column()
+    public exit_date: Date;
+    @Column()
+    public class_id: number;
+    @Column()
+    public total_left: number;
+    @Column()
+    public item_id: number;
+
+    //---------RELATIONS---------//
+
+    public exit_logs: ExitLog;
+    public 
+}
+

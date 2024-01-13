@@ -1,6 +1,9 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import * as passport from "passport";
+import { ExcludeNullInterceptor } from "src/interceptors/exclude-null.interceptor";
+import { TimeoutInterceptor } from "src/interceptors/timeout.interceptor";
+import { TransformInterceptor } from "src/interceptors/transform.interceptor";
 
 const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
 const PREFIX_API = `api/v${process.env.APP_VERSION}`;
@@ -29,8 +32,16 @@ export function passportConfig(app: INestApplication){
     app.use(passport.session());
 }
 
-export function pipesRegistrar(app: INestApplication){
+export function globalPipesRegistrar(app: INestApplication){
     app.useGlobalPipes(new ValidationPipe({transform: true}));
+}
+
+export function globalInterceptorRegistrar(app: INestApplication){
+    app.useGlobalInterceptors(
+        new TimeoutInterceptor(),
+        new ExcludeNullInterceptor(),
+        new TransformInterceptor()
+    );
 }
 
 export function setupSwagger(app: INestApplication): void {
@@ -38,7 +49,7 @@ export function setupSwagger(app: INestApplication): void {
         .setTitle("Inventory API Documentation")
         .setDescription("Inventory API's documentation")
         .setVersion('1.0.0')
-        .addServer(`${process.env.APP_URL}/api/v1`,'Local environtment')
+        .addServer(`${process.env.APP_URL}`,'Local environtment')
         .addCookieAuth('auth-session',{
             type: "apiKey",
             in: "cookie",

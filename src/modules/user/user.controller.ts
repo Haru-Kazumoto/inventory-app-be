@@ -6,14 +6,9 @@ import {
     Res, 
     Query, 
     ParseIntPipe,
-    Req,
-    DefaultValuePipe,
     Put,
     Delete,
-    Inject,
     UseGuards,
-    Session,
-    SetMetadata,
     Post,
     Request,
     Response,
@@ -22,48 +17,30 @@ import {
 } from '@nestjs/common';
 import { UserCreateDto } from './dto/user.dto';
 import { UserService } from './user.service';
-import { ResponseHttp } from 'src/utils/response.http.utils';
 import { User } from './entity/user.entity';
-import { Pagination } from 'nestjs-typeorm-paginate/dist/pagination';
-import { IPaginationOptions } from 'nestjs-typeorm-paginate';
 import { AuthenticatedGuard } from '../../security/guards/authenticated.guard';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { Roles } from 'src/security/decorator/roles.decorator';
-import { SessionData as ExpressSession } from 'express-session';
 import { Request as ExpressRequest, Response as ExpressResponse} from 'express';
-import { ApiBadRequestResponse, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
+import { Status } from 'src/enums/response.enum';
+import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('User')
+@UseGuards(RolesGuard)
+@Roles('SUPERADMIN')
 @Controller('user')
 export class UserController {
 
     constructor(
-        private readonly userService: UserService,
-        private readonly response: ResponseHttp
+        private readonly userService: UserService
     ){}
 
-    @UseGuards(AuthenticatedGuard, RolesGuard)
-    @Get('index')
-    public async index(
-        @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-        @Query('size', new DefaultValuePipe(5), ParseIntPipe) limit: number,
-        @Req() request: Request
-    ): Promise<Pagination<User>>{
-        const options: IPaginationOptions = {
-            limit: limit, 
-            page: page, 
-            route: request.url
-        };
-
-        return await this.userService.index(options);
-    }
-
-    @UseGuards(AuthenticatedGuard, RolesGuard)
+    @UseGuards(AuthenticatedGuard)
     @Get('find-all')
-    @Roles('SUPERADMIN')
     @ApiOkResponse({
         description: "Success get all users",
         schema: {
@@ -90,9 +67,9 @@ export class UserController {
         return this.userService.findMany(pageOptionsDto);
     }
 
-    @UseGuards(AuthenticatedGuard, RolesGuard)
-    @Roles('SUPERADMIN')
-    @Post('create-user')
+    @UseInterceptors(new TransformInterceptor())
+    @UseGuards(AuthenticatedGuard)
+    @Post('create')
     @ApiOkResponse({
             description: "Record has successfully created",
             schema: {
@@ -141,42 +118,84 @@ export class UserController {
         return response.status(200).json({  
             statusCode: response.statusCode,
             message: "User berhasil dibuat",
-            data: {
-                user: data
-            }
+            data: {user: data}
         });
     }
 
-    // @UseGuards(AuthenticatedGuard, RolesGuard)
-    @SetMetadata('isPublic', true)
-    @Get('find-by-username')
-    public async findByUsername(@Query('username') username: string){
-        return this.userService.findByUsername(username);
-    }
-
+    @UseInterceptors(new TransformInterceptor())
     @Put('update')
     @UseGuards(AuthenticatedGuard)
-    public async updateUser(@Query('id', ParseIntPipe) id: number,@Body() dto: UserCreateDto,@Res() res: ExpressResponse){
+    @ApiOkResponse({
+        description: "Success to update one record of user",
+        schema: {
+            type: "object",
+            properties: {
+                statusCode: {type: "number", example: 200},
+                message: {type: "string", example: "SUCCESS"},
+                data: {type: "object", example: {user: {}}}
+            }
+        }
+    })
+    @ApiBadRequestResponse({
+        description: "There is something bad happend to request",
+        schema: {
+            type: "object",
+            properties: {
+                statusCode: {type: "number", example: 400},
+                message: {type: "string", example: "Not valid type"},
+                data: {type: "object", example: null}
+            }
+        }
+    })
+    @ApiInternalServerErrorResponse({
+        description: "Internal server error response",
+        schema: {
+            type: "object",
+            properties: {
+                statusCode: {type: "number", example: 500},
+                message: {type: "string", example: "Internal server error"}
+            }
+        }
+    })
+    @ApiBody({type: UserCreateDto, description: "DTO Request for update", required: true})
+    @ApiQuery({
+        name: "id",
+        description: "Id user for update",
+        type: Number,
+        required: true
+    })
+    public async updateUser(
+        @Query('id', ParseIntPipe) id: number,
+        @Body() dto: UserCreateDto,
+        @Res() res: ExpressResponse
+    ){
         const instance = await this.userService.update(id, dto);
-        const response = this.response.createResponse(HttpStatus.OK, instance);
-
-        return this.response.sendResponse(res, response);
+        return res.status(200).json({
+            statusCode: res.statusCode,
+            message: Status.SUCCESS,
+            data: {user: instance}
+        })
     }
 
     @Delete('delete')
     @UseGuards(AuthenticatedGuard)
+    @ApiQuery({
+        name: "id",
+        description: "Id user for delete",
+        type: Number,
+        required: true
+    })
+    @ApiBadRequestResponse({
+        description: "Bad request response",
+        schema: {
+            type: "object",
+            properties:{
+                statusCode: {type: "number", example: 400},
+                message: {type: "string", example: "Id user tidak ditemukan"}
+            },
+        }
+    })
     public async deleteUser(@Query('id', ParseIntPipe) id: number){
         await this.userService.delete(id);
-    }
-
-    @Get('get-user')
-    getUser(@Req() req: ExpressRequest){
-        console.log(req.user);
-    }
-
-    @UseGuards(AuthenticatedGuard, RolesGuard)
-    @Get('hello')
-    getHello(@Session() session: ExpressSession): string{
-        return `Congrat's now you've been authenticated by your own role`;
     }
 } 
