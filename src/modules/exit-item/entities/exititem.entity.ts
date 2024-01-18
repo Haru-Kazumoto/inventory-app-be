@@ -1,9 +1,12 @@
 import { ExitLog } from "src/modules/exit-log/entities/exitlog.entity";
 import { BaseEntity } from "src/utils/base.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: "exit-items"})
 export class ExitItem extends BaseEntity {
+    @PrimaryGeneratedColumn("increment")
+    public id: number;
+
     @Column()
     public borrowers_name: string;
     @Column()

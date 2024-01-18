@@ -1,13 +1,15 @@
 import { BeforeInsert, BeforeUpdate, Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Exclude, instanceToPlain } from "class-transformer";
 import { BaseEntity } from "../../../utils/base.entity";
-import { Roles } from "../../role/roles.entity";
+import { Roles } from "../../role/entities/roles.entity";
 import { Notification } from "src/modules/notification/entities/notification.entity";
 
 import * as bcrypt from "bcrypt";
 
 @Entity({name: "users"})
 export class User extends BaseEntity{
+    @PrimaryGeneratedColumn("increment")
+    public id: number;
 
     @Column()
     public name: string;

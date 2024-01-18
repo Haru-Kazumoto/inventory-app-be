@@ -2,8 +2,6 @@ import { Exclude, instanceToPlain } from "class-transformer";
 import { CreateDateColumn, DeleteDateColumn, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 export abstract class BaseEntity {
-    @PrimaryGeneratedColumn("increment")
-    public id: number;
 
     @CreateDateColumn({name: "created_at",})
     @Exclude()

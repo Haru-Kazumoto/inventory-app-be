@@ -1,5 +1,5 @@
 import { RoleCreateDto } from "./dto/role.dto";
-import { Roles } from "./roles.entity";
+import { Roles } from "./entities/roles.entity";
 
 export interface IRoleService {
     createRole(requestBody: RoleCreateDto): Promise<Roles>;

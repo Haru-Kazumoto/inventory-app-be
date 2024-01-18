@@ -17,7 +17,7 @@ import {
 } from '@nestjs/common';
 import { UserCreateDto } from './dto/user.dto';
 import { UserService } from './user.service';
-import { User } from './entity/user.entity';
+import { User } from './entities/user.entity';
 import { AuthenticatedGuard } from '../../security/guards/authenticated.guard';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { Roles } from 'src/security/decorator/roles.decorator';
@@ -28,7 +28,6 @@ import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { Status } from 'src/enums/response.enum';
 import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 
-@UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('User')
 @UseGuards(RolesGuard)
 @Roles('SUPERADMIN')
@@ -40,6 +39,7 @@ export class UserController {
     ){}
 
     @UseGuards(AuthenticatedGuard)
+    @UseInterceptors(ClassSerializerInterceptor)
     @Get('find-all')
     @ApiOkResponse({
         description: "Success get all users",
@@ -113,7 +113,7 @@ export class UserController {
     })
     @ApiBody({type: UserCreateDto,description:"DTO Structure Response"})
     public async createOneUser(@Body() body: UserCreateDto, @Request() request: ExpressRequest, @Response() response: ExpressResponse){
-        const data: User = await this.userService.createUser(body);
+        const data: User = await this.userService.createUser(request,body);
 
         return response.status(200).json({  
             statusCode: response.statusCode,
@@ -177,11 +177,11 @@ export class UserController {
         })
     }
 
-    @Delete('delete')
+    @Delete('delete-hard')
     @UseGuards(AuthenticatedGuard)
     @ApiQuery({
         name: "id",
-        description: "Id user for delete",
+        description: "Id user for HARD delete",
         type: Number,
         required: true
     })
@@ -195,7 +195,29 @@ export class UserController {
             },
         }
     })
-    public async deleteUser(@Query('id', ParseIntPipe) id: number){
-        await this.userService.delete(id);
+    public async hardDeleteUser(@Query('id', ParseIntPipe) id: number){
+        await this.userService.hardDeleteById(id);
+    }
+
+    @Delete('delete-soft')
+    @UseGuards(AuthenticatedGuard)
+    @ApiQuery({
+        name: "id",
+        description: "Id user for SOFT delete",
+        type: Number,
+        required: true
+    })
+    @ApiBadRequestResponse({
+        description: "Bad request response",
+        schema: {
+            type: "object",
+            properties:{
+                statusCode: {type: "number", example: 400},
+                message: {type: "string", example: "Id user tidak ditemukan"}
+            },
+        }
+    })
+    public async softDeleteUser(@Query('id', ParseIntPipe) id: number){
+        await this.userService.softDeleteById(id);
     }
 } 

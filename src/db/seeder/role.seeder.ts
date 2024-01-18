@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Seeder } from 'nestjs-seeder';
-import { Roles } from 'src/modules/role/roles.entity';
+import { Roles } from 'src/modules/role/entities/roles.entity';
 import { Repository } from 'typeorm';
 import { TransactionalError } from 'typeorm-transactional';
 

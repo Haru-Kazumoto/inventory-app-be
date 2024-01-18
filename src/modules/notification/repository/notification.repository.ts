@@ -11,4 +11,9 @@ export class NotificationRepository extends Repository<Notification> {
         super(Notification, dataSource.createEntityManager());
     }
 
+    async findAllNotifications(userId: number): Promise<Notification[] | undefined>{
+        return await this.notificationRepository.find({where: {
+            user_id: userId
+        }});
+    }
 }

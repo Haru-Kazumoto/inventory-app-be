@@ -1,4 +1,5 @@
 import { ISession } from "connect-typeorm";
+import { Request } from "express";
 import { Column, DeleteDateColumn, Entity, Index, PrimaryColumn } from "typeorm";
 
 @Entity({name: 'sessions'})
@@ -15,4 +16,8 @@ export class Session implements ISession{
 
     @DeleteDateColumn()
     public destroyedAt?: Date;
+}
+
+export const getSession = (request: Request): Express.User => {
+    return request.user;
 }

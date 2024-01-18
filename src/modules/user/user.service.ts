@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './entity/user.entity';
+import { User } from './entities/user.entity';
 import { UserCreateDto } from './dto/user.dto';
 import { IUserService } from './user.service.interface';
 import { Transactional } from 'typeorm-transactional/dist/decorators/transactional';
 import { DataNotFoundException } from '../../exceptions/data_not_found.exception';
 import { UserRepository } from './repository/user.repository';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
-import { RoleRepository } from '../role/role.repository';
+import { RoleRepository } from '../role/repository/role.repository';
 import { UnauthorizedException } from 'src/exceptions/unauthorized.exception';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { NotificationService } from '../notification/notification.service';
 import { userCreateContent } from '../notification/notification.constant';
+import { Request } from 'express';
+import { getSession } from '../auth/session/session.entity';
 
 @Injectable()
 export class UserService implements IUserService{
@@ -23,26 +25,32 @@ export class UserService implements IUserService{
     ){}
 
     @Transactional()
-    public async createUser(body: UserCreateDto): Promise<User> {
+    public async createUser(request: Request, body: UserCreateDto): Promise<User> {
+        const user = getSession(request);
+
+        console.log(user);
+        
         await this.userUtils.checkField('username', body.username, 'Username telah terpakai').isExists();
 
         const role = await this.roleRepository.findRoleById(body.role_id);
         if(!role) throw new DataNotFoundException('Id role tidak ditemukan', 400);
 
-        const createObject = this.userRepository.create({
+        const userObj = this.userRepository.create({
             ...body,
             role: role
         });
+
+        console.log(userObj);
 
         //SEND NOTIFICATION
         await this.notificationService.sendNotification({
             title: "Pengguna baru",
             content: userCreateContent,
             color: "clay",
-            user_id: createObject.id
+            user_id: user.id
         });
 
-        return await this.userRepository.save(createObject);
+        return await this.userRepository.save(userObj);
     }
 
     public async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
@@ -63,11 +71,20 @@ export class UserService implements IUserService{
         return await this.userRepository.save(user);
     }
 
-    public async delete(id: number) {
+    public async hardDeleteById(id: number) {
         const data = await this.userRepository.findOne({where: {id: id}});
         if(!data) throw new DataNotFoundException("ID not found", 400);
         
         await this.userRepository.remove(data);
+    }
+
+    //BUG (hasMetadata)
+    @Transactional()
+    async softDeleteById(id: number): Promise<any> {
+        const findId = await this.userRepository.findById(id);
+        if(!findId) throw new DataNotFoundException("Id not found", 400);
+        
+        return await this.userRepository.softDeleteById(id);
     }
 
     //For Authentication

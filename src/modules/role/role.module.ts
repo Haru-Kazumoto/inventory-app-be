@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Roles } from './roles.entity';
+import { Roles } from './entities/roles.entity';
 import { RoleService } from './role.service';
 import { RoleController } from './role.controller';
-import { RoleRepository } from './role.repository';
+import { RoleRepository } from './repository/role.repository';
 import { ResponseHttp } from 'src/utils/response.http.utils';
 
 @Module({

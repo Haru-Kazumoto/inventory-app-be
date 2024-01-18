@@ -1,8 +1,10 @@
 import { BaseEntity } from "src/utils/base.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: "exit_log"})
 export class ExitLog extends BaseEntity {
+    @PrimaryGeneratedColumn("increment")
+    public id: number;
 
     @Column()
     public item_name: string;

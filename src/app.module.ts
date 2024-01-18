@@ -35,14 +35,14 @@ import { ExcludeNullInterceptor } from './interceptors/exclude-null.interceptor'
     //   provide: APP_INTERCEPTOR,
     //   useClass: TransformInterceptor
     // },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: TimeoutInterceptor
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: ExcludeNullInterceptor
-    }
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: TimeoutInterceptor
+    // },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: ExcludeNullInterceptor
+    // }
   ],
 })
 export class AppModule implements NestModule{

@@ -39,7 +39,7 @@ export function globalPipesRegistrar(app: INestApplication){
 export function globalInterceptorRegistrar(app: INestApplication){
     app.useGlobalInterceptors(
         new TimeoutInterceptor(),
-        new ExcludeNullInterceptor(),
+        // new ExcludeNullInterceptor(),
         new TransformInterceptor()
     );
 }
@@ -55,10 +55,10 @@ export function setupSwagger(app: INestApplication): void {
             in: "cookie",
             name: process.env.COOKIE_NAME
         }, "session")
-        .addTag("Auth","Authentication ability", {url:"/api/v1/auth", description: "Authentication endpoint"})
-        .addTag("User","User Management Endpoint", {url: "/api/v1/user", description: "User endpoint"})
-        .addTag("Role","Role Management Endpoint", {url: "/api/v1/role", description: "Role endpoint"})
-        .addTag("Item","Item management Endpoint", {url: "/api/v1/item", description: "Item endpoint"})
+        .addTag("Auth","Authentication ability", {url:`${PREFIX_API}/auth`, description: "Authentication endpoint"})
+        .addTag("User","User Management Endpoint", {url:`${PREFIX_API}/user`, description: "User endpoint"})
+        .addTag("Item","Item management Endpoint", {url:`${PREFIX_API}/item`, description: "Item endpoint"})
+        .addTag("Notification","Notification Management Endpoint", {url:`${PREFIX_API}/notification`, description: "Notification endpoint"})
         .build();
 
     const document = SwaggerModule.createDocument(app, options);

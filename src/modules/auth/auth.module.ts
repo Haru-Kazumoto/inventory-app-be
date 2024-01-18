@@ -1,7 +1,6 @@
-import { Module, Session } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from '../user/entity/user.entity';
-
+import { User } from '../user/entities/user.entity';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UserService } from '../user/user.service';
@@ -10,13 +9,15 @@ import { LocalStrategy } from '../../security/local.strategy';
 import { SessionSerializer } from '../../security/session.serializer';
 import { UserModule } from '../user/user.module';
 import { RoleModule } from '../role/role.module';
-import { RoleRepository } from '../role/role.repository';
+import { RoleRepository } from '../role/repository/role.repository';
+import { NotificationModule } from '../notification/notification.module';
 
 @Module(
     {
         imports: [
             TypeOrmModule.forFeature([User]),
             UserModule,
+            forwardRef(() => NotificationModule),
             RoleModule
         ],
         providers: [
@@ -28,6 +29,9 @@ import { RoleRepository } from '../role/role.repository';
             RoleRepository
         ],
         controllers: [AuthController],
+        exports: [
+            AuthService
+        ]
     }
 )
 export class AuthModule {}

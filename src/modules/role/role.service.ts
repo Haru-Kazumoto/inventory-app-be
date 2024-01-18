@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IRoleService } from './role.interface';
 import { RoleCreateDto } from './dto/role.dto';
-import { Roles } from './roles.entity';
-import { RoleRepository } from './role.repository';
+import { Roles } from './entities/roles.entity';
+import { RoleRepository } from './repository/role.repository';
 import { Transactional } from 'typeorm-transactional';
 import { DuplicateDataException } from 'src/exceptions/duplicate_data.exception';
 

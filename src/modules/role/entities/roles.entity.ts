@@ -1,9 +1,11 @@
-import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "../user/entity/user.entity";
+import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "../../user/entities/user.entity";
 import { BaseEntity } from "src/utils/base.entity";
 
 @Entity({name: "roles"})
 export class Roles extends BaseEntity {
+    @PrimaryGeneratedColumn("increment")
+    public id: number;
 
     @Column({unique: true})
     public name: string;

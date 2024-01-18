@@ -1,14 +1,14 @@
 import { UserService } from 'src/modules/user/user.service';
 import { ForbiddenException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { IAuthService } from './auth.service.interface';
-import { User } from '../user/entity/user.entity';
+import { User } from '../user/entities/user.entity';
 import * as bcrypt from "bcrypt";
 import { Request } from 'express';
 import { AuthRequest } from './auth.dto';
 import { Transactional } from 'typeorm-transactional';
 import { UserRepository } from '../user/repository/user.repository';
 import { comparePassword } from 'src/utils/password.utils';
-import { RoleRepository } from '../role/role.repository';
+import { RoleRepository } from '../role/repository/role.repository';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
 
@@ -42,6 +42,10 @@ export class AuthService implements IAuthService {
 
     public async getSession(idAccount: number): Promise<User> {
         return await this.userRepsitory.findById(idAccount);
+    }
+
+    getCurrent(req: any): any{
+        return req.user;
     }
 
     public async logout(request: Request): Promise<any> {

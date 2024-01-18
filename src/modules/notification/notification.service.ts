@@ -5,9 +5,10 @@ import { INotificationService } from './notification.service.interface';
 import { NotificationRepository } from './repository/notification.repository';
 import { UserRepository } from '../user/repository/user.repository';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
-import { User } from '../user/entity/user.entity';
+import { User } from '../user/entities/user.entity';
 import { Transaction } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
+import { Notification } from './entities/notification.entity';
 
 @Injectable()
 export class NotificationService implements INotificationService{
@@ -28,5 +29,18 @@ export class NotificationService implements INotificationService{
 
     return await this.notificationRepository.save(notifObject);
   }
+
+  async getNotifications(userId: number): Promise<Notification[]> {
+    await this.checkUserIdIsExists(userId);
+
+    return await this.notificationRepository.findAllNotifications(userId);
+  }
+
+  async checkUserIdIsExists(userId: number): Promise<Boolean>{
+    const findIdUser = await this.userRepository.findById(userId);
+    if(!findIdUser) throw new DataNotFoundException("User id not found", 400);
+
+    return true;
+  };
 
 }

@@ -1,12 +1,14 @@
+import { Request } from "express";
 import { UserCreateDto } from "./dto/user.dto";
-import { User } from "./entity/user.entity";
+import { User } from "./entities/user.entity";
 import { PageDto, PageOptionsDto } from "src/utils/pagination.utils";
 
 export interface IUserService {
-    createUser(body: UserCreateDto): Promise<User>;
+    createUser(request: Request, body: UserCreateDto): Promise<User>;
     findMany(pageOptions: PageOptionsDto): Promise<PageDto<User>>;
     update(id: number, body: UserCreateDto): Promise<User>;
-    delete(id: number): any;
+    hardDeleteById(id: number): any;
+    softDeleteById(id: number): Promise<any>;
     findByUsername(username: string): Promise<User>;
     findById(id: number): Promise<User>;
 }

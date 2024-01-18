@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
-import { User } from '../entity/user.entity';
+import { User } from '../entities/user.entity';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
 
@@ -19,6 +19,13 @@ export class UserRepository extends Repository<User>{
                 username: username
             }
         });
+    }
+
+    async softDeleteById(id: number): Promise<any>{
+        return await this.dataSource.createQueryBuilder()
+            .softDelete()
+            .where("id = :id", {id: id})
+            .execute();
     }
 
     async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {

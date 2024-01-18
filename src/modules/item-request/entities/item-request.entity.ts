@@ -1,8 +1,10 @@
 import { BaseEntity } from "src/utils/base.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: "item-requests"})
 export class ItemRequest extends BaseEntity {
+    @PrimaryGeneratedColumn("increment")
+    public id: number;
 
     @Column()
     public name: string;

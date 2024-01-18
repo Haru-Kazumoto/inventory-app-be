@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './entity/user.entity';
+import { User } from './entities/user.entity';
 import { ResponseHttp } from 'src/utils/response.http.utils';
 import { UserRepository } from './repository/user.repository';
 import { UserService } from './user.service';
@@ -14,7 +14,7 @@ import { NotificationModule } from '../notification/notification.module';
   imports: [
     TypeOrmModule.forFeature([User, Roles]),
     RoleModule,
-    NotificationModule
+    forwardRef(() => NotificationModule)
   ],
   controllers: [UserController],
   providers: [
@@ -28,9 +28,9 @@ import { NotificationModule } from '../notification/notification.module';
     }
   ],
   exports: [
-    UserService,
     UserUtils,
     UserRepository,
+    UserService,
     {
       provide: 'USER_SERVICE',
       useClass: UserService

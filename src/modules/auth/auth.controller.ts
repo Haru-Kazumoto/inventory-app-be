@@ -21,9 +21,7 @@ import { AuthService } from './auth.service';
 import { Request as ExpressRequest, Response as ExpressResponse} from 'express';
 import { AuthLogin, AuthRequest } from './auth.dto';
 import { Session as ExpressSession, SessionData } from 'express-session';
-import { User } from '../user/entity/user.entity';
-import { RolesGuard } from 'src/security/guards/roles.guard';
-import { Roles } from 'src/security/decorator/roles.decorator';
+import { User } from '../user/entities/user.entity';
 import { ApiBody, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @ApiTags("Auth")
@@ -89,10 +87,16 @@ export class AuthController {
         return this.authService.logout(request);
     }
 
+    // @UseGuards(AuthenticatedGuard)
+    // @Get('get-session')
+    // async getSession(@Session() session: any, @Res() response: ExpressResponse): Promise<any>{
+    //     const user: User = session.passport.user;
+    //     return response.status(200).json({user: await this.authService.getSession(user.id)})
+    // }
+
     @UseGuards(AuthenticatedGuard)
     @Get('get-session')
-    async getSession(@Session() session: any, @Res() response: ExpressResponse): Promise<any>{
-        const user: User = session.passport.user;
-        return response.status(200).json({user: await this.authService.getSession(user.id)})
+    async getSession(req: ExpressRequest): Promise<any>{
+        return req.session;
     }
 }

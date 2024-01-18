@@ -9,7 +9,7 @@ export const ApiPaginatedResponse = <TModel extends Type<any>>(model: TModel) =>
             description: "Successfully received model list",
             schema: {
                 allOf: [
-                    { $ref: getSchemaPath(PageDto)},
+                    { $ref: getSchemaPath(PageDto) },
                     {
                         properties: {
                             data: {

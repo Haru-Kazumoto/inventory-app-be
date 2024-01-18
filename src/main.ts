@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { initializeTransactionalContext } from 'typeorm-transactional/dist/common';
 import { TypeormStore } from 'connect-typeorm';

@@ -2,10 +2,13 @@ import { Class } from "src/modules/class/entities/class.entity";
 import { ExitItem } from "src/modules/exit-item/entities/exititem.entity";
 import { ExitLog } from "src/modules/exit-log/entities/exitlog.entity";
 import { BaseEntity } from "src/utils/base.entity";
-import { BeforeInsert, Column, Entity, OneToMany } from "typeorm";
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: "items"})
 export class Item extends BaseEntity {
+    @PrimaryGeneratedColumn("increment")
+    public id: number;
+
     @Column()
     public name: string;
 
