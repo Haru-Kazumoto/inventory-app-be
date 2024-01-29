@@ -16,7 +16,7 @@ export class CreateNotificationDto {
     @IsString()
     @IsNotEmpty()
     @ApiProperty()
-    public color?: string;
+    public color?: string | null;
     
     @IsBoolean()
     @IsNotEmpty()

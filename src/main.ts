@@ -27,7 +27,7 @@ async function bootstrap() {
     session(
       {
         name: config.cookieOptions.name,
-        secret: config.cookieOptions.secret,
+        secret: "8C121F33FD1B74731D9E613E217B3",
         resave: config.cookieOptions.resave,
         saveUninitialized: config.cookieOptions.saveUninitialized,
         cookie: { maxAge: config.cookieOptions.maxAge },

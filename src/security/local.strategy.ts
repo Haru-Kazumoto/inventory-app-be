@@ -1,10 +1,8 @@
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy } from "passport-local";
 import { AuthService } from "../modules/auth/auth.service";
-import { AuthRequest } from "../modules/auth/interfaces/auth.request.interface";
 import { RoleRepository } from "src/modules/role/repository/role.repository";
-import { User } from "src/modules/user/entities/user.entity";
 import { Roles } from "src/modules/role/entities/roles.entity";
 import { DataNotFoundException } from "src/exceptions/data_not_found.exception";
 
@@ -22,7 +20,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     async validate(username: string, password: string):  Promise<any>{
         const user = await this.authService.validateUser(username, password);
         if(!user) {
-            throw new UnauthorizedException("Username or password isn't valid.");
+            throw new ForbiddenException("Username or password isn't valid.");
         }
         return user;
     }

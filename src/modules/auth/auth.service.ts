@@ -11,6 +11,8 @@ import { comparePassword } from 'src/utils/password.utils';
 import { RoleRepository } from '../role/repository/role.repository';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { ParsedQs } from 'qs';
 
 @Injectable()
 export class AuthService implements IAuthService { 
@@ -20,17 +22,16 @@ export class AuthService implements IAuthService {
         private readonly roleRepository: RoleRepository,
         private userUtils: UserUtils
     ){}
+    
 
     public async validateUser(username: string, password: string): Promise<any> {
         const user: User = await this.userService.findByUsername(username);
-        const isPasswordMatch: boolean = await comparePassword(password, user.password);
+        const isPasswordMatch: boolean = await bcrypt.compare(password, user.password);
 
         if(user && isPasswordMatch){
             const {password, ...rest} = user;
             return rest;
         }
-
-        throw new ForbiddenException();
     }
 
     public async login(request: Request): Promise<any> {
@@ -40,14 +41,6 @@ export class AuthService implements IAuthService {
         };
     }
 
-    public async getSession(idAccount: number): Promise<User> {
-        return await this.userRepsitory.findById(idAccount);
-    }
-
-    getCurrent(req: any): any{
-        return req.user;
-    }
-
     public async logout(request: Request): Promise<any> {
         request.session.destroy(() => {
             return {
@@ -55,6 +48,10 @@ export class AuthService implements IAuthService {
                 statusCode: HttpStatus.OK
             };
         });
+    }
+
+    getSession(request: Request): Express.User {
+        return request.user;
     }
 
     @Transactional()

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../../user/entities/user.entity";
 import { BaseEntity } from "src/utils/base.entity";
 
@@ -13,7 +13,7 @@ export class Roles extends BaseEntity {
     @Column()
     public major: string;
 
-    @OneToOne(() => User, (user) => user.role)
-    public user: User;
+    @OneToMany(() => User, (user) => user.role)
+    public user: User[];
 
 }

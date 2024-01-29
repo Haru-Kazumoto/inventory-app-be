@@ -20,17 +20,13 @@ import { LocalGuard } from '../../security/guards/localguard.guard';
 import { AuthService } from './auth.service';
 import { Request as ExpressRequest, Response as ExpressResponse} from 'express';
 import { AuthLogin, AuthRequest } from './auth.dto';
-import { Session as ExpressSession, SessionData } from 'express-session';
-import { User } from '../user/entities/user.entity';
 import { ApiBody, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @ApiTags("Auth")
 @Controller('auth')
 export class AuthController {
 
-    constructor(
-        private readonly authService: AuthService
-    ){}
+    constructor(private readonly authService: AuthService){}
 
     @SetMetadata('isPublic', true)
     @UseGuards(LocalGuard)
@@ -65,7 +61,7 @@ export class AuthController {
     @UsePipes(new ValidationPipe())
     @ApiBody({type: AuthRequest, description: "Request requirements for registration user"})
     @Post('register')
-    async register(@Body() request: AuthRequest, @Req() req: ExpressRequest){
+    async register(@Body() request: AuthRequest){
         return await this.authService.register(request);
     }
 
@@ -87,16 +83,9 @@ export class AuthController {
         return this.authService.logout(request);
     }
 
-    // @UseGuards(AuthenticatedGuard)
-    // @Get('get-session')
-    // async getSession(@Session() session: any, @Res() response: ExpressResponse): Promise<any>{
-    //     const user: User = session.passport.user;
-    //     return response.status(200).json({user: await this.authService.getSession(user.id)})
-    // }
-
     @UseGuards(AuthenticatedGuard)
     @Get('get-session')
-    async getSession(req: ExpressRequest): Promise<any>{
-        return req.session;
+    getSession(@Req() req: ExpressRequest): Express.User{
+        return this.authService.getSession(req);
     }
 }
