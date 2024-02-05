@@ -8,7 +8,7 @@ export class AuthenticatedGuard implements CanActivate {
     const req = context.switchToHttp().getRequest<Request>();
     
     if(!req.isAuthenticated()){
-      throw new ForbiddenException("You have to login first to get permission");
+      throw new ForbiddenException("You must login first to get permission!");
     }
 
     return req.isAuthenticated();

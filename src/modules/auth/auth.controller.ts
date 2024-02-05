@@ -84,8 +84,49 @@ export class AuthController {
     }
 
     @UseGuards(AuthenticatedGuard)
+    @HttpCode(HttpStatus.OK)
+    @ApiOkResponse({
+        description: "User Session",
+        schema: {
+            type: "object",
+            properties: {
+                status: { type: "number", example: 200 },
+                message: { type: "string", example: "OK" },
+                data: {
+                    type: "object",
+                    properties: {
+                        user: {
+                            type: "object",
+                            properties: {
+                                id: { type: "number", example: 1 },
+                                name: { type: "string", example: "admin" },
+                                username: { type: "string", example: "admin" },
+                                role_id: { type: "number", example: 5 },
+                                role: {
+                                    type: "object",
+                                    properties: {
+                                        id: { type: "number", example: 5 },
+                                        name: { type: "string", example: "SUPERADMIN" },
+                                        major: { type: "string", example: "SUPERADMIN" },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    })
     @Get('get-session')
-    getSession(@Req() req: ExpressRequest): Express.User{
-        return this.authService.getSession(req);
+    async getSession(@Req() req: ExpressRequest, @Res() res: ExpressResponse) {
+        const data = await this.authService.getSession(req);
+        
+        return res.status(200).json({  
+            statusCode: res.statusCode,
+            message: "Hasil User",
+            data: {
+                user: data
+            }
+        });
     }
 }

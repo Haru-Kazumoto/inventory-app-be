@@ -7,12 +7,9 @@ import { Request } from 'express';
 import { AuthRequest } from './auth.dto';
 import { Transactional } from 'typeorm-transactional';
 import { UserRepository } from '../user/repository/user.repository';
-import { comparePassword } from 'src/utils/password.utils';
 import { RoleRepository } from '../role/repository/role.repository';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
-import { ParamsDictionary } from 'express-serve-static-core';
-import { ParsedQs } from 'qs';
 
 @Injectable()
 export class AuthService implements IAuthService { 
@@ -42,16 +39,21 @@ export class AuthService implements IAuthService {
     }
 
     public async logout(request: Request): Promise<any> {
-        request.session.destroy(() => {
-            return {
-                message: "Logout success",
-                statusCode: HttpStatus.OK
-            };
-        });
+        setTimeout(() => {
+            request.session.destroy(() => {
+                return {
+                    message: "Logout success",
+                    statusCode: HttpStatus.OK
+                };
+            });
+        }, 2000);
     }
 
-    getSession(request: Request): Express.User {
-        return request.user;
+    async getSession(request: Request): Promise<User> {
+        const user = request.user; 
+        const findUserBySession: User = await this.userRepsitory.findById(user.id);
+
+        return findUserBySession;
     }
 
     @Transactional()

@@ -21,6 +21,12 @@ export class UserRepository extends Repository<User>{
         });
     }
 
+    async findUserByRole(role: "SUPERADMIN" | "ADMIN"): Promise<User[]>{
+        return this.userRepository.createQueryBuilder("user")
+            .where("user.role.name = :role", {role})
+            .getMany();
+    }
+
     async softDeleteById(id: number): Promise<any>{
         return await this.dataSource.createQueryBuilder()
             .softDelete()

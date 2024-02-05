@@ -52,14 +52,6 @@ export class UserService implements IUserService{
     }
 
     public async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
-
-        //TEST SEND NOTIFICATION
-        await this.notificationService.sendNotification({
-            title: "Menarik data",
-            content: "Data user di audit",
-            user_id: 2
-        })
-
         return this.userRepository.findMany(pageOptionsDto);
     }
 

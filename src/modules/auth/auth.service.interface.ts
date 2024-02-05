@@ -7,5 +7,5 @@ export interface IAuthService {
     register(requset: AuthRequest): Promise<any>;
     login(request: Request): Promise<any>;
     logout(request: Request): Promise<any>;
-    getSession(request: Request): Express.User;
+    getSession(request: Request): Promise<User>;
 }

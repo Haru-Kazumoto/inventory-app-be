@@ -26,6 +26,11 @@ export class CreateNotificationDto {
     @IsNumber()
     @IsNotEmpty()
     @ApiProperty()
-    public user_id: number;    
+    public user_id: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    public toSuperadmin: boolean;
 
 }

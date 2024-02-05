@@ -25,6 +25,9 @@ export class Notification extends BaseEntity {
     @Column()
     public user_id: number;
 
+    @Column({default: false})
+    public toSuperadmin: boolean;
+
     @ManyToOne(() => User, user => user.notifications)
     public user: User;
 

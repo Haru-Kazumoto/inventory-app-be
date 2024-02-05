@@ -17,10 +17,17 @@ export class RoleRepository extends Repository<Roles>{
         });
     }
 
+    public async findRole(role: "ADMIN" | "SUPERADMIN"): Promise<Roles[] | any>{
+        return this.createQueryBuilder("role")
+            .where("role.name = :role ", {role})
+            .getMany();
+    }
+
     public async findAllRoles(): Promise<Roles[]>{
         return await this.find({
             select: {
-                name: true
+                name: true,
+                major: true
             }
         });
     }    

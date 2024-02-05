@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
-import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { INotificationService } from './notification.service.interface';
 import { NotificationRepository } from './repository/notification.repository';
 import { UserRepository } from '../user/repository/user.repository';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
 import { User } from '../user/entities/user.entity';
-import { Transaction } from 'typeorm';
 import { Transactional } from 'typeorm-transactional';
 import { Notification } from './entities/notification.entity';
 
@@ -18,16 +16,31 @@ export class NotificationService implements INotificationService{
   ){}
 
   @Transactional()
-  async sendNotification(options: CreateNotificationDto): Promise<any> {
-    const userId: User = await this.userRepository.findById(options.user_id);
-    if(!userId) throw new DataNotFoundException("User id not found", 400);
-
-    const notifObject = this.notificationRepository.create({
+  async sendNotification(options: CreateNotificationDto): Promise<void> {
+    const adminId: User = await this.userRepository.findById(options.user_id);
+    if(!adminId) throw new DataNotFoundException("User id not found", 400);
+  
+    //If notification not send to superadmin 
+    let notifObject: Notification = this.notificationRepository.create({
       ...options,
-      user: userId
+      user: adminId,
     });
 
-    return await this.notificationRepository.save(notifObject);
+    //If the notification must send to superadmins
+    if(options.toSuperadmin){
+      const superadmins: User[] = await this.userRepository.findUserByRole("SUPERADMIN");
+
+      for (const superadmin of superadmins) {
+        notifObject = this.notificationRepository.create({
+          ...options,
+          user: superadmin,
+        });
+
+        await this.notificationRepository.save(notifObject);
+      }
+    }
+  
+    await this.notificationRepository.save(notifObject);
   }
 
   async getNotifications(userId: number): Promise<Notification[]> {
