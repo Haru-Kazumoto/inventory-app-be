@@ -9,11 +9,12 @@ export async function pagination<T>(
     const {skip, take, order} = pageOptionsDto;
 
     const queryBuilder = repository.createQueryBuilder(queryAlias);
-
+    
     queryBuilder
         .orderBy(`${queryAlias}.created_at`, order)
         .skip(skip)
-        .take(take);
+        .take(take)
+        .withDeleted;
 
     const itemCount = await queryBuilder.getCount();
     const {entities} = await queryBuilder.getRawAndEntities();

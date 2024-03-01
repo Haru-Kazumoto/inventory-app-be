@@ -4,17 +4,15 @@ import { LoggingMiddleware } from './middleware/logging.middleware';
 import { AuthModule } from './modules/auth/auth.module';
 import { DatabaseModule } from './db/database.module';
 import { ConfigurationAppModule } from './config/config.module';
-import { ExitlogModule } from './modules/exit-log/exitlog.module';
-import { ItemsModule } from './modules/items/items.module';
-import { ClassModule } from './modules/class/class.module';
-import { ItemRequestModule } from './modules/item-request/item-request.module';
 import { NotificationModule } from './modules/notification/notification.module';
-import { LookupModule } from './modules/lookup/lookup.module';
-import { ExititemModule } from './modules/exit-item/exititem.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { TransformInterceptor } from './interceptors/transform.interceptor';
-import { TimeoutInterceptor } from './interceptors/timeout.interceptor';
-import { ExcludeNullInterceptor } from './interceptors/exclude-null.interceptor';
+import { AuditLogsModule } from './modules/audit-logs/audit-logs.module';
+import { ClassModule } from './modules/class/class.module';
+import { RedeemCodeModule } from './modules/redeem_code/redeem_code.module';
+import { ItemDetailsModule } from './modules/item_details/item_details.module';
+import { ExitLogsModule } from './modules/exit_logs/exit_logs.module';
+import { ItemsModule } from './modules/items/items.module';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './exceptions/filters/exception.filter';
 
 @Module({
   imports: [
@@ -22,27 +20,19 @@ import { ExcludeNullInterceptor } from './interceptors/exclude-null.interceptor'
     UserModule,
     DatabaseModule,
     AuthModule,
-    LookupModule,
-    ExitlogModule,
-    ItemsModule,
+    NotificationModule,
+    AuditLogsModule,
     ClassModule,
-    ExititemModule,
-    ItemRequestModule,
-    NotificationModule
+    RedeemCodeModule,
+    ItemDetailsModule,
+    ItemsModule,
+    ExitLogsModule,
   ],
   providers: [
     // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: TransformInterceptor
+    //   provide: APP_FILTER,
+    //   useClass: HttpExceptionFilter,
     // },
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: TimeoutInterceptor
-    // },
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: ExcludeNullInterceptor
-    // }
   ],
 })
 export class AppModule implements NestModule{

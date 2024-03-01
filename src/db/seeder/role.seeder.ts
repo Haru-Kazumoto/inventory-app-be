@@ -32,8 +32,8 @@ export class RoleSeeder implements Seeder {
                     major: 'TE'
                 },
                 {
-                    name: 'ADMIN_AKL',
-                    major: 'AKL'
+                    name: 'ADMIN_AK',
+                    major: 'AK'
                 },
                 {
                     name: 'SUPERADMIN',

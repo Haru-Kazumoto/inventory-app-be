@@ -36,6 +36,15 @@ export class ItemsRepository extends Repository<Item> {
         })
     }
 
+    async findItemByItemCode(item_code: string): Promise<Item> {
+        return await this.itemRepository.findOne({
+            where: {
+                item_code: item_code
+            },
+            withDeleted: true
+        });
+    }
+
     //TODO : CHANGE THE LOGIC SEARCH BY CATEGORY (DYNAMIC)
     async findManyBy(category: string,pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
         const queryBuilder = this.itemRepository.createQueryBuilder("item");

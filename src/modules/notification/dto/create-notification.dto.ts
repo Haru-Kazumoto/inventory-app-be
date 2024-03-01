@@ -31,6 +31,6 @@ export class CreateNotificationDto {
     @IsNumber()
     @IsNotEmpty()
     @ApiProperty()
-    public toSuperadmin: boolean;
+    public toSuperadmin?: boolean;
 
 }

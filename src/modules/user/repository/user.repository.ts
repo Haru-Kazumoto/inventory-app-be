@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { PageDto, PageMetaDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
+import { Roles } from 'src/modules/role/entities/roles.entity';
 
 @Injectable()
 export class UserRepository extends Repository<User>{
@@ -14,7 +15,7 @@ export class UserRepository extends Repository<User>{
     }
 
     async findUserByUsername(username: string): Promise<User> {
-        return this.userRepository.findOne({
+        return await this.userRepository.findOne({
             where: {
                 username: username
             }
@@ -27,14 +28,19 @@ export class UserRepository extends Repository<User>{
             .getMany();
     }
 
-    async softDeleteById(id: number): Promise<any>{
-        return await this.dataSource.createQueryBuilder()
+    async softDeleteById(id: number) {
+        const query = this.createQueryBuilder("role");
+
+        await query
             .softDelete()
-            .where("id = :id", {id: id})
+            .from(Roles)
+            .where("role.id = :id", {id: id})
             .execute();
     }
 
     async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
+        // const query = this.createQueryBuilder("user");
+
         return pagination<User>(this, pageOptionsDto, "user");
     }
 

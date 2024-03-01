@@ -23,7 +23,7 @@ export class NotificationService implements INotificationService{
     //If notification not send to superadmin 
     let notifObject: Notification = this.notificationRepository.create({
       ...options,
-      user: adminId,
+      // user: adminId,
     });
 
     //If the notification must send to superadmins
@@ -33,7 +33,7 @@ export class NotificationService implements INotificationService{
       for (const superadmin of superadmins) {
         notifObject = this.notificationRepository.create({
           ...options,
-          user: superadmin,
+          // user: superadmin,
         });
 
         await this.notificationRepository.save(notifObject);

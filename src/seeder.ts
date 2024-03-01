@@ -5,6 +5,10 @@ import * as dotenv from "dotenv";
 import { User } from "./modules/user/entities/user.entity";
 import { RoleSeeder } from "./db/seeder/role.seeder";
 import { Notification } from "./modules/notification/entities/notification.entity";
+import { ClassSeeder } from "./db/seeder/class.seeder";
+import { Class } from "./modules/class/entitites/class.entity";
+import { Item } from "./modules/items/entities/item.entity";
+import { AuditLogs } from "./modules/audit-logs/entities/audit_logs.entity";
 
 dotenv.config();
 
@@ -19,14 +23,17 @@ seeder({
             password: process.env.DB_PASSWORD,
             autoLoadEntities: Boolean(process.env.DB_LOAD_ENTITIES),
             synchronize: Boolean(process.env.DB_SYNC),
-            entities: [Roles, User, Notification]
+            entities: [Roles, User, Notification, Item, Class, AuditLogs]
         }),
         TypeOrmModule.forFeature([
             Roles, 
             User, 
-            Notification
+            Notification,
+            Class,
+            Item, AuditLogs
         ])
     ]
 }).run([
-    RoleSeeder,
+    // RoleSeeder,
+    ClassSeeder
 ]);

@@ -76,13 +76,13 @@ export class UserService implements IUserService{
         await this.userRepository.remove(data);
     }
 
-    //BUG (hasMetadata)
+    //BUG (hasMetadata) [TESTING]
     @Transactional()
     async softDeleteById(id: number): Promise<any> {
         const findId = await this.userRepository.findById(id);
         if(!findId) throw new DataNotFoundException("Id not found", 400);
         
-        return await this.userRepository.softDeleteById(id);
+        return await this.userRepository.softDelete(id);
     }
 
     //For Authentication

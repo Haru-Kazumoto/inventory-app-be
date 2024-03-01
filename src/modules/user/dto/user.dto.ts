@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsEmail, IsString, IsNumber } from "class-validator";
+import { IsNotEmpty, IsString, IsNumber } from "class-validator";
 
 export class UserCreateDto {
 
@@ -34,7 +34,7 @@ export class UserCreateDto {
     @ApiProperty({
         example: 1,
         required: true,
-        description: "The system will find role id and set it to 'role' relations"
+        description: "[1: ADMIN_TJKT, 2: ADMIN_TO, 3: ADMIN_TE, 4: ADMIN_AK, 5: SUPERADMIN]"
     })
     role_id: number;
     
