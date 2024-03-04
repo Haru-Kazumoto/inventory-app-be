@@ -23,13 +23,13 @@ export class UserService implements IUserService{
         private readonly userRepository: UserRepository,
         private readonly roleRepository: RoleRepository,
         private readonly notificationService: NotificationService,
-        private readonly authService: AuthService,
+        // private readonly authService: AuthService,
         private userUtils: UserUtils
     ){}
 
     @Transactional()
     public async createUser(request: Request, body: UserCreateDto): Promise<User> {
-        const user = await this.authService.getSession();
+        // const user = await this.authService.getSession();
         
         await this
             .userUtils
@@ -44,12 +44,12 @@ export class UserService implements IUserService{
         });
 
         //SEND NOTIFICATION
-        await this.notificationService.sendNotification({
-            title: "Pengguna baru",
-            content: userCreateContent,
-            color: "clay",
-            user_id: user.id
-        });
+        // await this.notificationService.sendNotification({
+        //     title: "Pengguna baru",
+        //     content: userCreateContent,
+        //     color: "clay",
+        //     user_id: user.id
+        // });
 
         return await this.userRepository.save(newUser);
     }

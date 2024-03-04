@@ -14,9 +14,9 @@ import { AuthModule } from '../auth/auth.module';
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Roles]),
+    // forwardRef(() => AuthModule),
+    forwardRef(() => NotificationModule),
     RoleModule,
-    forwardRef(() => AuthModule),
-    forwardRef(() => NotificationModule)
   ],
   controllers: [UserController],
   providers: [
