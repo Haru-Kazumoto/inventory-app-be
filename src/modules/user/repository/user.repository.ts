@@ -39,8 +39,6 @@ export class UserRepository extends Repository<User>{
     }
 
     async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
-        // const query = this.createQueryBuilder("user");
-
         return pagination<User>(this, pageOptionsDto, "user");
     }
 

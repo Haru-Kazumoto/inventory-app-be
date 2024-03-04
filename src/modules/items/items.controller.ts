@@ -34,6 +34,7 @@ import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 import { Status } from 'src/enums/response.enum';
+import { ItemCategory } from 'src/enums/item_category.enum';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
@@ -89,14 +90,13 @@ export class ItemsController {
     type: CreateItemDto,
     description: 'DTO Structure response from create one item',
   })
-  // @UseInterceptors(ClassSerializerInterceptor)
+  @ApiBody({
+    type: CreateItemDto,
+    description: 'DTO Structure response from create one item',
+  })
   @Post('create')
-  async createOneItem(
-    @Body() dto: CreateItemDto,
-    @Req() request: Request,
-    @Res() response: Response,
-  ) {
-    const data = await this.itemsService.createOne(request, dto);
+  async createOneItem(@Body() dto: CreateItemDto, @Res() response: Response) {
+    const data = await this.itemsService.createOne(dto);
 
     return response.status(response.statusCode).json({
       statusCode: response.statusCode,
@@ -130,9 +130,10 @@ export class ItemsController {
   })
   @ApiPaginatedResponse(Item)
   public async findManyItem(
+    @Query() category: ItemCategory,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
-    return this.itemsService.findMany(pageOptionsDto);
+    return this.itemsService.findMany(category, pageOptionsDto);
   }
 
   @UseInterceptors(new TransformInterceptor())
@@ -194,7 +195,7 @@ export class ItemsController {
     });
   }
 
-  @Delete('delete-hard')
+  @Delete('delete')
   @UseGuards(AuthenticatedGuard)
   @ApiQuery({
     name: 'id',
@@ -212,7 +213,7 @@ export class ItemsController {
       },
     },
   })
-  public async hardDeleteItem(@Query('id', ParseIntPipe) id: number) {
+  public async deleteItem(@Query('id', ParseIntPipe) id: number) {
     await this.itemsService.deleteById(id);
   }
 }

@@ -14,6 +14,7 @@ import { userCreateContent } from '../notification/notification.constant';
 import { Request } from 'express';
 
 import * as bcrypt from "bcrypt";
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService implements IUserService{
@@ -22,14 +23,16 @@ export class UserService implements IUserService{
         private readonly userRepository: UserRepository,
         private readonly roleRepository: RoleRepository,
         private readonly notificationService: NotificationService,
+        private readonly authService: AuthService,
         private userUtils: UserUtils
     ){}
 
     @Transactional()
     public async createUser(request: Request, body: UserCreateDto): Promise<User> {
-        const user: Express.User = getSession(request);
+        const user = await this.authService.getSession();
         
-        await this.userUtils
+        await this
+            .userUtils
             .checkField('username', body.username, 'Username telah terpakai')
             .isExists();
 

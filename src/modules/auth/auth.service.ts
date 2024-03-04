@@ -1,8 +1,7 @@
 import { UserService } from 'src/modules/user/user.service';
-import { ForbiddenException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpStatus, Inject, Injectable, Req } from '@nestjs/common';
 import { IAuthService } from './auth.service.interface';
 import { User } from '../user/entities/user.entity';
-import * as bcrypt from "bcrypt";
 import { Request } from 'express';
 import { AuthRequest } from './auth.dto';
 import { Transactional } from 'typeorm-transactional';
@@ -11,13 +10,16 @@ import { RoleRepository } from '../role/repository/role.repository';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
 
+import * as bcrypt from "bcrypt";
+import * as cls from "cls-hooked";
+
 @Injectable()
 export class AuthService implements IAuthService { 
     constructor(
-        private userService: UserService,
-        private readonly userRepsitory: UserRepository,
+        @Inject('USER_SERVICE') private userService: UserService,
+        private readonly userRepository: UserRepository,
         private readonly roleRepository: RoleRepository,
-        private userUtils: UserUtils
+        private readonly userUtils: UserUtils
     ){}
     
 
@@ -46,14 +48,17 @@ export class AuthService implements IAuthService {
                     statusCode: HttpStatus.OK
                 };
             });
-        }, 2000);
+        }, 5000);
     }
 
-    async getSession(request: Request): Promise<User> {
-        const user = request.user; 
-        const findUserBySession: User = await this.userRepsitory.findById(user.id);
+    async getSession(): Promise<User> {
+        const session = cls.getNamespace('session');
+        const request = session.get('request');
+        const user = request.user;
 
-        return findUserBySession;
+        const findSession = await this.userRepository.findById(user.id);
+
+        return findSession;
     }
 
     @Transactional()
@@ -64,12 +69,12 @@ export class AuthService implements IAuthService {
 
         if(!role) throw new DataNotFoundException("Role id not found.", 400);
 
-        const createUser = this.userRepsitory.create({
+        const createUser = this.userRepository.create({
             ...request,
             role: role,
             password: await bcrypt.hash(request.password, 10),
         });
 
-        await this.userRepsitory.save(createUser); //ini ada error nih.
+        await this.userRepository.save(createUser); //ini ada error nih.
     }
 }

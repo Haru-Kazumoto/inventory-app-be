@@ -16,7 +16,7 @@ import { NotificationModule } from '../notification/notification.module';
     {
         imports: [
             TypeOrmModule.forFeature([User]),
-            UserModule,
+            forwardRef(() => UserModule),
             forwardRef(() => NotificationModule),
             RoleModule
         ],

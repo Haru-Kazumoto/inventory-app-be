@@ -32,8 +32,8 @@ export class AuditLogsService implements IAuditLogsService {
   }
 
   //not used yet
-  getAllReport(pageOptionsDto: PageOptionsDto): Promise<PageDto<AuditLogs>> {
-    return this.auditRepository.findMany(pageOptionsDto);
+  getAllReport(): Promise<AuditLogs[]> {
+    return this.auditRepository.find();
   }
 
   async deleteOneReport(id: number): Promise<void> {
