@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { User, getSession } from './entities/user.entity';
 import { UserCreateDto } from './dto/user.dto';
 import { IUserService } from './user.service.interface';
@@ -23,7 +23,7 @@ export class UserService implements IUserService{
         private readonly userRepository: UserRepository,
         private readonly roleRepository: RoleRepository,
         private readonly notificationService: NotificationService,
-        private readonly authService: AuthService,
+        @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
         private userUtils: UserUtils
     ){}
 
