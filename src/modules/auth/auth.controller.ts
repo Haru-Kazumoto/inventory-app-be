@@ -118,8 +118,8 @@ export class AuthController {
         }
     })
     @Get('get-session')
-    async getSession(@Req() req: ExpressRequest, @Res() res: ExpressResponse) {
-        const data = await this.authService.getSession(req);
+    async getSession(@Res() res: ExpressResponse) {
+        const data = await this.authService.getSession();
         
         return res.status(200).json({  
             statusCode: res.statusCode,

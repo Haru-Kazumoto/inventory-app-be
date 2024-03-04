@@ -13,6 +13,10 @@ import { getSession } from '../user/entities/user.entity';
 import { NotificationService } from '../notification/notification.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { EditMethod } from 'src/enums/edit_methods.enum';
+import { ItemCategory } from 'src/enums/item_category.enum';
+import { QueryFailedError } from 'typeorm';
+import { AuthService } from '../auth/auth.service';
+import { ExecutionContextHost } from '@nestjs/core/helpers/execution-context-host';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -20,14 +24,15 @@ export class ItemsService implements IItemsService {
     private readonly itemRepository: ItemsRepository,
     private readonly classRepository: ClassRepository,
     private readonly notificationService: NotificationService,
-    private readonly auditLogService: AuditLogsService
+    private readonly auditLogService: AuditLogsService,
+    private readonly authService: AuthService
   ){}
 
   @Transactional()
-  async createOne(request: Request, body: CreateItemDto): Promise<Item> {
-    const session = getSession(request);
-    try{
-      const classEntity = await this.classRepository.findClassById(body.class_id);
+  async createOne(body: CreateItemDto): Promise<Item> {
+    const session = await this.authService.getSession();
+
+    const classEntity = await this.classRepository.findClassById(body.class_id);
 
       const newItem = this.itemRepository.create({
         ...body,
@@ -53,13 +58,10 @@ export class ItemsService implements IItemsService {
       });
 
       return resultData;
-    } catch {
-      throw new BadRequestException("Whoops, it seems like you have an error.");
-    }
   }
 
-  findMany(category: any, pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
-    throw new Error('Method not implemented.');
+  async findMany(category: ItemCategory, pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
+    return await this.itemRepository.findMany(category,pageOptionsDto);
   }
 
   updateOne(id: number, body: UpdateItemDto): Promise<Item> {

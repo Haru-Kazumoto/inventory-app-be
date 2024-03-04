@@ -13,6 +13,7 @@ import { ExitLogsModule } from './modules/exit_logs/exit_logs.module';
 import { ItemsModule } from './modules/items/items.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './exceptions/filters/exception.filter';
+import { AuthSessionMiddleware } from './middleware/auth-session.middleware';
 
 @Module({
   imports: [
@@ -37,6 +38,6 @@ import { HttpExceptionFilter } from './exceptions/filters/exception.filter';
 })
 export class AppModule implements NestModule{
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(LoggingMiddleware).forRoutes('*');
+        consumer.apply(LoggingMiddleware,AuthSessionMiddleware).forRoutes('*');
     }
 }

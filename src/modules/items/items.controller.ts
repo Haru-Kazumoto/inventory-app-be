@@ -55,10 +55,9 @@ export class ItemsController {
   }
   })
   @ApiBody({type: CreateItemDto, description: "DTO Structure response from create one item"})
-  // @UseInterceptors(ClassSerializerInterceptor)
   @Post('create')
-  async createOneItem(@Body() dto: CreateItemDto, @Req() request: Request, @Res() response: Response){
-    const data = await this.itemsService.createOne(request,dto);
+  async createOneItem(@Body() dto: CreateItemDto,@Res() response: Response){
+    const data = await this.itemsService.createOne(dto);
 
     return response.status(response.statusCode).json({
       statusCode: response.statusCode,
