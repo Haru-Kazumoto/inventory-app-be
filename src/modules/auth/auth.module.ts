@@ -22,7 +22,7 @@ import { NotificationModule } from '../notification/notification.module';
         ],
         providers: [
             AuthService,
-            UserService,
+            // UserService,
             UserRepository,
             LocalStrategy,
             SessionSerializer,
