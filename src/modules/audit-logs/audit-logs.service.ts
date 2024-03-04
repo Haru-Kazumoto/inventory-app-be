@@ -10,33 +10,33 @@ import { AuditLogsRepository } from './repositories/audit-logs.repository';
 
 @Injectable()
 export class AuditLogsService implements IAuditLogsService {
-    constructor(
-        private readonly itemRepository: ItemsRepository,
-        private readonly auditRepository: AuditLogsRepository
-    ){}
+  constructor(
+    private readonly itemRepository: ItemsRepository,
+    private readonly auditRepository: AuditLogsRepository,
+  ) {}
 
-    @Transactional()
-    async createReport(body: CreateAuditLogsDto): Promise<void> {
-        const item: Item = await this.itemRepository.findOne({where: {id: body.item_id}});
+  @Transactional()
+  async createReport(body: CreateAuditLogsDto): Promise<void> {
+    const item: Item = await this.itemRepository.findOne({
+      where: { id: body.item_id },
+    });
 
-        const createData = this.auditRepository.create({
-            edited_by: body.edited_by,
-            edit_method: body.edit_method,
-            item_id: body.item_id,
-            item: item
-        });
+    const createData = this.auditRepository.create({
+      edited_by: body.edited_by,
+      edit_method: body.edit_method,
+      item_id: body.item_id,
+      item: item,
+    });
 
-        await this.auditRepository.save(createData);
-    }
+    await this.auditRepository.save(createData);
+  }
 
-    //not used yet
-    getAllReport(pageOptions: PageOptionsDto): Promise<PageDto<AuditLogs>> {
-        throw new Error('Method not implemented.');
-    }
+  //not used yet
+  getAllReport(pageOptionsDto: PageOptionsDto): Promise<PageDto<AuditLogs>> {
+    return this.auditRepository.findMany(pageOptionsDto);
+  }
 
-    async deleteOneReport(id: number): Promise<void> {
-        await this.auditRepository.delete(id);
-    }
-
-
+  async deleteOneReport(id: number): Promise<void> {
+    await this.auditRepository.delete(id);
+  }
 }
