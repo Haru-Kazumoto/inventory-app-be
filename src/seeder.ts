@@ -36,7 +36,7 @@ seeder({
         ])
     ]
 }).run([
-    // RoleSeeder,
-    // ClassSeeder,
+    RoleSeeder,
+    ClassSeeder,
     ItemSeeder
 ]);
