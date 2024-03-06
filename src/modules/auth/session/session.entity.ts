@@ -17,7 +17,3 @@ export class Session implements ISession{
     @DeleteDateColumn()
     public destroyedAt?: Date;
 }
-
-export const getSession = (request: Request): Express.User => {
-    return request.user;
-}

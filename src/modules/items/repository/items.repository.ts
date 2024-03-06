@@ -1,8 +1,10 @@
-import { DataSource, Repository } from "typeorm";
+import { ItemCategory } from 'src/enums/item_category.enum';
+import { DataSource, Repository, SelectQueryBuilder } from "typeorm";
 import { Item } from "../entities/item.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PageDto, PageMetaDto, PageOptionsDto } from "src/utils/pagination.utils";
+import { pagination } from "src/utils/modules_utils/pagination.utils";
 
 @Injectable()
 export class ItemsRepository extends Repository<Item> {
@@ -12,20 +14,14 @@ export class ItemsRepository extends Repository<Item> {
         super(Item, dataSource.createEntityManager());
     }
 
-    async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
-        const queryBuilder = this.itemRepository.createQueryBuilder("item");
+    async findMany(category: ItemCategory,pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
+        const queryAlias = "item";
 
-        queryBuilder
-            .orderBy("item.created_at", pageOptionsDto.order)
-            .skip(pageOptionsDto.skip)
-            .take(pageOptionsDto.take);
+        const whereCondition = (qb: SelectQueryBuilder<Item>) => {
+            qb.where(`${queryAlias}.item_category = :category`, { category });
+        }
 
-        const itemCount = await queryBuilder.getCount();
-        const {entities} = await queryBuilder.getRawAndEntities();
-
-        const pageMetaDto = new PageMetaDto({itemCount, pageOptionsDto});
-
-        return new PageDto(entities, pageMetaDto);
+        return await pagination<Item>(this, pageOptionsDto, queryAlias, whereCondition);
     }
 
     async findById(id: number): Promise<Item> {
@@ -36,21 +32,13 @@ export class ItemsRepository extends Repository<Item> {
         })
     }
 
-    //TODO : CHANGE THE LOGIC SEARCH BY CATEGORY (DYNAMIC)
-    async findManyBy(category: string,pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
-        const queryBuilder = this.itemRepository.createQueryBuilder("item");
-
-        queryBuilder
-            .orderBy("item.created_at", pageOptionsDto.order)
-            .skip(pageOptionsDto.skip)
-            .take(pageOptionsDto.take);
-
-        const itemCount = await queryBuilder.getCount();
-        const {entities} = await queryBuilder.getRawAndEntities();
-
-        const pageMetaDto = new PageMetaDto({itemCount, pageOptionsDto});
-
-        return new PageDto(entities, pageMetaDto);
+    async findItemByItemCode(item_code: string): Promise<Item> {
+        return await this.itemRepository.findOne({
+            where: {
+                item_code: item_code
+            },
+            withDeleted: true
+        });
     }
 
     countItemsBy(status: string): Promise<any> {

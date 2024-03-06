@@ -1,42 +1,50 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsString, Matches } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsString, Matches } from "class-validator";
+import { ItemCategory } from "src/enums/item_category.enum";
+import { ItemType } from "src/enums/item_type.enum";
+import { StatusItem } from "src/enums/status_item.enum";
 
 export class CreateItemDto {
     @IsString()
     @IsNotEmpty()
-    @ApiProperty()
+    @ApiProperty({example: "Mikrotik"})
     public name: string; //items name
 
     @IsString()
     @IsNotEmpty()
-    @Matches('/^[A-Za-z]{3}|[A-Za-z0-9]{5}-[A-Za-z0-9]+$/',null,{
-        message: "Kode item harus diawali dengan 3 sampai 5 huruf lalu di akhiri dengan random teks."
-    })
-    @ApiProperty({example: "MKT-3476U923LL"})
+    @ApiProperty({example: "MKT-123456789"})
     public item_code: string;
 
     @IsString()
     @IsNotEmpty()
-    @ApiProperty()
-    public status_item: string; //lookup type STATUS
+    @IsEnum(StatusItem)
+    @ApiProperty({example: StatusItem.TERSEDIA})
+    public status_item: StatusItem; //lookup type STATUS
 
     @IsString()
     @IsNotEmpty()
-    @ApiProperty()
-    public category_item: string; //lookup type CATEGOTRY harusnya kategory nya itu habis pakai dan tidak
+    @ApiProperty({example: "BOSDA"})
+    public source_fund: string;
+
+    @IsString()
+    @IsNotEmpty()
+    @IsEnum(ItemCategory)
+    @ApiProperty({example: ItemCategory.BARANG_HABIS_PAKAI})
+    public category_item: ItemCategory; 
 
     @IsNumber()
     @IsNotEmpty()
-    @ApiProperty()
+    @ApiProperty({example: 1000000})
+    public unit_price: number;
+
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty({example: 1})
     public class_id: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    @ApiProperty()
-    public total_current: number;
-
     @IsString()
     @IsNotEmpty()
-    @ApiProperty()
-    public item_type: string; //lookup type TYPE harusnya ATK dan NON ATK
+    @IsEnum(ItemType)
+    @ApiProperty({example: ItemType.NON_ATK})
+    public item_type: ItemType; 
 }

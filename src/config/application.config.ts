@@ -59,6 +59,8 @@ export function setupSwagger(app: INestApplication): void {
         .addTag("User","User Management Endpoint", {url:`${PREFIX_API}/user`, description: "User endpoint"})
         .addTag("Item","Item management Endpoint", {url:`${PREFIX_API}/item`, description: "Item endpoint"})
         .addTag("Notification","Notification Management Endpoint", {url:`${PREFIX_API}/notification`, description: "Notification endpoint"})
+        .addTag("AuditLog","Audit Log Management Endpoint", {url:`${PREFIX_API}/audit-logs`, description: "Audit Log endpoint",})
+        .addTag("ExitLogs","Exit Logs managemnent endpoint")
         .build();
 
     const document = SwaggerModule.createDocument(app, options);

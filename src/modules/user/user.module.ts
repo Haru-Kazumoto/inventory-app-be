@@ -9,12 +9,14 @@ import { UserUtils } from 'src/utils/modules_utils/user.utils';
 import { Roles } from 'src/security/decorator/roles.decorator';
 import { RoleModule } from '../role/role.module';
 import { NotificationModule } from '../notification/notification.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Roles]),
+    forwardRef(() => AuthModule),
+    forwardRef(() => NotificationModule),
     RoleModule,
-    forwardRef(() => NotificationModule)
   ],
   controllers: [UserController],
   providers: [

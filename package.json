@@ -1,8 +1,8 @@
 {
-  "name": "nest-js-learn",
+  "name": "Inventory-Application",
   "version": "0.0.1",
-  "description": "Im learning nestjs with typeorm ",
-  "author": "Ziaurrahman",
+  "description": "This is a backend boilerplate of inventory application",
+  "author": "Ziaurrahman the developer",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -19,7 +19,11 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "node dist/seeder",
-    "seed:refresh": "node dist/seeder --refresh"
+    "seed:refresh": "node dist/seeder --refresh",
+    "typeorm": "npm run build && npx typeorm -d dist/db/data-source.js",
+    "migration:generate": "npm run typeorm -- migration:generate",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert"
   },
   "dependencies": {
     "@faker-js/faker": "^8.3.1",
@@ -37,6 +41,7 @@
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
+    "cls-hooked": "^4.2.2",
     "connect-typeorm": "^2.0.0",
     "dotenv": "^16.3.1",
     "express-session": "^1.17.3",

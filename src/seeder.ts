@@ -4,8 +4,12 @@ import { Roles } from "src/modules/role/entities/roles.entity";
 import * as dotenv from "dotenv";
 import { User } from "./modules/user/entities/user.entity";
 import { RoleSeeder } from "./db/seeder/role.seeder";
-import { LookupSeeder } from "./db/seeder/lookup.seeder";
-import { Lookup } from "./modules/lookup/entities/lookup.entity";
+import { Notification } from "./modules/notification/entities/notification.entity";
+import { ClassSeeder } from "./db/seeder/class.seeder";
+import { Class } from "./modules/class/entitites/class.entity";
+import { Item } from "./modules/items/entities/item.entity";
+import { AuditLogs } from "./modules/audit-logs/entities/audit_logs.entity";
+import { ItemSeeder } from "./db/seeder/item.seeder";
 
 dotenv.config();
 
@@ -20,15 +24,19 @@ seeder({
             password: process.env.DB_PASSWORD,
             autoLoadEntities: Boolean(process.env.DB_LOAD_ENTITIES),
             synchronize: Boolean(process.env.DB_SYNC),
-            entities: [Roles, User]
+            entities: [Roles, User, Notification, Item, Class, AuditLogs]
         }),
         TypeOrmModule.forFeature([
             Roles, 
             User, 
-            Lookup
+            Notification,
+            Class,
+            Item, 
+            AuditLogs,
         ])
     ]
 }).run([
-    RoleSeeder,
-    LookupSeeder
+    // RoleSeeder,
+    // ClassSeeder,
+    ItemSeeder
 ]);

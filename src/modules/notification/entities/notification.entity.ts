@@ -16,8 +16,8 @@ export class Notification extends BaseEntity {
     @Column()
     public date_send: Date;
 
-    @Column()
-    public color: string; //For color status notification 
+    @Column({nullable: true})
+    public color?: string | null; //For color status notification 
 
     @Column({default: false})
     public hasRead: boolean; //For status read notification on UI
@@ -25,8 +25,11 @@ export class Notification extends BaseEntity {
     @Column()
     public user_id: number;
 
-    @ManyToOne(() => User, user => user.notifications)
-    public user: User;
+    @Column({default: false})
+    public toSuperadmin: boolean;
+
+    // @ManyToOne(() => User, user => user.notifications)
+    // public user: User;
 
     @BeforeInsert()
     @BeforeUpdate()

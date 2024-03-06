@@ -8,7 +8,7 @@ import { Session } from './modules/auth/session/session.entity';
 import config, { 
   passportConfig, 
   globalPipesRegistrar,
-  globalInterceptorRegistrar,
+  // globalInterceptorRegistrar,
   setupSwagger 
 } from "./config/application.config";
 import * as session from 'express-session';
@@ -27,7 +27,7 @@ async function bootstrap() {
     session(
       {
         name: config.cookieOptions.name,
-        secret: config.cookieOptions.secret,
+        secret: "8C121F33FD1B74731D9E613E217B3",
         resave: config.cookieOptions.resave,
         saveUninitialized: config.cookieOptions.saveUninitialized,
         cookie: { maxAge: config.cookieOptions.maxAge },
@@ -44,12 +44,15 @@ async function bootstrap() {
   passportConfig(app);
   
   globalPipesRegistrar(app);
-  // globalInterceptorRegistrar(app);
   
   try{
     await app.listen(process.env.APP_PORT);
-    Logger.log(`Nest running on port ${process.env.APP_PORT}`, "Application")
-    Logger.log(`Swagger available at ${process.env.APP_URL}/api`, "Swagger")
+    
+    if(process.env.NODE_STATUS == "DEV"){
+      Logger.log(`Nest running on port ${process.env.APP_PORT}`, "Application")
+      Logger.log(`Swagger available at ${process.env.APP_URL}/api`, "Swagger")
+    }
+
   } catch(error) {
     Logger.log(`Error starting Nest application: ${error}`, "","Application", false);
     process.exit(1);

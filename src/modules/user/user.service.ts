@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { User } from './entities/user.entity';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { User, getSession } from './entities/user.entity';
 import { UserCreateDto } from './dto/user.dto';
 import { IUserService } from './user.service.interface';
 import { Transactional } from 'typeorm-transactional/dist/decorators/transactional';
@@ -12,7 +12,9 @@ import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { NotificationService } from '../notification/notification.service';
 import { userCreateContent } from '../notification/notification.constant';
 import { Request } from 'express';
-import { getSession } from '../auth/session/session.entity';
+
+import * as bcrypt from "bcrypt";
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UserService implements IUserService{
@@ -21,26 +23,25 @@ export class UserService implements IUserService{
         private readonly userRepository: UserRepository,
         private readonly roleRepository: RoleRepository,
         private readonly notificationService: NotificationService,
+        @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
         private userUtils: UserUtils
     ){}
 
     @Transactional()
     public async createUser(request: Request, body: UserCreateDto): Promise<User> {
-        const user = getSession(request);
-
-        console.log(user);
+        const user = await this.authService.getSession();
         
-        await this.userUtils.checkField('username', body.username, 'Username telah terpakai').isExists();
+        await this
+            .userUtils
+            .checkField('username', body.username, 'Username telah terpakai')
+            .isExists();
 
         const role = await this.roleRepository.findRoleById(body.role_id);
-        if(!role) throw new DataNotFoundException('Id role tidak ditemukan', 400);
-
-        const userObj = this.userRepository.create({
+        const newUser = this.userRepository.create({
             ...body,
-            role: role
+            role: role,
+            password: await bcrypt.hash(body.password, 10)
         });
-
-        console.log(userObj);
 
         //SEND NOTIFICATION
         await this.notificationService.sendNotification({
@@ -50,7 +51,7 @@ export class UserService implements IUserService{
             user_id: user.id
         });
 
-        return await this.userRepository.save(userObj);
+        return await this.userRepository.save(newUser);
     }
 
     public async findMany(pageOptionsDto: PageOptionsDto): Promise<PageDto<User>> {
@@ -78,13 +79,13 @@ export class UserService implements IUserService{
         await this.userRepository.remove(data);
     }
 
-    //BUG (hasMetadata)
+    //BUG (hasMetadata) [TESTING]
     @Transactional()
     async softDeleteById(id: number): Promise<any> {
         const findId = await this.userRepository.findById(id);
         if(!findId) throw new DataNotFoundException("Id not found", 400);
         
-        return await this.userRepository.softDeleteById(id);
+        return await this.userRepository.softDelete(id);
     }
 
     //For Authentication
