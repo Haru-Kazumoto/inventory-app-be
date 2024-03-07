@@ -70,6 +70,14 @@ export class ExitLogsService implements IExitLogsService {
         }
     }
 
+    async findExitLogByRedeemCode(redeemCode: string): Promise<ExitLogs> {
+        const findRedeemCode: ExitLogs = await this.exitlogRepository.findExitLogByRedeemCode(redeemCode);
+        console.log(findRedeemCode);
+        if(!findRedeemCode) throw new NotFoundException("Redeem Code tidak ada.");
+
+        return findRedeemCode;
+    }
+    
     async findAllLogs(pageOptionsDto: PageOptionsDto, filter?: FilterParam): Promise<PageDto<ExitLogs>> {
         return null;
     }

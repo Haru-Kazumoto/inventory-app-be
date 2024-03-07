@@ -1,7 +1,7 @@
-import { Body, Controller, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ExitLogsService } from './exit_logs.service';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
-import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateExitLogDto } from './dtos/exit_logs.dto';
 import { Response } from 'express';
 
@@ -23,4 +23,20 @@ export class ExitLogsController {
     });
   }
 
+  @ApiQuery({
+    name: "redeem-code",
+    description: "For querying with redeem code",
+    type: String,
+    required: true
+  })
+  @Get("find-log-by-code")
+  async findLogByRedeemCode(@Query("redeem-code") redeem_code: string, @Res() response: Response) {
+    const data = await this.exitLogsService.findExitLogByRedeemCode(redeem_code);
+
+    return response.status(200).json({
+      statusCode: response.statusCode,
+      message: HttpStatus.OK,
+      data: {exit_log: data}
+    });
+  }
 }
