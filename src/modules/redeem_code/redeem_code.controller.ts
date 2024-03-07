@@ -4,6 +4,9 @@ import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateExitLogDto } from '../exit_logs/dtos/exit_logs.dto';
 import { Response } from 'express';
+import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
+import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
+import { PageOptionsDto } from 'src/utils/pagination.utils';
 
 @ApiTags('RedeemCode')
 @UseGuards(AuthenticatedGuard)
@@ -32,6 +35,29 @@ export class RedeemCodeController {
   @Get('find-by-code')
   async findByRedeemCode(@Query("redeem-code") redeemCode: string, @Res() response: Response) {
     const data = await this.redeemCodeService.findByRedeemCode(redeemCode);
+
+    return response.status(200).json({
+      statusCode: response.statusCode,
+      message: "OK",
+      data: {redeem_code: data}
+    });
+  }
+
+  @Get('find-all-codes')
+  @ApiPaginatedResponse(ExitLogs)
+  async findAllRedeemCodes(@Query() pageOptionsDto: PageOptionsDto) {
+    return await this.redeemCodeService.findAllRedeemCodes(pageOptionsDto);
+  }
+
+  @ApiQuery({
+    name: "redeem-code",
+    description: "parameter for use redeem code",
+    type: String,
+    required: true
+  })
+  @Post('store-redeem-code')
+  async storeRedeemCode(@Query("redeem-code") redeemCode: string, @Res() response: Response){
+    const data = await this.redeemCodeService.storeRedeemCode(redeemCode);
 
     return response.status(200).json({
       statusCode: response.statusCode,

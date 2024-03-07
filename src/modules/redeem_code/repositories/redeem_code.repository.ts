@@ -1,6 +1,8 @@
 import { DataSource, Repository } from "typeorm";
 import { RedeemCode } from "../entities/redeem_code.entity";
 import { Injectable } from "@nestjs/common";
+import { PageDto, PageOptionsDto } from "src/utils/pagination.utils";
+import { pagination } from "src/utils/modules_utils/pagination.utils";
 
 @Injectable()
 export class RedeemCodeRepository extends Repository<RedeemCode> {
@@ -14,4 +16,8 @@ export class RedeemCodeRepository extends Repository<RedeemCode> {
             .getOne();
     }
     
+    async findManyPage(pageOptionsDto: PageOptionsDto): Promise<PageDto<RedeemCode>>{
+        return pagination<RedeemCode>(this, pageOptionsDto, "redeemCode");
+    }
+
 }

@@ -13,6 +13,7 @@ import { StatusExit } from 'src/enums/status_exit.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { Item } from '../items/entities/item.entity';
 import { ItemDetails } from '../item_details/entities/item_details.entity';
+import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
 
 @Injectable()
 export class RedeemCodeService implements IRedeemCodeService{
@@ -27,63 +28,112 @@ export class RedeemCodeService implements IRedeemCodeService{
 
     async createRedeemCode(body: CreateExitLogDto): Promise<RedeemCode> {
         const queryRunner = this.dataSource.createQueryRunner();
-
+    
         await queryRunner.connect();
         await queryRunner.startTransaction();
-
+    
         try {
             const createLog = this.exitlogRepository.create(body);
-
-            //Saving the exit log entity first
+            // Saving the exit log entity first
             const newLog = await queryRunner.manager.save(ExitLogs, createLog);
 
-            //item_details
-            const item_details = body.item_details.map(async (itemDetail) => {
-                const createItemDetail = this.itemDetailsRepository.create({
-                    item_id: itemDetail.item_id,
-                    exit_log: newLog
-                });
-
-                const itemChoosen: Item = await this.itemRepository.findById(itemDetail.item_id);
-
-                if(!itemChoosen) throw new NotFoundException(`Id item not found [${itemDetail.item_id}]`);
-
-                if(itemChoosen.status_item !== StatusItem.TERSEDIA) {
+            newLog.item_details.map(async (itemDetail) => {
+                const itemChoosen: Item = await this.itemRepository.findById(itemDetail.id);
+                // if (!itemChoosen) {
+                //     throw new NotFoundException(`Id item not found [${itemDetail.item_id}]`);
+                // }
+    
+                if (itemChoosen.status_item !== StatusItem.TERSEDIA) {
                     throw new BadRequestException("Barang sedang tidak tersedia di inventory.");
                 }
-
-                if(body.item_category !== itemChoosen.category_item){
-                    throw new BadRequestException("Kategory barang tidak sama dengan yang dipilih");
+    
+                if (body.item_category !== itemChoosen.category_item) {
+                    throw new BadRequestException("Kategori barang tidak sama dengan yang dipilih");
                 }
-
+    
                 // Set the item status based on exit status
                 itemChoosen.status_item = (body.status_exit === StatusExit.PEMINJAMAN)
                     ? StatusItem.SEDANG_DIPINJAM
                     : StatusItem.SEDANG_DIPAKAI;
-            
-                await queryRunner.manager.save(ItemDetails,createItemDetail);
-                await queryRunner.manager.save(Item,itemChoosen);
+
+                await queryRunner.manager.save(Item, itemChoosen);
             });
-
-            //Wait the item_details flow done
-            await Promise.all(item_details);
-
-            //generate the number redeemcode first
+    
+            // generate the number redeemcode first
             const redeemCodeNumber: string = this.generateRedeemCode();
-
-            //create the redeemCode object
+    
+            // create the redeemCode object
             const newRedeemCode = this.redeemCodeRepository.create({
                 redeem_code: redeemCodeNumber,
                 generated_date: new Date(),
                 log_id: newLog.id,
                 exitLog: newLog
             });
-
+    
             const result = await queryRunner.manager.save(RedeemCode, newRedeemCode);
-
             await queryRunner.commitTransaction();
-            
+    
             return result;
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            throw err;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+    
+    async storeRedeemCode(redeemCode: string): Promise<RedeemCode> {
+        const queryRunner = this.dataSource.createQueryRunner();
+
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            const findRedeemCode: RedeemCode = await this.redeemCodeRepository.findOne({
+                where: {
+                    redeem_code: redeemCode
+                },
+                relations: {
+                    exitLog: true
+                }
+            })
+            if(!findRedeemCode) throw new NotFoundException("Redeem code tidak ditemukan");
+
+            if(findRedeemCode.generated_date !== null && findRedeemCode.is_valid === false){
+                throw new BadRequestException("Redeem code telah di use");    
+            }
+
+            //changing status redeem code
+            findRedeemCode.destroyed_date = new Date();
+            findRedeemCode.is_valid = false;
+
+            //set the status item to TERSEDIA back
+            const changeStatusItems = findRedeemCode.exitLog.item_details.map(async (itemDetail) => {
+                
+                const findItem: Item = await this.itemRepository.findOne({
+                    where: {
+                        id: itemDetail.item_id
+                    }
+                });
+
+                if(!findItem) throw new BadRequestException("Id item tidak ditemukan.");
+
+                //change status item
+                findItem.status_item = StatusItem.TERSEDIA;
+
+                //saving the changes
+                await queryRunner.manager.save(Item, findItem);
+            })
+
+            //Wait for the items changed
+            await Promise.all(changeStatusItems);
+
+            const result = await queryRunner.manager.save(RedeemCode, findRedeemCode);
+        
+            await queryRunner.commitTransaction();
+
+            return result;
+
         } catch(err) {
             await queryRunner.rollbackTransaction();
 
@@ -91,14 +141,14 @@ export class RedeemCodeService implements IRedeemCodeService{
         } finally {
             await queryRunner.release();
         }
-    }
-
-    async useRedeemCode(redeemCode: string): Promise<ExitLogs> {
-        throw new BadRequestException("Method hot implemented yet.");
     }   
 
     async findByRedeemCode(redeemCode: string): Promise<RedeemCode> {
         return await this.redeemCodeRepository.findByRedeemCode(redeemCode);
+    }
+
+    async findAllRedeemCodes(pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
+        return this.redeemCodeRepository.findManyPage(pageOptions);    
     }
 
     generateRedeemCode(): string {
