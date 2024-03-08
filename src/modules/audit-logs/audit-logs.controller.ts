@@ -116,8 +116,13 @@ export class AuditLogsController {
       },
     },
   })
-  public async findManyAuditLogReport(): Promise<AuditLogs[]> {
-    return this.auditLogsService.getAllReport();
+  public async findManyAuditLogReport(@Res() response: Response) {
+    const reportData = await this.auditLogsService.getAllReport();
+    return response.status(response.statusCode).json({
+      statusCode: response.statusCode,
+      message: 'OK',
+      data: reportData,
+    });
   }
 
   @Delete('delete')

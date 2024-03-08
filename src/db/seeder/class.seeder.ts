@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Seeder } from 'nestjs-seeder';
 import { Major } from 'src/enums/majors.enum';
 import { Class } from 'src/modules/class/entitites/class.entity';
-import { Roles } from 'src/modules/role/entities/roles.entity';
 import { Repository } from 'typeorm';
 import { TransactionalError } from 'typeorm-transactional';
 

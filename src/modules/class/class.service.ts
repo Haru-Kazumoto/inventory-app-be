@@ -1,63 +1,115 @@
-import { Injectable } from '@nestjs/common';
-// import { ClassRepository } from './repositories/class.repository';
-// import { Request } from 'express';
-// import { Transactional } from 'typeorm-transactional/dist/decorators/transactional';
-// import { Class } from './entitites/class.entity';
-// import { ClassCreateDto } from './dto/class.dto';
-// import { classCreateContent } from '../notification/notification.constant';
-// import { AuthService } from '../auth/auth.service';
-// import { NotificationService } from '../notification/notification.service';
-// import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { ClassRepository } from './repositories/class.repository';
+import { Transactional } from 'typeorm-transactional/dist/decorators/transactional';
+import { Class } from './entitites/class.entity';
+import { classCreateContent } from '../notification/notification.constant';
+import { AuthService } from '../auth/auth.service';
+import { NotificationService } from '../notification/notification.service';
+import { CreateClassDto, UpdateClassDto } from './dto/class.dto';
+import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
+import { IClassService } from './interfaces/class.interface';
+import { DataSource } from 'typeorm';
 
 @Injectable()
-export class ClassService {
-  // constructor(
-  //   private readonly classRepository: ClassRepository,
-  //   private readonly notificationService: NotificationService,
-  //   private readonly authService: AuthService,
-  // ) {}
+export class ClassService implements IClassService {
+  constructor(
+    private readonly classRepository: ClassRepository,
+    private readonly notificationService: NotificationService,
+    private readonly authService: AuthService,
+    private readonly dataSource: DataSource,
+  ) {}
 
-  // @Transactional()
-  // public async createOne(body: ClassCreateDto): Promise<Class> {
-  //   const session = await this.authService.getSession();
+  @Transactional()
+  public async createOne(body: CreateClassDto): Promise<Class> {
+    const queryRunner = this.dataSource.createQueryRunner();
 
-  //   const newClass = this.classRepository.create(body);
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const session = await this.authService.getSession();
 
-  //   //SEND NOTIFICATION
-  //   await this.notificationService.sendNotification({
-  //     title: 'Kelas Baru',
-  //     content: classCreateContent,
-  //     color: 'clay',
-  //     user_id: session.id,
-  //   });
+      const findClass = this.classRepository.findOne({
+        where: { class_name: body.class_name },
+      });
 
-  //   return await this.classRepository.save(newClass);
-  // }
+      if (findClass) throw new ConflictException('Kelas sudah ada');
 
-  // findMany(): Promise<Class[]> {
-  //   return this.classRepository.find();
-  // }
+      const newClass = this.classRepository.create(body);
 
-  // async deleteById(id: number): Promise<void> {
-  //   const data = await this.classRepository.findOne({ where: { id: id } });
+      const resultData = await this.classRepository.save(newClass);
 
-  //   if (!data) {
-  //     throw new DataNotFoundException('ID not found', 400);
-  //   }
+      //SEND NOTIFICATION
+      await this.notificationService.sendNotification({
+        title: 'Kelas Baru',
+        content: classCreateContent,
+        color: 'clay',
+        user_id: session.id,
+      });
 
-  //   await this.classRepository.remove(data);
-  // }
+      await queryRunner.commitTransaction();
 
-  // @Transactional()
-  // public async updateOne(id: number, body: ClassCreateDto): Promise<Class> {
-  //   const newClass = await this.classRepository.findOne({
-  //     where: { id: id },
-  //   });
+      return resultData;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 
-  //   if (!newClass) throw new DataNotFoundException('Id class not found', 400);
+  findMany(): Promise<Class[]> {
+    try {
+      const data = this.classRepository.find();
 
-  //   Object.assign(newClass, body);
+      if (!data) throw new NotFoundException('Kelas tidak ditemukan');
 
-  //   return await this.classRepository.save(newClass);
-  // }
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async findById(id: number): Promise<Class> {
+    return await this.classRepository.findClassById(id);
+  }
+
+  async deleteById(id: number): Promise<void> {
+    const data = await this.classRepository.findOne({ where: { id: id } });
+
+    if (!data) throw new NotFoundException('Kelas tidak ditemukan');
+
+    await this.classRepository.remove(data);
+  }
+
+  @Transactional()
+  public async updateOne(id: number, body: UpdateClassDto): Promise<Class> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const updateClass = await this.classRepository.findOne({
+        where: { id: id },
+      });
+
+      if (!updateClass) throw new NotFoundException('Kelas tidak ditemukan');
+
+      Object.assign(updateClass, body);
+
+      const resultData = await this.classRepository.save(updateClass);
+
+      await queryRunner.commitTransaction();
+
+      return resultData;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }

@@ -19,7 +19,12 @@ export class AuditLogs {
     @Column({name: "item_id", nullable: false})
     public item_id: number;
 
-    @ManyToOne(() => Item, (item) => item.audit_logs)
+    @ManyToOne(() => Item, (item) => item.audit_logs, {
+        cascade: true,
+        onDelete: 'CASCADE',
+        eager: true,
+        nullable: true,
+    })
     @JoinColumn()
     public item: Item;
 

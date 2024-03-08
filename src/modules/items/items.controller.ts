@@ -130,7 +130,7 @@ export class ItemsController {
   })
   @ApiPaginatedResponse(Item)
   public async findManyItem(
-    @Query() category: ItemCategory,
+    @Query("category") category: ItemCategory,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
     return this.itemsService.findMany(category, pageOptionsDto);
