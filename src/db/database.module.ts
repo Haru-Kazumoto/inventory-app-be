@@ -18,7 +18,7 @@ import { addTransactionalDataSource } from 'typeorm-transactional';
                 autoLoadEntities: configService.getOrThrow('DB_LOAD_ENTITIES'),
                 synchronize: configService.getOrThrow('DB_SYNC'),
                 entities: [__dirname + '/../**/*.entity.{js,ts}'],
-                logging: true, //set to true if want to take a look sql
+                logging: false, //set to true if want to take a look sql
                 //MIGRATIONS
                 migrations: ["dist/db/migrations/*.js"]
             }),
