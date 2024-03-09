@@ -1,223 +1,98 @@
-import { 
-    Body, 
-    Controller, 
-    Get, 
-    HttpStatus, 
-    Res, 
-    Query, 
-    ParseIntPipe,
-    Put,
-    Delete,
-    UseGuards,
-    Post,
-    Request,
-    Response,
-    UseInterceptors,
-    ClassSerializerInterceptor
-} from '@nestjs/common';
-import { UserCreateDto } from './dto/user.dto';
-import { UserService } from './user.service';
-import { User } from './entities/user.entity';
-import { AuthenticatedGuard } from '../../security/guards/authenticated.guard';
-import { RolesGuard } from 'src/security/guards/roles.guard';
-import { Roles } from 'src/security/decorator/roles.decorator';
-import { Request as ExpressRequest, Response as ExpressResponse} from 'express';
-import { ApiBadRequestResponse, ApiBody, ApiForbiddenResponse, ApiInternalServerErrorResponse, ApiOkResponse, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
-import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
+import * as NestCommon from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
+import {
+  Request as ExpressRequest,
+  Response as ExpressResponse,
+} from 'express';
 import { Status } from 'src/enums/response.enum';
 import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
+import { Roles } from 'src/security/decorator/roles.decorator';
+import { RolesGuard } from 'src/security/guards/roles.guard';
+import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
+import { AuthenticatedGuard } from '../../security/guards/authenticated.guard';
+import {
+  CreateOneUserDecorator,
+  DeleteHardUserDecorator,
+  DeleteSoftUserDecorator,
+  FindAllUserDecorator,
+  UpdateUserDecorator,
+} from './decorator';
+import { UpdateUserDto, UserCreateDto } from './dto';
+import { User } from './entities/user.entity';
+import { UserService } from './user.service';
 
 @ApiTags('User')
-@UseGuards(RolesGuard)
+@NestCommon.UseGuards(RolesGuard)
 @Roles('SUPERADMIN')
-@Controller('user')
+@NestCommon.Controller('user')
 export class UserController {
+  constructor(private readonly userService: UserService) {}
 
-    constructor(
-        private readonly userService: UserService
-    ){}
+  // Find All
+  @NestCommon.UseGuards(AuthenticatedGuard)
+  @NestCommon.UseInterceptors(NestCommon.ClassSerializerInterceptor)
+  @NestCommon.Get('find-all')
+  @FindAllUserDecorator()
+  public async findManyUser(
+    @NestCommon.Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<User>> {
+    return this.userService.findMany(pageOptionsDto);
+  }
 
-    @UseGuards(AuthenticatedGuard)
-    @UseInterceptors(ClassSerializerInterceptor)
-    @Get('find-all')
-    @ApiOkResponse({
-        description: "Success get all users",
-        schema: {
-            type: "object",
-            properties: {
-                statusCode: {type: "number", example: 200},
-                message: {type: "string", example: "OK"},
-                data: {type: "array", example: {users: [{}]}}
-            }
-        }
-    })
-    @ApiInternalServerErrorResponse({
-        description: "Internal server error",
-        schema: {
-            type: "object",
-            properties: {
-                statusCode: {type: "number", example: 500},
-                message: {type: "string", example: "Internal server error"}
-            }
-        }
-    })
-    @ApiPaginatedResponse(User)
-    public async findManyUser(@Query() pageOptionsDto: PageOptionsDto): Promise<PageDto<User>>{
-        return this.userService.findMany(pageOptionsDto);
-    }
+  // Create
+  @NestCommon.UseInterceptors(new TransformInterceptor())
+  @NestCommon.UseGuards(AuthenticatedGuard)
+  @NestCommon.Post('create')
+  @CreateOneUserDecorator()
+  public async createOneUser(
+    @NestCommon.Body() body: UserCreateDto,
+    @NestCommon.Request() request: ExpressRequest,
+    @NestCommon.Response() response: ExpressResponse,
+  ) {
+    const data: User = await this.userService.createUser(request, body);
 
-    @UseInterceptors(new TransformInterceptor())
-    @UseGuards(AuthenticatedGuard)
-    @Post('create')
-    @ApiOkResponse({
-            description: "Record has successfully created",
-            schema: {
-                type: "object",
-                properties: {
-                    status:{type: "number", example: 200},
-                    message:{type: "string", example: "OK"},
-                    data: {type: "object", example: {user:{}}}
-                }
-            }
-    })
-    @ApiBadRequestResponse({
-            description: "Bad Request",
-            schema: {
-                type: "object",
-                properties: {
-                    error: {type: "array", example:["username cannot be empty","email pattern not valid"]}
-                }
-            }
-    })
-    @ApiForbiddenResponse({
-        description: "Forbidden resource or ability",
-        schema: {
-            type: "object",
-            properties: {
-                statusCode: {type: "number",example: 401},
-                message: {type: "string", example: "Not Authenticated"},
-                error: {type: "string", example: "Forbidden"}
-            }
-        }
-    })
-    @ApiInternalServerErrorResponse({
-        description: "Internal Server Error",
-        schema: {
-            type: "object",
-            properties: {
-                message: {type: "string", example: "Internal server error"},
-                status: {type: "number", example: 500}
-            }
-        }
-    })
-    @ApiBody({type: UserCreateDto,description:"DTO Structure Response"})
-    public async createOneUser(@Body() body: UserCreateDto, @Request() request: ExpressRequest, @Response() response: ExpressResponse){
-        const data: User = await this.userService.createUser(request,body);
+    return response.status(200).json({
+      statusCode: response.statusCode,
+      message: 'User berhasil dibuat',
+      data: { user: data },
+    });
+  }
 
-        return response.status(200).json({  
-            statusCode: response.statusCode,
-            message: "User berhasil dibuat",
-            data: {user: data}
-        });
-    }
+  // Update
+  @NestCommon.Put('update')
+  @NestCommon.UseInterceptors(new TransformInterceptor())
+  @NestCommon.UseGuards(AuthenticatedGuard)
+  @UpdateUserDecorator()
+  public async updateUser(
+    @NestCommon.Query('id', NestCommon.ParseIntPipe) id: number,
+    @NestCommon.Body() dto: UpdateUserDto,
+    @NestCommon.Res() res: ExpressResponse,
+  ) {
+    const instance = await this.userService.update(id, dto);
+    return res.status(200).json({
+      statusCode: res.statusCode,
+      message: Status.SUCCESS,
+      data: { user: instance },
+    });
+  }
 
-    @UseInterceptors(new TransformInterceptor())
-    @Put('update')
-    @UseGuards(AuthenticatedGuard)
-    @ApiOkResponse({
-        description: "Success to update one record of user",
-        schema: {
-            type: "object",
-            properties: {
-                statusCode: {type: "number", example: 200},
-                message: {type: "string", example: "SUCCESS"},
-                data: {type: "object", example: {user: {}}}
-            }
-        }
-    })
-    @ApiBadRequestResponse({
-        description: "There is something bad happend to request",
-        schema: {
-            type: "object",
-            properties: {
-                statusCode: {type: "number", example: 400},
-                message: {type: "string", example: "Not valid type"},
-                data: {type: "object", example: null}
-            }
-        }
-    })
-    @ApiInternalServerErrorResponse({
-        description: "Internal server error response",
-        schema: {
-            type: "object",
-            properties: {
-                statusCode: {type: "number", example: 500},
-                message: {type: "string", example: "Internal server error"}
-            }
-        }
-    })
-    @ApiBody({type: UserCreateDto, description: "DTO Request for update", required: true})
-    @ApiQuery({
-        name: "id",
-        description: "Id user for update",
-        type: Number,
-        required: true
-    })
-    public async updateUser(
-        @Query('id', ParseIntPipe) id: number,
-        @Body() dto: UserCreateDto,
-        @Res() res: ExpressResponse
-    ){
-        const instance = await this.userService.update(id, dto);
-        return res.status(200).json({
-            statusCode: res.statusCode,
-            message: Status.SUCCESS,
-            data: {user: instance}
-        })
-    }
+  // Delete Hard
+  @NestCommon.Delete('delete-hard')
+  @NestCommon.UseGuards(AuthenticatedGuard)
+  @DeleteHardUserDecorator()
+  public async hardDeleteUser(
+    @NestCommon.Query('id', NestCommon.ParseIntPipe) id: number,
+  ) {
+    await this.userService.hardDeleteById(id);
+  }
 
-    @Delete('delete-hard')
-    @UseGuards(AuthenticatedGuard)
-    @ApiQuery({
-        name: "id",
-        description: "Id user for HARD delete",
-        type: Number,
-        required: true
-    })
-    @ApiBadRequestResponse({
-        description: "Bad request response",
-        schema: {
-            type: "object",
-            properties:{
-                statusCode: {type: "number", example: 400},
-                message: {type: "string", example: "Id user tidak ditemukan"}
-            },
-        }
-    })
-    public async hardDeleteUser(@Query('id', ParseIntPipe) id: number){
-        await this.userService.hardDeleteById(id);
-    }
-
-    @Delete('delete-soft')
-    @UseGuards(AuthenticatedGuard)
-    @ApiQuery({
-        name: "id",
-        description: "Id user for SOFT delete",
-        type: Number,
-        required: true
-    })
-    @ApiBadRequestResponse({
-        description: "Bad request response",
-        schema: {
-            type: "object",
-            properties:{
-                statusCode: {type: "number", example: 400},
-                message: {type: "string", example: "Id user tidak ditemukan"}
-            },
-        }
-    })
-    public async softDeleteUser(@Query('id', ParseIntPipe) id: number){
-        await this.userService.softDeleteById(id);
-    }
-} 
+  // Delete Soft
+  @NestCommon.Delete('delete-soft')
+  @NestCommon.UseGuards(AuthenticatedGuard)
+  @DeleteSoftUserDecorator()
+  public async softDeleteUser(
+    @NestCommon.Query('id', NestCommon.ParseIntPipe) id: number,
+  ) {
+    await this.userService.softDeleteById(id);
+  }
+}
