@@ -17,7 +17,7 @@ export class RedeemCodeRepository extends Repository<RedeemCode> {
     }
     
     async findManyPage(pageOptionsDto: PageOptionsDto): Promise<PageDto<RedeemCode>>{
-        return pagination<RedeemCode>(this, pageOptionsDto, "redeemCode");
+        return pagination<RedeemCode>(this, pageOptionsDto, "redeem_code");
     }
 
 }

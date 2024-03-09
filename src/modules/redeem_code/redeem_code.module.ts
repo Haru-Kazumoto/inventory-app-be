@@ -5,16 +5,13 @@ import { RedeemCodeRepository } from './repositories/redeem_code.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RedeemCode } from './entities/redeem_code.entity';
 import { Item } from '../items/entities/item.entity';
-import { ItemDetails } from '../item_details/entities/item_details.entity';
 import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
-import { ItemDetailsModule } from '../item_details/item_details.module';
 import { ItemsModule } from '../items/items.module';
 import { ExitLogsModule } from '../exit_logs/exit_logs.module';
   
 @Module({
   imports: [
-    TypeOrmModule.forFeature([RedeemCode, Item, ItemDetails, ExitLogs]),
-    ItemDetailsModule,
+    TypeOrmModule.forFeature([RedeemCode, Item, ExitLogs]),
     ItemsModule,
     ExitLogsModule
   ],

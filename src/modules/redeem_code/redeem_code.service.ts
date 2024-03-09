@@ -1,26 +1,23 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { IRedeemCodeService } from './redeem_code.service.interface';
 import { RedeemCodeRepository } from './repositories/redeem_code.repository';
-import { CreateRedeemCodeDto } from './dtos/redeem_code.dto';
 import { RedeemCode } from './entities/redeem_code.entity';
 import { DataSource } from 'typeorm';
 import { CreateExitLogDto } from '../exit_logs/dtos/exit_logs.dto';
 import { ItemsRepository } from '../items/repository/items.repository';
-import { ItemDetailsRepository } from '../item_details/repositories/item_details.repository';
 import { ExitLogsRepository } from '../exit_logs/repositories/exit_logs.repository';
 import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
 import { StatusExit } from 'src/enums/status_exit.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { Item } from '../items/entities/item.entity';
-import { ItemDetails } from '../item_details/entities/item_details.entity';
 import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
+import { ItemDetails } from '../item_details/entities/item_details.entity';
 
 @Injectable()
 export class RedeemCodeService implements IRedeemCodeService{
 
     constructor(
         private readonly exitlogRepository: ExitLogsRepository,
-        private readonly itemDetailsRepository: ItemDetailsRepository,
         private readonly itemRepository: ItemsRepository,
         private readonly redeemCodeRepository: RedeemCodeRepository,
         private dataSource: DataSource
@@ -37,12 +34,11 @@ export class RedeemCodeService implements IRedeemCodeService{
             // Saving the exit log entity first
             const newLog = await queryRunner.manager.save(ExitLogs, createLog);
 
-            newLog.item_details.map(async (itemDetail) => {
-                const itemChoosen: Item = await this.itemRepository.findById(itemDetail.id);
-                // if (!itemChoosen) {
-                //     throw new NotFoundException(`Id item not found [${itemDetail.item_id}]`);
-                // }
-    
+            if(body.total !== newLog.item_details.length) throw new BadRequestException("Total tidak sama dengan yang diinginkan.");
+
+            await Promise.all(newLog.item_details.map(async (itemDetail: ItemDetails) => {
+                const itemChoosen: Item = await this.itemRepository.findById(itemDetail.item_id);
+
                 if (itemChoosen.status_item !== StatusItem.TERSEDIA) {
                     throw new BadRequestException("Barang sedang tidak tersedia di inventory.");
                 }
@@ -57,7 +53,7 @@ export class RedeemCodeService implements IRedeemCodeService{
                     : StatusItem.SEDANG_DIPAKAI;
 
                 await queryRunner.manager.save(Item, itemChoosen);
-            });
+            }));
     
             // generate the number redeemcode first
             const redeemCodeNumber: string = this.generateRedeemCode();
@@ -71,6 +67,11 @@ export class RedeemCodeService implements IRedeemCodeService{
             });
     
             const result = await queryRunner.manager.save(RedeemCode, newRedeemCode);
+
+            //update the exit log
+            newLog.redeem_code = result;
+            await queryRunner.manager.save(ExitLogs, newLog);
+
             await queryRunner.commitTransaction();
     
             return result;
@@ -147,6 +148,7 @@ export class RedeemCodeService implements IRedeemCodeService{
         return await this.redeemCodeRepository.findByRedeemCode(redeemCode);
     }
 
+    //error
     async findAllRedeemCodes(pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
         return this.redeemCodeRepository.findManyPage(pageOptions);    
     }
@@ -163,4 +165,7 @@ export class RedeemCodeService implements IRedeemCodeService{
 
         return redeemCode;
     }
+
+    // ------------------ UTILS --------------------- //
+
 }
