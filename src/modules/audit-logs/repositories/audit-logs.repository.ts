@@ -7,6 +7,4 @@ export class AuditLogsRepository extends Repository<AuditLogs> {
     constructor(public dataSource: DataSource){
         super(AuditLogs, dataSource.createEntityManager());
     }   
-
-
 }

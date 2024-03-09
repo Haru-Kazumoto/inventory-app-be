@@ -16,7 +16,7 @@ export class RedeemCode {
     @Column({name: "is_valid", nullable: false, default: true})
     public is_valid: boolean;
 
-    @Column({name: "destroyed_date", nullable: true})
+    @Column({name: "destroyed_date", nullable: true, default: null})
     public destroyed_date: Date;
 
     @Column({name: "log_id", nullable: false})
