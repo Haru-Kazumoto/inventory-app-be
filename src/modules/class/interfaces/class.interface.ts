@@ -1,4 +1,5 @@
-import { CreateClassDto, UpdateClassDto } from '../dto/class.dto';
+import { CreateClassDto } from '../dto/create-class.dto';
+import { UpdateClassDto } from '../dto/update-class.dto';
 import { Class } from '../entitites/class.entity';
 
 export interface IClassService {

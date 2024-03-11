@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -21,6 +20,8 @@ import { EditMethod } from 'src/enums/edit_methods.enum';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { DataSource, QueryFailedError } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
+import { StatusItem } from 'src/enums/status_item.enum';
+import { itemDeleteContent } from '../notification/notification.constant';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -36,31 +37,26 @@ export class ItemsService implements IItemsService {
   @Transactional()
   async createOne(body: CreateItemDto): Promise<Item> {
     const queryRunner = this.dataSource.createQueryRunner();
-
     await queryRunner.connect();
     await queryRunner.startTransaction();
+
     try {
       const session = await this.authService.getSession();
-
       const classEntity = await this.classRepository.findClassById(
         body.class_id,
       );
-
       const newItem = this.itemRepository.create({
         ...body,
         class: classEntity,
       });
-
       const resultData = await this.itemRepository.save(newItem);
 
-      //CREATE AUDIT LOGS
       await this.auditLogService.createReport({
         edit_method: EditMethod.CREATE,
         edited_by: session.id,
         item_id: resultData.id,
       });
 
-      //CREATE NOTIFICATION
       await this.notificationService.sendNotification({
         title: 'Item Baru Berhasil ditambahkan!',
         content: `Item ${
@@ -70,6 +66,7 @@ export class ItemsService implements IItemsService {
         user_id: session.id,
       });
 
+      await queryRunner.commitTransaction();
       return resultData;
     } catch (error) {
       await queryRunner.rollbackTransaction();
@@ -81,13 +78,36 @@ export class ItemsService implements IItemsService {
 
   async findMany(
     category: ItemCategory,
+    className: string,
+    itemName: string,
+    status: StatusItem,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
     try {
-      const data = await this.itemRepository.findMany(category, pageOptionsDto);
-
+      const data = await this.itemRepository.findMany(
+        category,
+        className,
+        itemName,
+        status,
+        pageOptionsDto,
+      );
       if (!data) throw new NotFoundException('Data tidak ditemukan');
+      return data;
+    } catch (error) {
+      throw error;
+    }
+  }
 
+  async findAllItemCodeByItemName(
+    itemName: string,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Item>> {
+    try {
+      const data = await this.itemRepository.findAllItemCodeByItemName(
+        itemName,
+        pageOptionsDto,
+      );
+      if (!data) throw new NotFoundException('Data tidak ditemukan');
       return data;
     } catch (error) {
       throw error;
@@ -120,7 +140,7 @@ export class ItemsService implements IItemsService {
 
       //UPDATE NOTIFICATION
       await this.notificationService.sendNotification({
-        title: 'Item Baru Berhasil diupdate!',
+        title: 'Item Berhasil diupdate!',
         content: `Item ${
           body.name
         } baru telah berhasil diupdate ke inventory pada waktu ${new Date()}`,
@@ -154,15 +174,12 @@ export class ItemsService implements IItemsService {
 
     await this.itemRepository.remove(data);
 
-    //DELETE NOTIFICATION
-    // await this.notificationService.sendNotification({
-    //   title: 'Item berhasil dihapus!',
-    //   content: `Item ${
-    //     body.name
-    //   } baru telah berhasil diupdate ke inventory pada waktu ${new Date()}`,
-    //   color: 'blue',
-    //   user_id: session.id,
-    // });
+    await this.notificationService.sendNotification({
+      title: 'Item Berhasil dihapus!',
+      content: itemDeleteContent,
+      color: 'blue',
+      user_id: session.id,
+    });
 
     return Promise.resolve();
   }

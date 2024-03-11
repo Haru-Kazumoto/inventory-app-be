@@ -8,7 +8,6 @@ import {
   Delete,
   UseGuards,
   UseInterceptors,
-  ClassSerializerInterceptor,
   Res,
   Req,
   Query,
@@ -35,6 +34,7 @@ import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 import { Status } from 'src/enums/response.enum';
 import { ItemCategory } from 'src/enums/item_category.enum';
+import { StatusItem } from 'src/enums/status_item.enum';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
@@ -129,11 +129,57 @@ export class ItemsController {
     },
   })
   @ApiPaginatedResponse(Item)
+  @ApiQuery({
+    name: 'category',
+    description: 'Category of item',
+    type: String,
+    required: true,
+  })
   public async findManyItem(
-    @Query("category") category: ItemCategory,
+    @Query('category') category: ItemCategory,
+    @Query('status') status: StatusItem,
+    @Query('name') itemName: string,
+    @Query('class') className: string,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
-    return this.itemsService.findMany(category, pageOptionsDto);
+    return this.itemsService.findMany(
+      category,
+      className,
+      itemName,
+      status,
+      pageOptionsDto,
+    );
+  }
+
+  @UseGuards(AuthenticatedGuard)
+  @Get('find-by-item-name')
+  @ApiOkResponse({
+    description: 'Success get all items',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 200 },
+        message: { type: 'string', example: 'OK' },
+        data: { type: 'array', example: { items: [{}] } },
+      },
+    },
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Internal Server Error',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 500 },
+        message: { type: 'string', example: 'Internal server error' },
+      },
+    },
+  })
+  @ApiPaginatedResponse(Item)
+  public async findAllItemCodeByItemName(
+    @Query('name') name: string,
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Item>> {
+    return this.itemsService.findAllItemCodeByItemName(name, pageOptionsDto);
   }
 
   @UseInterceptors(new TransformInterceptor())

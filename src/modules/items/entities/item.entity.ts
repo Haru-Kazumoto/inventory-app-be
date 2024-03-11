@@ -72,7 +72,12 @@ export class Item extends BaseEntity {
   @OneToMany(() => AuditLogs, (audit) => audit.item, {})
   public audit_logs: AuditLogs[];
 
-  @ManyToOne(() => Class, (classEntity) => classEntity.item)
+  @ManyToOne(() => Class, (classEntity) => classEntity.item, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    eager: true,
+    nullable: true,
+  })
   @JoinColumn()
   public class: Class;
 

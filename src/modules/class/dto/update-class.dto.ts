@@ -2,7 +2,7 @@ import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { Major } from 'src/enums/majors.enum';
 
-export class CreateClassDto {
+export class UpdateClassDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -21,5 +21,3 @@ export class CreateClassDto {
   })
   major: Major;
 }
-
-export class UpdateClassDto extends PartialType(CreateClassDto) {}

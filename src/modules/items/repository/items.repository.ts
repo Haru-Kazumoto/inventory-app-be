@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
+import { StatusItem } from 'src/enums/status_item.enum';
 
 @Injectable()
 export class ItemsRepository extends Repository<Item> {
@@ -16,13 +17,51 @@ export class ItemsRepository extends Repository<Item> {
 
   async findMany(
     category: ItemCategory,
+    className: string,
+    itemName: string,
+    status: StatusItem,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
     const queryAlias = 'item';
 
     const whereCondition = (qb: SelectQueryBuilder<Item>) => {
-      qb.where(`${queryAlias}.category_item = :category`, {
-        category,
+      switch (true) {
+        case !!category:
+          qb.andWhere(`${queryAlias}.category_item = :category`, { category });
+        case !!status:
+          qb.andWhere(`${queryAlias}.status_item = :status`, { status });
+        case !!className:
+          qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+            `class.class_name = :className`,
+            { className },
+          );
+        case !!itemName:
+          qb.andWhere(`${queryAlias}.name LIKE :itemName`, {
+            itemName: `%${itemName}%`,
+          });
+          break;
+        default:
+          break;
+      }
+    };
+
+    return await pagination<Item>(
+      this,
+      pageOptionsDto,
+      queryAlias,
+      whereCondition,
+    );
+  }
+
+  async findAllItemCodeByItemName(
+    itemName: string,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Item>> {
+    const queryAlias = 'item';
+
+    const whereCondition = (qb: SelectQueryBuilder<Item>) => {
+      qb.where(`${queryAlias}.name = :itemName`, {
+        itemName,
       });
     };
 
