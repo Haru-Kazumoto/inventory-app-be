@@ -25,23 +25,28 @@ export class ItemsRepository extends Repository<Item> {
     const queryAlias = 'item';
 
     const whereCondition = (qb: SelectQueryBuilder<Item>) => {
-      switch (true) {
-        case !!category:
-          qb.andWhere(`${queryAlias}.category_item = :category`, { category });
-        case !!status:
-          qb.andWhere(`${queryAlias}.status_item = :status`, { status });
-        case !!className:
-          qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
-            `class.class_name = :className`,
-            { className },
-          );
-        case !!itemName:
-          qb.andWhere(`${queryAlias}.name LIKE :itemName`, {
-            itemName: `%${itemName}%`,
-          });
-          break;
-        default:
-          break;
+      if (category) {
+        qb.andWhere(`${queryAlias}.category_item = :category`, {
+          category,
+        });
+      }
+      if (status) {
+        qb.andWhere(`${queryAlias}.status_item = :status`, {
+          status,
+        });
+      }
+      if (className) {
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+          `class.class_name = :className`,
+          {
+            className,
+          },
+        );
+      }
+      if (itemName) {
+        qb.andWhere(`${queryAlias}.name LIKE :itemName`, {
+          itemName: `%${itemName}%`,
+        });
       }
     };
 
