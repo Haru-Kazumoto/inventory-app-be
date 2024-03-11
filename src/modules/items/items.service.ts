@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,15 +10,13 @@ import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
 import { Item } from './entities/item.entity';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { Transactional } from 'typeorm-transactional';
-import { Request } from 'express';
 import { generateRandomNumber } from 'src/utils/modules_utils/item.utils';
 import { ClassRepository } from '../class/repositories/class.repository';
-import { getSession } from '../user/entities/user.entity';
 import { NotificationService } from '../notification/notification.service';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { EditMethod } from 'src/enums/edit_methods.enum';
 import { ItemCategory } from 'src/enums/item_category.enum';
-import { DataSource, QueryFailedError } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 
 @Injectable()

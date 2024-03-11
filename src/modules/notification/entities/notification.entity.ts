@@ -28,9 +28,6 @@ export class Notification extends BaseEntity {
     @Column({default: false})
     public toSuperadmin: boolean;
 
-    // @ManyToOne(() => User, user => user.notifications)
-    // public user: User;
-
     @BeforeInsert()
     @BeforeUpdate()
     @BeforeRemove()

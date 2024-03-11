@@ -1,12 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ClassSerializerInterceptor, Res } from '@nestjs/common';
+import { Controller, Get, Delete, Res, Query, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
-import { ApiBadRequestResponse, ApiHideProperty, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Notification } from './entities/notification.entity';
+import { ApiBadRequestResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 import { Status } from 'src/enums/response.enum';
+import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 
 @ApiTags("Notification")
-@UseInterceptors(ClassSerializerInterceptor)
 @Controller('notification')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
@@ -39,6 +38,7 @@ export class NotificationController {
       }
     }
   })
+  @UseGuards(AuthenticatedGuard)
   @Get("get-notifications")
   async getNotifications(userId: number, @Res() res: Response): Promise<any> {
     return res.status(200).json({
@@ -47,6 +47,23 @@ export class NotificationController {
       data: {
         notifications: await this.notificationService.getNotifications(userId)
       }
+    });
+  }
+
+  @ApiQuery({
+    name: "notif-id",
+    description: "Delete notification by id",
+    type: Number,
+    required: true
+  })
+  @UseGuards(AuthenticatedGuard)
+  @Delete("delete-notification")
+  async deleteNotification(@Query("notif-id") notifId: number, @Res() response: Response){
+    await this.notificationService.deleteNotification(notifId);
+
+    return response.status(200).json({
+      statusCode: 200,
+      message: "DELETED"
     });
   }
 }

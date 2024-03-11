@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsNumber, IsString, Matches } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Matches } from "class-validator";
 import { ItemCategory } from "src/enums/item_category.enum";
 import { ItemType } from "src/enums/item_type.enum";
 import { StatusItem } from "src/enums/status_item.enum";
@@ -31,6 +31,11 @@ export class CreateItemDto {
     @IsEnum(ItemCategory)
     @ApiProperty({example: ItemCategory.BARANG_HABIS_PAKAI})
     public category_item: ItemCategory; 
+
+    @IsNotEmpty()
+    @IsOptional()
+    @ApiProperty({example: "1 PACK / 1 PCS"})
+    public total_unit?: string;
 
     @IsNumber()
     @IsNotEmpty()

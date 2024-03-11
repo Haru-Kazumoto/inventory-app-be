@@ -24,7 +24,8 @@ export class Item extends BaseEntity {
   @Column({ name: 'name', nullable: false })
   public name: string;
 
-  @Column({ name: 'item_code', nullable: false, unique: true })
+  //item code is optional for non atk type and barang habis pakai category
+  @Column({ name: 'item_code', nullable: true, unique: true })
   public item_code: string;
 
   @Column({
@@ -44,6 +45,10 @@ export class Item extends BaseEntity {
   //handled by function
   @Column({ name: 'total_unit_price', nullable: true })
   public total_unit_price: number;
+
+  //new
+  @Column({ name: "total_unit", nullable: true })
+  public total_unit: string;
 
   @Column({
     name: 'category_item',

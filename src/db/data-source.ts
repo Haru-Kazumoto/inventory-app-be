@@ -4,7 +4,7 @@ export const dataSourceOptions: DataSourceOptions = {
     type: 'postgres',
     database: "Inventory-app DB",
     username: "postgres",
-    password: "Ayasbogor123_",
+    password: "admin",
     entities: ["dist/**/*.entity.js"],
     //MIGRATIONS
     migrations: ["dist/db/migrations/*.js"],

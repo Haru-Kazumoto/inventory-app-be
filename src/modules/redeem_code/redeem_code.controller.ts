@@ -65,4 +65,21 @@ export class RedeemCodeController {
       data: {redeem_code: data}
     });
   }
+
+  @ApiQuery({
+    name: "redeem-code",
+    description: "parameter for find exit log by redeem code",
+    type: String,
+    required: true
+  })
+  @Get('find-exit-log')
+  async findExitLogByRedeemCode(@Query("redeem-code") redeemCode: string, @Res() response: Response){
+    const data = await this.redeemCodeService.findExitLogByRedeemCode(redeemCode);
+
+    return response.status(200).json({
+      statusCode: response.statusCode,
+      message: "OK",
+      data: {exit_log: data}
+    });
+  }
 }

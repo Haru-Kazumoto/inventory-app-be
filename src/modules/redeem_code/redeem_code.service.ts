@@ -12,9 +12,10 @@ import { StatusItem } from 'src/enums/status_item.enum';
 import { Item } from '../items/entities/item.entity';
 import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
 import { ItemDetails } from '../item_details/entities/item_details.entity';
+import { ItemCategory } from 'src/enums/item_category.enum';
 
 @Injectable()
-export class RedeemCodeService implements IRedeemCodeService{
+export class RedeemCodeService implements IRedeemCodeService {
 
     constructor(
         private readonly exitlogRepository: ExitLogsRepository,
@@ -22,7 +23,7 @@ export class RedeemCodeService implements IRedeemCodeService{
         private readonly redeemCodeRepository: RedeemCodeRepository,
         private dataSource: DataSource
     ){}
-
+        
     async createRedeemCode(body: CreateExitLogDto): Promise<RedeemCode> {
         const queryRunner = this.dataSource.createQueryRunner();
     
@@ -30,11 +31,14 @@ export class RedeemCodeService implements IRedeemCodeService{
         await queryRunner.startTransaction();
     
         try {
+
+            /**
+             * The exit log data must be created first before redeem code
+             */
             const createLog = this.exitlogRepository.create(body);
-            // Saving the exit log entity first
             const newLog = await queryRunner.manager.save(ExitLogs, createLog);
 
-            if(body.total !== newLog.item_details.length) throw new BadRequestException("Total tidak sama dengan yang diinginkan.");
+            if(body.total !== newLog.item_details.length) throw new BadRequestException("Total item tidak sama dengan yang diinginkan.");
 
             await Promise.all(newLog.item_details.map(async (itemDetail: ItemDetails) => {
                 const itemChoosen: Item = await this.itemRepository.findById(itemDetail.item_id);
@@ -47,30 +51,62 @@ export class RedeemCodeService implements IRedeemCodeService{
                     throw new BadRequestException("Kategori barang tidak sama dengan yang dipilih");
                 }
     
-                // Set the item status based on exit status
-                itemChoosen.status_item = (body.status_exit === StatusExit.PEMINJAMAN)
-                    ? StatusItem.SEDANG_DIPINJAM
-                    : StatusItem.SEDANG_DIPAKAI;
+                /**
+                 * If the item category is "BARANG_TIDAK_HABIS_PAKAI" the status item will be always update 
+                 * due to exit item, otherwise the status item will be managed by admin in data barang page (manually update)
+                 */
+                if(body.item_category === ItemCategory.BARANG_TIDAK_HABIS_PAKAI) {
+                    itemChoosen.status_item = (body.status_exit === StatusExit.PEMINJAMAN)
+                        ? StatusItem.SEDANG_DIPINJAM
+                        : StatusItem.SEDANG_DIPAKAI;
+                }
+
+                itemDetail.category_item = itemChoosen.category_item;
 
                 await queryRunner.manager.save(Item, itemChoosen);
             }));
     
-            // generate the number redeemcode first
-            const redeemCodeNumber: string = this.generateRedeemCode();
-    
-            // create the redeemCode object
-            const newRedeemCode = this.redeemCodeRepository.create({
-                redeem_code: redeemCodeNumber,
-                generated_date: new Date(),
-                log_id: newLog.id,
-                exitLog: newLog
-            });
-    
-            const result = await queryRunner.manager.save(RedeemCode, newRedeemCode);
 
-            //update the exit log
-            newLog.redeem_code = result;
-            await queryRunner.manager.save(ExitLogs, newLog);
+            /**
+             * If the item category is BARANG_HABIS_PAKAI whenever the item borrowed the redeem code must be generated,
+             * otherwise only create the exit log but not the redeem code 
+             * 
+             */
+            let newRedeemCode: RedeemCode;
+            let result: RedeemCode;
+            
+            
+            if(body.item_category === ItemCategory.BARANG_TIDAK_HABIS_PAKAI){
+                // generate the number redeemcode first
+                const redeemCodeNumber: string = this.generateRedeemCode();
+        
+                // create the redeemCode object
+                newRedeemCode = this.redeemCodeRepository.create({
+                    redeem_code: redeemCodeNumber,
+                    generated_date: new Date(),
+                    log_id: newLog.id,
+                    exitLog: newLog
+                });
+        
+                result = await queryRunner.manager.save(RedeemCode, newRedeemCode);
+
+                //update the exit log
+                newLog.redeem_code = result;
+
+                await queryRunner.manager.save(ExitLogs, newLog);
+            } else {
+                newRedeemCode = this.redeemCodeRepository.create({
+                    redeem_code: null,
+                    generated_date: null,
+                    is_valid: null,
+                    destroyed_date: null,
+                    log_id: newLog.id,
+                    exitLog: newLog
+                });
+        
+                result = await queryRunner.manager.save(RedeemCode, newRedeemCode);
+            }
+            
 
             await queryRunner.commitTransaction();
     
@@ -144,14 +180,59 @@ export class RedeemCodeService implements IRedeemCodeService{
         }
     }   
 
+    async updateRedeemCode(redeemCode: string): Promise<RedeemCode> {
+        const queryRunner = this.dataSource.createQueryRunner();
+
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+
+        try {
+            const findRedeemCode: RedeemCode = await this.redeemCodeRepository.findOne(
+                {
+                    where: {
+                        redeem_code: redeemCode
+                    },
+                    relations: {
+                        exitLog: true
+                    }
+                }
+            );
+
+            return null;
+        } catch(err) {
+            await queryRunner.rollbackTransaction();
+
+            throw err;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
     async findByRedeemCode(redeemCode: string): Promise<RedeemCode> {
         return await this.redeemCodeRepository.findByRedeemCode(redeemCode);
     }
 
-    //error
     async findAllRedeemCodes(pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
         return this.redeemCodeRepository.findManyPage(pageOptions);    
     }
+
+    async findExitLogByRedeemCode(redeemCode: string): Promise<ExitLogs> {
+        const findCode: RedeemCode = await this.redeemCodeRepository.findOne({
+            where: {
+                redeem_code: redeemCode
+            },
+            relations: {
+                exitLog: true
+            }
+        });
+
+        if(!findCode) throw new NotFoundException("Data barang keluar tidak ditemukan, masukan kode redeem dengan benar");
+
+        return findCode.exitLog;
+    }
+
+
+    // ------------------ UTILS --------------------- //
 
     generateRedeemCode(): string {
         const chars = '1234567890';
@@ -165,7 +246,4 @@ export class RedeemCodeService implements IRedeemCodeService{
 
         return redeemCode;
     }
-
-    // ------------------ UTILS --------------------- //
-
 }

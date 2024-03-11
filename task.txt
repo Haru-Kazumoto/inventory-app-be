@@ -1,0 +1,16 @@
+task : 
+
+redeem code : 
+- jika siswa menginginkan sebuah barang lagi tetapi dia sudah mengenerate sebuah redeem code, maka caranya adalah 
+  mengambil redeem code yang sudah ada lalu di update pada item_detailsnya (sesuai dengan kategori barang yang diminta).
+
+  api : redeem-code/regenerate-code?current-code=17829
+  metode : PATCH
+
+- buat 2 api khusus untuk mengeluarkan barang dari inventory sesuai kategori yaitu habis dan tidak habis. Karna dia memiliki 2 
+  request yang berbeda jadi untuk mensingkronkan request dan result di pisahkan saja (saat ini api mengeluarkan barang sudah ada 
+  untuk yang barang tidak habis)
+
+  api : redeem-code/
+
+item : 
