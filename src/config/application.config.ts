@@ -5,6 +5,7 @@ import { ExcludeNullInterceptor } from 'src/interceptors/exclude-null.intercepto
 import { TimeoutInterceptor } from 'src/interceptors/timeout.interceptor';
 import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 
+
 const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
 const PREFIX_API = `api/v${process.env.APP_VERSION}`;
 

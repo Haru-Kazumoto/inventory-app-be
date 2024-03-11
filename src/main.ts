@@ -18,10 +18,16 @@ async function bootstrap() {
   dotenv.config();
   initializeTransactionalContext();
 
-  const app = await NestFactory.create(AppModule, {cors: config.corsOption});
+  const app = await NestFactory.create(AppModule, 
+    // {cors: config.corsOption}
+    );
   const sessionRepository = app.get(DataSource).getRepository(Session);
 
-  
+  app.enableCors({
+    credentials: true,
+    origin: "http://localhost:5173",
+    
+  })
   app.setGlobalPrefix(config.globalPrefix);
   app.use(
     session(

@@ -25,10 +25,6 @@ export class User extends BaseEntity{
     @ManyToOne(() => Roles, role => role.user)
     @JoinColumn()
     public role: Roles;
-    
-    toJSON(){
-        return instanceToPlain(this)
-    }
 }
 
 export const getSession = (request: Request): Express.User => {

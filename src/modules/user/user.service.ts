@@ -15,6 +15,7 @@ import { Request } from 'express';
 
 import * as bcrypt from "bcrypt";
 import { AuthService } from '../auth/auth.service';
+import { UpdateUserDto } from './dto';
 
 @Injectable()
 export class UserService implements IUserService{
@@ -59,17 +60,23 @@ export class UserService implements IUserService{
     }
 
     @Transactional()
-    public async update(id: number, body: UserCreateDto): Promise<User> {
+    public async update(id: number, body: UpdateUserDto): Promise<User> {
         const user = await this.userRepository.findById(id);
+
         if(!user) throw new DataNotFoundException("Id user not found", 400);
 
-        this.userUtils.checkField('username', body.username, "Username sudah ada").isExists();
+        if (body.username !== user.username) {
+             await this.userUtils.checkField('username', body.username, "Username sudah ada").isExists();
+        }
 
-        user.username = body.username;
+        const { password, ...rest } = body
+        if (password) {
+            Object.assign(user, {...rest,password: await bcrypt.hash(password, 10)});
+        } else {
+            Object.assign(user, {...rest,password: user.password });
+        }
 
-        Object.assign(user, body);
-
-        return await this.userRepository.save(user);
+        return await this.userRepository.save(user);    
     }
 
     public async hardDeleteById(id: number) {

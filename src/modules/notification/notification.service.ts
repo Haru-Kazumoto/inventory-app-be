@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { INotificationService } from './notification.service.interface';
 import { NotificationRepository } from './repository/notification.repository';
@@ -55,5 +55,12 @@ export class NotificationService implements INotificationService{
 
     return true;
   };
+
+  async deleteNotification(notifId: number): Promise<void> {
+    const findNotif: Notification = await this.notificationRepository.findOne({where: {id: notifId}});
+    if(!findNotif) throw new NotFoundException("Id notifikasi tidak di temukan");
+
+    await this.notificationRepository.delete(notifId);
+  }
 
 }

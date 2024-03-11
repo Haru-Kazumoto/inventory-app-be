@@ -24,95 +24,38 @@ export class ItemSeeder implements Seeder {
     async seedItems(): Promise<any>{
         const itemData: CreateItemDto[] = [
             {
-                name: "MIKROTIK",
-                item_code: "MKT-938573",
+                name: "RJ-45",
+                item_code: "RJ-728843",
                 item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
+                category_item: ItemCategory.BARANG_HABIS_PAKAI,
+                unit_price: 50000,
                 source_fund: "BOSDA",
                 status_item: StatusItem.TERSEDIA,
+                total_unit: "10 PACK",
                 class_id: 1
             },
             {
-                name: "MIKROTIK",
-                item_code: "MKT-345687",
+                name: "KABEL LAN",
+                item_code: "LAN-839457",
                 item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
+                category_item: ItemCategory.BARANG_HABIS_PAKAI,
+                unit_price: 150000,
                 source_fund: "BOSDA",
                 status_item: StatusItem.TERSEDIA,
+                total_unit: "1 ROLL",
                 class_id: 1
             },
             {
-                name: "MIKROTIK",
-                item_code: "MKT-123456",
+                name: "KABEL OPTIC",
+                item_code: "OPT-82794",
                 item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
+                category_item: ItemCategory.BARANG_HABIS_PAKAI,
+                unit_price: 200000,
                 source_fund: "BOSDA",
                 status_item: StatusItem.TERSEDIA,
+                total_unit: "2 ROLL",
                 class_id: 1
             },
-            {
-                name: "MIKROTIK",
-                item_code: "MKT-346782",
-                item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
-                source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
-                class_id: 1
-            },
-            {
-                name: "MIKROTIK",
-                item_code: "MKT-125432",
-                item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
-                source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
-                class_id: 1
-            },
-            {
-                name: "MIKROTIK",
-                item_code: "MKT-234152",
-                item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
-                source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
-                class_id: 1
-            },
-            {
-                name: "MIKROTIK",
-                item_code: "MKT-345567",
-                item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
-                source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
-                class_id: 1
-            },
-            {
-                name: "MIKROTIK",
-                item_code: "MKT-234569",
-                item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
-                source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
-                class_id: 1
-            },
-            {
-                name: "MIKROTIK",
-                item_code: "MKT-123497",
-                item_type: ItemType.NON_ATK,
-                category_item: ItemCategory.BARANG_TIDAK_HABIS_PAKAI,
-                unit_price: 1000000,
-                source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
-                class_id: 1
-            }
         ];
         
         try{

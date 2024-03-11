@@ -10,7 +10,7 @@ export enum FilterParam {
 }
 
 export interface IExitLogsService {
-    createLog(body: CreateExitLogDto): Promise<ExitLogs>;
+    findLogById(logId: number): Promise<ExitLogs>;
+    findLogByBorrowerName(borrowerName: string): Promise<ExitLogs>;
     findAllLogs(pageOptionsDto: PageOptionsDto, filter?: FilterParam): Promise<PageDto<ExitLogs>>;
-    findExitLogByRedeemCode(redeemCode: string): Promise<ExitLogs>;
 }
