@@ -132,8 +132,22 @@ export class ItemsController {
   @ApiQuery({
     name: 'category',
     description: 'Category of item',
-    type: String,
-    required: true,
+    required: false,
+  })
+  @ApiQuery({
+    name: 'status',
+    description: 'Status of item',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'name',
+    description: 'Name of item',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'class',
+    description: 'Class of item',
+    required: false,
   })
   public async findManyItem(
     @Query('category') category: ItemCategory,
