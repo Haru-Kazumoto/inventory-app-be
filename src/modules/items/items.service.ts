@@ -21,6 +21,7 @@ import { AuthService } from '../auth/auth.service';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { itemDeleteContent } from '../notification/notification.constant';
 import { Class } from '../class/entitites/class.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -113,57 +114,53 @@ export class ItemsService implements IItemsService {
     }
   }
 
-  @Transactional()
   public async updateOne(id: number, body: UpdateItemDto): Promise<Item> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const session = await this.authService.getSession();
+        const session: User = await this.authService.getSession();
 
-      const findItem = await this.itemRepository.findById(id);
-      if (!findItem) throw new NotFoundException('Item tidak ditemukan');
+        const findItem: Item = await this.itemRepository.findById(id);
+        if (!findItem) throw new NotFoundException('Item tidak ditemukan');
 
-      const findClass: Class = await this.classRepository.findOne({where: {id: body.class_id}});
-      if(!findClass) throw new NotFoundException("Class id tidak di temukan");
+        const findClass: Class = await this.classRepository.findOne({where: {id: body.class_id}});
+        if(!findClass) throw new NotFoundException("Class id tidak ditemukan");
 
-      const createItem: Item = this.itemRepository.create({
-        ...body,
-        class: findClass
-      });
+        // Menggunakan merge untuk menggabungkan data yang baru dengan data yang ada di objek findItem
+        const mergeData: Item = this.itemRepository.merge(findItem, {...body, class: findClass});
 
-      Object.assign(createItem, body);
+        const resultData = await this.itemRepository.save(mergeData);
 
-      const resultData = await this.itemRepository.save(createItem);
+        //UPDATE AUDIT LOGS
+        await this.auditLogService.createReport({
+            edit_method: EditMethod.UPDATE,
+            edited_by: session.id,
+            item_id: resultData.id,
+        });
 
-      //UPDATE AUDIT LOGS
-      await this.auditLogService.createReport({
-        edit_method: EditMethod.UPDATE,
-        edited_by: session.id,
-        item_id: resultData.id,
-      });
+        //UPDATE NOTIFICATION
+        await this.notificationService.sendNotification({
+            title: 'Item Berhasil diupdate!',
+            content: `Item ${
+              body.name
+            } baru telah berhasil diupdate ke inventory pada waktu ${new Date()}`,
+            color: 'blue',
+            user_id: session.id,
+        });
 
-      //UPDATE NOTIFICATION
-      await this.notificationService.sendNotification({
-        title: 'Item Berhasil diupdate!',
-        content: `Item ${
-          body.name
-        } baru telah berhasil diupdate ke inventory pada waktu ${new Date()}`,
-        color: 'blue',
-        user_id: session.id,
-      });
+        await queryRunner.commitTransaction();
 
-      await queryRunner.commitTransaction();
-
-      return resultData;
+        return resultData;
     } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
+        await queryRunner.rollbackTransaction();
+        throw error;
     } finally {
-      await queryRunner.release();
+        await queryRunner.release();
     }
-  }
+}
+
 
   public async deleteById(id: number): Promise<void> {
     const session = await this.authService.getSession();
