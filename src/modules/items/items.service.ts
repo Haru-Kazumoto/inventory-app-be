@@ -76,7 +76,7 @@ export class ItemsService implements IItemsService {
 
   async findMany(
     category: ItemCategory,
-    className: string,
+    classId: number,
     itemName: string,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,
@@ -84,7 +84,7 @@ export class ItemsService implements IItemsService {
     try {
       const data = await this.itemRepository.findMany(
         category,
-        className,
+        classId,
         itemName,
         status,
         pageOptionsDto,

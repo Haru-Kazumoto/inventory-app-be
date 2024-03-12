@@ -17,7 +17,7 @@ export class ItemsRepository extends Repository<Item> {
 
   async findMany(
     category: ItemCategory,
-    className: string,
+    classId: number,
     itemName: string,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,
@@ -35,11 +35,11 @@ export class ItemsRepository extends Repository<Item> {
           status,
         });
       }
-      if (className) {
+      if (classId) {
         qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
-          `class.class_name = :className`,
+          `class.id = :classId`,
           {
-            className,
+            classId
           },
         );
       }
