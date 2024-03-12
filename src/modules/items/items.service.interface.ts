@@ -8,8 +8,17 @@ import { StatusItem } from 'src/enums/status_item.enum';
 
 export interface IItemsService {
   createOne(body: CreateItemDto): Promise<Item>;
-  findMany(category: ItemCategory,className: string,itemName: string,status: StatusItem,pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>>;
-  findAllItemCodeByItemName(itemName: string,pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>>;
+  findMany(
+    category: ItemCategory,
+    classId: number,
+    itemName: string,
+    status: StatusItem,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Item>>;
+  findAllItemCodeByItemName(
+    itemName: string,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Item>>;
   updateOne(id: number, body: UpdateItemDto): Promise<Item>;
   deleteById(id: number): Promise<void>;
 }
