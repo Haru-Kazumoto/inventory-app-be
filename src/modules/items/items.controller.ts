@@ -143,6 +143,7 @@ export class ItemsController {
     name: 'category',
     description: 'Category of item',
     required: false,
+    enum: ItemCategory
   })
   @ApiQuery({
     name: 'status',

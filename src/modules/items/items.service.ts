@@ -126,6 +126,7 @@ export class ItemsService implements IItemsService {
       if (!item) throw new NotFoundException('Item tidak ditemukan');
 
       Object.assign(item, body);
+      item.class.id = body.class_id
 
       const resultData = await this.itemRepository.save(item);
 
