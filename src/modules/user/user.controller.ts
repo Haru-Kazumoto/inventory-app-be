@@ -1,4 +1,3 @@
-import * as NestCommon from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
   Request as ExpressRequest,
@@ -20,34 +19,35 @@ import {
 import { UpdateUserDto, UserCreateDto } from './dto';
 import { User } from './entities/user.entity';
 import { UserService } from './user.service';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, ParseIntPipe, Post, Put, Query, Request, Res, Response, UseGuards, UseInterceptors } from '@nestjs/common';
 
 @ApiTags('User')
-@NestCommon.UseGuards(RolesGuard)
+@UseGuards(RolesGuard)
 @Roles('SUPERADMIN')
-@NestCommon.Controller('user')
+@Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   // Find All
-  @NestCommon.UseGuards(AuthenticatedGuard)
-  @NestCommon.UseInterceptors(NestCommon.ClassSerializerInterceptor)
-  @NestCommon.Get('find-all')
+  @UseGuards(AuthenticatedGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Get('find-all')
   @FindAllUserDecorator()
   public async findManyUser(
-    @NestCommon.Query() pageOptionsDto: PageOptionsDto,
+    @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<User>> {
     return this.userService.findMany(pageOptionsDto);
   }
 
   // Create
-  @NestCommon.UseInterceptors(new TransformInterceptor())
-  @NestCommon.UseGuards(AuthenticatedGuard)
-  @NestCommon.Post('create')
+  @UseInterceptors(new TransformInterceptor())
+  @UseGuards(AuthenticatedGuard)
+  @Post('create')
   @CreateOneUserDecorator()
   public async createOneUser(
-    @NestCommon.Body() body: UserCreateDto,
-    @NestCommon.Request() request: ExpressRequest,
-    @NestCommon.Response() response: ExpressResponse,
+    @Body() body: UserCreateDto,
+    @Request() request: ExpressRequest,
+    @Response() response: ExpressResponse,
   ) {
     const data: User = await this.userService.createUser(request, body);
 
@@ -59,14 +59,14 @@ export class UserController {
   }
 
   // Update
-  @NestCommon.Put('update')
-  @NestCommon.UseInterceptors(new TransformInterceptor())
-  @NestCommon.UseGuards(AuthenticatedGuard)
+  @Put('update')
+  @UseInterceptors(new TransformInterceptor())
+  @UseGuards(AuthenticatedGuard)
   @UpdateUserDecorator()
   public async updateUser(
-    @NestCommon.Query('id', NestCommon.ParseIntPipe) id: number,
-    @NestCommon.Body() dto: UpdateUserDto,
-    @NestCommon.Res() res: ExpressResponse,
+    @Query('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateUserDto,
+    @Res() res: ExpressResponse,
   ) {
     const instance = await this.userService.update(id, dto);
     return res.status(200).json({
@@ -77,21 +77,21 @@ export class UserController {
   }
 
   // Delete Hard
-  @NestCommon.Delete('delete-hard')
-  @NestCommon.UseGuards(AuthenticatedGuard)
+  @Delete('delete-hard')
+  @UseGuards(AuthenticatedGuard)
   @DeleteHardUserDecorator()
   public async hardDeleteUser(
-    @NestCommon.Query('id', NestCommon.ParseIntPipe) id: number,
+    @Query('id', ParseIntPipe) id: number,
   ) {
     await this.userService.hardDeleteById(id);
   }
 
   // Delete Soft
-  @NestCommon.Delete('delete-soft')
-  @NestCommon.UseGuards(AuthenticatedGuard)
+  @Delete('delete-soft')
+  @UseGuards(AuthenticatedGuard)
   @DeleteSoftUserDecorator()
   public async softDeleteUser(
-    @NestCommon.Query('id', NestCommon.ParseIntPipe) id: number,
+    @Query('id', ParseIntPipe) id: number,
   ) {
     await this.userService.softDeleteById(id);
   }

@@ -1,4 +1,5 @@
 import { ItemCategory } from 'src/enums/item_category.enum';
+import { ItemCondition } from 'src/enums/item_condition.enum';
 import { ItemType } from 'src/enums/item_type.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { AuditLogs } from 'src/modules/audit-logs/entities/audit_logs.entity';
@@ -49,6 +50,10 @@ export class Item extends BaseEntity {
   //new
   @Column({ name: "total_unit", nullable: true })
   public total_unit: string;
+
+  //new
+  @Column({ name: "item_condition", nullable: true, enum: ItemCondition, default: ItemCondition.BAIK})
+  public item_condition: ItemCondition;
 
   @Column({
     name: 'category_item',

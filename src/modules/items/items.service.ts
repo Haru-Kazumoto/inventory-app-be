@@ -20,6 +20,7 @@ import { DataSource } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { itemDeleteContent } from '../notification/notification.constant';
+import { Class } from '../class/entitites/class.entity';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -121,13 +122,20 @@ export class ItemsService implements IItemsService {
     try {
       const session = await this.authService.getSession();
 
-      const item = await this.itemRepository.findById(id);
+      const findItem = await this.itemRepository.findById(id);
+      if (!findItem) throw new NotFoundException('Item tidak ditemukan');
 
-      if (!item) throw new NotFoundException('Item tidak ditemukan');
+      const findClass: Class = await this.classRepository.findOne({where: {id: body.class_id}});
+      if(!findClass) throw new NotFoundException("Class id tidak di temukan");
 
-      Object.assign(item, body);
+      const createItem: Item = this.itemRepository.create({
+        ...body,
+        class: findClass
+      });
 
-      const resultData = await this.itemRepository.save(item);
+      Object.assign(createItem, body);
+
+      const resultData = await this.itemRepository.save(createItem);
 
       //UPDATE AUDIT LOGS
       await this.auditLogService.createReport({
