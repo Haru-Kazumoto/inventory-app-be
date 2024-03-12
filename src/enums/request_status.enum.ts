@@ -1,0 +1,7 @@
+export enum RequestStatus {
+  PENDING = 'PENDING',
+  ACCEPTED = 'ACCEPTED',
+  REJECTED = 'REJECTED',
+  ON_THE_WAY = 'ON_THE_WAY',
+  ARRIVED = 'ARRIVED',
+}

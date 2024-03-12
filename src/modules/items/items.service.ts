@@ -19,7 +19,10 @@ import { ItemCategory } from 'src/enums/item_category.enum';
 import { DataSource } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { StatusItem } from 'src/enums/status_item.enum';
-import { itemDeleteContent } from '../notification/notification.constant';
+import {
+  itemCreateContent,
+  itemDeleteContent,
+} from '../notification/notification.constant';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -57,9 +60,7 @@ export class ItemsService implements IItemsService {
 
       await this.notificationService.sendNotification({
         title: 'Item Baru Berhasil ditambahkan!',
-        content: `Item ${
-          body.name
-        } baru telah berhasil ditambahkan ke inventory pada waktu ${new Date()}`,
+        content: itemCreateContent,
         color: 'blue',
         user_id: session.id,
       });

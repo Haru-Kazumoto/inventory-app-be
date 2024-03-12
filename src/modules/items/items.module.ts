@@ -16,18 +16,10 @@ import { AuthModule } from '../auth/auth.module';
     ClassModule,
     NotificationModule,
     AuthModule,
-    forwardRef(() => AuditLogsModule)
+    forwardRef(() => AuditLogsModule),
   ],
-  controllers: [
-    ItemsController
-  ],
-  providers: [
-    ItemsService, 
-    ItemsRepository
-  ],
-  exports: [
-    ItemsService, 
-    ItemsRepository
-  ]
+  controllers: [ItemsController],
+  providers: [ItemsService, ItemsRepository],
+  exports: [ItemsService, ItemsRepository],
 })
 export class ItemsModule {}

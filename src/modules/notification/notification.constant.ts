@@ -8,6 +8,10 @@ export const userUpdateContent = `Pengguna berhasil di perbarui`;
 export const itemCreateContent = `Item baru telah berhasil ditambahkan ke inventory pada waktu ${new Date()}`;
 export const itemDeleteContent = `Item berhasil dihapus dari inventory pada waktu ${new Date()}`;
 
+//---------REQUEST ITEM---------//
+export const requestCreateContent = `Request baru telah berhasil ditambahkan ke inventory pada waktu ${new Date()}`;
+export const requestDeleteContent = `Request berhasil dihapus dari inventory pada waktu ${new Date()}`;
+
 //---------CLASS---------//
 export const classCreateContent = `Kelas berhasil dibuat`;
 export const classDeleteContent = `Kelas berhasil dihapus dari inventory pada waktu ${new Date()}`;
