@@ -3,7 +3,7 @@ import { IRedeemCodeService } from './redeem_code.service.interface';
 import { RedeemCodeRepository } from './repositories/redeem_code.repository';
 import { RedeemCode } from './entities/redeem_code.entity';
 import { DataSource } from 'typeorm';
-import { CreateExitLogDto } from '../exit_logs/dtos/exit_logs.dto';
+import { CreateExitLogDto, UpdateExitLogDto } from '../exit_logs/dtos/exit_logs.dto';
 import { ItemsRepository } from '../items/repository/items.repository';
 import { ExitLogsRepository } from '../exit_logs/repositories/exit_logs.repository';
 import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
@@ -180,40 +180,75 @@ export class RedeemCodeService implements IRedeemCodeService {
         }
     }   
 
-    async updateRedeemCode(redeemCode: string): Promise<RedeemCode> {
+    async updateRedeemCode(redeemCode: string, body: UpdateExitLogDto): Promise<RedeemCode> {
         const queryRunner = this.dataSource.createQueryRunner();
-
+    
         await queryRunner.connect();
         await queryRunner.startTransaction();
-
+    
         try {
-            const findRedeemCode: RedeemCode = await this.redeemCodeRepository.findOne(
-                {
-                    where: {
-                        redeem_code: redeemCode
-                    },
-                    relations: {
-                        exitLog: true
-                    }
+            const findRedeemCode: RedeemCode = await this.redeemCodeRepository.findOneOrFail({
+                where: { redeem_code: redeemCode },
+                relations: { exitLog: true }
+            });
+    
+            const currentExitLog: ExitLogs = findRedeemCode.exitLog;
+            
+            await Promise.all(body.item_details.map(async (itemDetail: ItemDetails) => {
+                //check is availability on inventory
+                const itemChoosen: Item = await this.itemRepository.findById(itemDetail.item_id);
+                if(!itemChoosen) throw new BadRequestException("Item tidak ada di inventory!");
+
+                //check is the item availablel or not
+                if (itemChoosen.status_item !== StatusItem.TERSEDIA) {
+                    throw new BadRequestException("Barang sedang tidak tersedia di inventory.");
                 }
-            );
+    
+                //check is the item type equals with the request
+                if (body.item_category !== itemChoosen.category_item) {
+                    throw new BadRequestException("Kategori barang tidak sama dengan yang dipilih");
+                }
+    
+                //if the item is 'barang habis pakai' then change the status item with the type request
+                if (body.item_category === ItemCategory.BARANG_TIDAK_HABIS_PAKAI) {
+                    itemChoosen.status_item = (body.status_exit === StatusExit.PEMINJAMAN)
+                        ? StatusItem.SEDANG_DIPINJAM
+                        : StatusItem.SEDANG_DIPAKAI;
+                }
 
-            return null;
-        } catch(err) {
+                //set the category item to item detail object
+                itemDetail.category_item = itemChoosen.category_item;
+        
+                await queryRunner.manager.save(Item, itemChoosen);
+            }));
+    
+            const mergingExitLog: ExitLogs = this.exitlogRepository.merge(currentExitLog, body);
+    
+            // save the updated exit log
+            await queryRunner.manager.save(ExitLogs, mergingExitLog);
+    
+            await queryRunner.commitTransaction();
+    
+            // return the current redeem code with updated exit log
+            return findRedeemCode;
+        } catch (err) {
             await queryRunner.rollbackTransaction();
-
             throw err;
         } finally {
             await queryRunner.release();
         }
     }
+    
 
     async findByRedeemCode(redeemCode: string): Promise<RedeemCode> {
-        return await this.redeemCodeRepository.findByRedeemCode(redeemCode);
+        return await this.redeemCodeRepository.findOne({
+            where: {redeem_code: redeemCode},
+            relations: {exitLog: true}
+        });
     }
 
-    async findAllRedeemCodes(pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
-        return this.redeemCodeRepository.findManyPage(pageOptions);    
+    async findAllRedeemCodes(filterStatus: "VALID" | "NOT VALID",pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
+        return this.redeemCodeRepository.findManyCode(filterStatus,pageOptions);
     }
 
     async findExitLogByRedeemCode(redeemCode: string): Promise<ExitLogs> {
@@ -245,5 +280,11 @@ export class RedeemCodeService implements IRedeemCodeService {
         }
 
         return redeemCode;
+    }
+
+    checkValidRedeemCode(redeemCode: RedeemCode) {
+        if(!redeemCode.is_valid) {
+            throw new BadRequestException("Kode redeem telah kadarluawasa, tidak bisa melakukan update!");
+        }
     }
 }

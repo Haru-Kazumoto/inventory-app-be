@@ -7,6 +7,7 @@ import { Response } from 'express';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { ExitLogs } from './entities/exit_logs.entity';
 import { PageOptionsDto } from 'src/utils/pagination.utils';
+import { ItemCategory } from 'src/enums/item_category.enum';
 
 @ApiTags('ExitLogs')
 @UseGuards(AuthenticatedGuard)
@@ -16,8 +17,14 @@ export class ExitLogsController {
 
   @Get('find-all')
   @ApiPaginatedResponse(ExitLogs)
-  async findManyLogsWithPagination(@Query() pageOptionsDto: PageOptionsDto) {
-    return await this.exitLogsService.findAllLogs(pageOptionsDto);
+  @ApiQuery({
+    name: "category",
+    description: "Find exit log by item category",
+    enum: ItemCategory,
+    required: true
+  })
+  async findManyLogsWithPagination(@Query('category') filterCategory: ItemCategory,@Query() pageOptionsDto: PageOptionsDto) {
+    return await this.exitLogsService.findAllLogs(filterCategory,pageOptionsDto);
   }
 
   @ApiQuery({
