@@ -28,6 +28,7 @@ import { ApiTags } from '@nestjs/swagger';
 export class RequestItemsController {
   constructor(private readonly requestItemsService: RequestItemsService) {}
 
+  // Menginzinkan role selain superadmin untuk membuat request
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
   @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
@@ -48,6 +49,7 @@ export class RequestItemsController {
     });
   }
 
+  // mengizinkan semua role untuk mengakses data request items
   @NestCommon.UseGuards(AuthenticatedGuard)
   @NestCommon.Get('find-all')
   @FindAllRequestDecorator()
@@ -59,6 +61,7 @@ export class RequestItemsController {
     return this.requestItemsService.findMany(className, status, pageOptionsDto);
   }
 
+  // Mengizinkan role selain superadmin untuk mengupdate request
   @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
   @NestCommon.Put('update')
   @NestCommon.UseInterceptors(new TransformInterceptor())
@@ -77,6 +80,7 @@ export class RequestItemsController {
     });
   }
 
+  // Mengizinkan role superadmin untuk mengupdate status request
   @Roles('SUPERADMIN')
   @NestCommon.Put('accept')
   @NestCommon.UseInterceptors(new TransformInterceptor())
@@ -94,6 +98,7 @@ export class RequestItemsController {
     });
   }
 
+  // Mengizinkan role superadmin untuk mengupdate status request
   @Roles('SUPERADMIN')
   @NestCommon.Put('reject')
   @NestCommon.UseInterceptors(new TransformInterceptor())
@@ -111,6 +116,7 @@ export class RequestItemsController {
     });
   }
 
+  // Mengizinkan role superadmin untuk mengupdate status request
   @Roles('SUPERADMIN')
   @NestCommon.Put('arrive')
   @NestCommon.UseInterceptors(new TransformInterceptor())
@@ -128,6 +134,7 @@ export class RequestItemsController {
     });
   }
 
+  // Mengizinkan role superadmin untuk mengupdate status request
   @Roles('SUPERADMIN')
   @NestCommon.Put('on-the-way')
   @NestCommon.UseInterceptors(new TransformInterceptor())
@@ -145,6 +152,7 @@ export class RequestItemsController {
     });
   }
 
+    // Mengizinkan role superadmin untuk mengupdate status request
   @NestCommon.Delete('delete')
   @NestCommon.UseGuards(AuthenticatedGuard)
   @DeleteRequestDecorator()

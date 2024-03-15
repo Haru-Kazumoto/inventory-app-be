@@ -33,6 +33,7 @@ export class RequestItemsService implements IRequestItems {
   ) {}
 
   @Transactional()
+  // Membuat request item
   public async createRequest(body: CreateRequestItemDto): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -67,6 +68,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  // Mencari semua request items, dengan filter nama class dan status request
   public findMany(
     className: string,
     status: RequestStatus,
@@ -79,6 +81,7 @@ export class RequestItemsService implements IRequestItems {
     );
   }
 
+  // Mengupdate property request item seperti item_name, total request, description, dan class id dengan id
   @Transactional()
   public async updateRequest(
     id: number,
@@ -119,6 +122,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  //Menghapus request item dengan id
   public async deleteRequest(id: number): Promise<void> {
     const session = await this.authService.getSession();
 
@@ -140,6 +144,7 @@ export class RequestItemsService implements IRequestItems {
     return Promise.resolve();
   }
 
+  // Mengupdate status request menjadi accepted
   @Transactional()
   public async acceptRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -153,22 +158,31 @@ export class RequestItemsService implements IRequestItems {
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
-        status: RequestStatus.ACCEPTED,
-        accepted_date: new Date(),
-      });
+      // Hanya mengizinkan status pending agar request lain tidak bisa diubah menjadi accepted
+      if (request.status === RequestStatus.PENDING) {
+        const mergeData: RequestItem = this.requestItemRepository.merge(
+          request,
+          {
+            status: RequestStatus.ACCEPTED,
+            accepted_date: new Date(),
+          },
+        );
 
-      const resultData = await this.requestItemRepository.save(mergeData);
+        const resultData = await this.requestItemRepository.save(mergeData);
 
-      await this.notificationService.sendNotification({
-        title: 'Status Request Berubah!',
-        content: requestUpdateContent,
-        color: 'blue',
-        user_id: session.id,
-      });
+        await this.notificationService.sendNotification({
+          title: 'Status Request Berubah!',
+          content: requestUpdateContent,
+          color: 'blue',
+          user_id: session.id,
+        });
 
-      await queryRunner.commitTransaction();
-      return resultData;
+        await queryRunner.commitTransaction();
+
+        return resultData;
+      } else {
+        throw new BadRequestException('Request tidak diterima');
+      }
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -177,6 +191,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  // Mengupdate status request menjadi rejected
   @Transactional()
   public async rejectRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -190,26 +205,29 @@ export class RequestItemsService implements IRequestItems {
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      if (request.status == RequestStatus.ACCEPTED)
-        throw new BadRequestException(
-          'Request sudah diterima, tidak bisa ditolak kembali',
+      // Hanya mengizinkan status pending agar request lain tidak bisa diubah menjadi reject
+      if (request.status === RequestStatus.PENDING) {
+        const mergeData: RequestItem = this.requestItemRepository.merge(
+          request,
+          {
+            status: RequestStatus.REJECTED,
+          },
         );
 
-      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
-        status: RequestStatus.REJECTED,
-      });
+        const resultData = await this.requestItemRepository.save(mergeData);
 
-      const resultData = await this.requestItemRepository.save(mergeData);
+        await this.notificationService.sendNotification({
+          title: 'Status Request Berubah!',
+          content: requestUpdateContent,
+          color: 'blue',
+          user_id: session.id,
+        });
 
-      await this.notificationService.sendNotification({
-        title: 'Status Request Berubah!',
-        content: requestUpdateContent,
-        color: 'blue',
-        user_id: session.id,
-      });
-
-      await queryRunner.commitTransaction();
-      return resultData;
+        await queryRunner.commitTransaction();
+        return resultData;
+      } else {
+        throw new BadRequestException('Request tidak diterima.');
+      }
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -218,6 +236,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  // Mengupdate status request menjadi arrived
   @Transactional()
   public async arriveRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -231,23 +250,32 @@ export class RequestItemsService implements IRequestItems {
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
-        status: RequestStatus.ARRIVED,
-        arrive_date: new Date(),
-        is_arrive: true,
-      });
+      // Cek apakah request sudah on the way, jika tidak maka mengembalikan error
+      if (request.status === RequestStatus.ON_THE_WAY) {
+        // mengubah is_arrive menjadi true, jika request sudah arrive
+        const mergeData: RequestItem = this.requestItemRepository.merge(
+          request,
+          {
+            status: RequestStatus.ARRIVED,
+            arrive_date: new Date(),
+            is_arrive: true,
+          },
+        );
 
-      const resultData = await this.requestItemRepository.save(mergeData);
+        const resultData = await this.requestItemRepository.save(mergeData);
 
-      await this.notificationService.sendNotification({
-        title: 'Status Request Berubah!',
-        content: requestUpdateContent,
-        color: 'blue',
-        user_id: session.id,
-      });
+        await this.notificationService.sendNotification({
+          title: 'Status Request Berubah!',
+          content: requestUpdateContent,
+          color: 'blue',
+          user_id: session.id,
+        });
 
-      await queryRunner.commitTransaction();
-      return resultData;
+        await queryRunner.commitTransaction();
+        return resultData;
+      } else {
+        throw new BadRequestException('Request tidak diterima.');
+      }
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -256,6 +284,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  // Mengupdate status request menjadi on the way
   @Transactional()
   public async onTheWayRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
@@ -269,22 +298,31 @@ export class RequestItemsService implements IRequestItems {
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
-        status: RequestStatus.ON_THE_WAY,
-        is_arrive: false,
-      });
+      // Cek apakah request sudah diterima, jika tidak maka mengembalikan error
+      if (request.status === RequestStatus.ACCEPTED) {
+        // mengubah is_arrive menjadi false ketika request sedang on the way
+        const mergeData: RequestItem = this.requestItemRepository.merge(
+          request,
+          {
+            status: RequestStatus.ON_THE_WAY,
+            is_arrive: false,
+          },
+        );
 
-      const resultData = await this.requestItemRepository.save(mergeData);
+        const resultData = await this.requestItemRepository.save(mergeData);
 
-      await this.notificationService.sendNotification({
-        title: 'Status Request Berubah!',
-        content: requestUpdateContent,
-        color: 'blue',
-        user_id: session.id,
-      });
+        await this.notificationService.sendNotification({
+          title: 'Status Request Berubah!',
+          content: requestUpdateContent,
+          color: 'blue',
+          user_id: session.id,
+        });
 
-      await queryRunner.commitTransaction();
-      return resultData;
+        await queryRunner.commitTransaction();
+        return resultData;
+      } else {
+        throw new BadRequestException('Request tidak diterima.');
+      }
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
