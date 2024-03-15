@@ -18,7 +18,9 @@ import { Transactional } from 'typeorm-transactional';
 import {
   requestCreateContent,
   requestDeleteContent,
+  requestUpdateContent,
 } from '../notification/notification.constant';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class RequestItemsService implements IRequestItems {
@@ -31,7 +33,7 @@ export class RequestItemsService implements IRequestItems {
   ) {}
 
   @Transactional()
-  public async createRequest(body): Promise<any> {
+  public async createRequest(body: CreateRequestItemDto): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -44,14 +46,12 @@ export class RequestItemsService implements IRequestItems {
 
       const newRequest = this.requestItemRepository.create({
         ...body,
-        request_date: new Date(),
-        status: RequestStatus.PENDING,
         class: classEntity,
       });
       const resultData = await this.requestItemRepository.save(newRequest);
 
       await this.notificationService.sendNotification({
-        title: 'Request Baru Berhasil ditambahkan!',
+        title: 'Request Baru Berhasil Ditambahkan!',
         content: requestCreateContent,
         color: 'blue',
         user_id: session.id,
@@ -89,18 +89,21 @@ export class RequestItemsService implements IRequestItems {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      const session = await this.authService.getSession();
+      const session: User = await this.authService.getSession();
 
       const request = await this.requestItemRepository.findById(id);
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      Object.assign(request, body);
+      const mergeData: RequestItem = this.requestItemRepository.merge(
+        request,
+        body,
+      );
 
-      const resultData = await this.requestItemRepository.save(request);
+      const resultData = await this.requestItemRepository.save(mergeData);
 
       await this.notificationService.sendNotification({
-        title: 'Request Berhasil diupdate!',
+        title: 'Request Item Berhasil Diupdate!',
         content: requestCreateContent,
         color: 'blue',
         user_id: session.id,
@@ -128,7 +131,7 @@ export class RequestItemsService implements IRequestItems {
     await this.requestItemRepository.remove(data);
 
     await this.notificationService.sendNotification({
-      title: 'Request Berhasil dihapus!',
+      title: 'Request Item Berhasil Dihapus!',
       content: requestDeleteContent,
       color: 'blue',
       user_id: session.id,
@@ -137,6 +140,7 @@ export class RequestItemsService implements IRequestItems {
     return Promise.resolve();
   }
 
+  @Transactional()
   public async acceptRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -149,16 +153,16 @@ export class RequestItemsService implements IRequestItems {
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      Object.assign(request, {
+      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
         status: RequestStatus.ACCEPTED,
         accepted_date: new Date(),
       });
 
-      const resultData = await this.requestItemRepository.save(request);
+      const resultData = await this.requestItemRepository.save(mergeData);
 
       await this.notificationService.sendNotification({
-        title: 'Request Berhasil diupdate!',
-        content: requestCreateContent,
+        title: 'Status Request Berubah!',
+        content: requestUpdateContent,
         color: 'blue',
         user_id: session.id,
       });
@@ -173,6 +177,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  @Transactional()
   public async rejectRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -187,16 +192,18 @@ export class RequestItemsService implements IRequestItems {
 
       if (request.status == RequestStatus.ACCEPTED)
         throw new BadRequestException(
-          'Request sudah di accept, tidak bisa di reject',
+          'Request sudah diterima, tidak bisa ditolak kembali',
         );
 
-      Object.assign(request, { status: RequestStatus.REJECTED });
+      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
+        status: RequestStatus.REJECTED,
+      });
 
-      const resultData = await this.requestItemRepository.save(request);
+      const resultData = await this.requestItemRepository.save(mergeData);
 
       await this.notificationService.sendNotification({
-        title: 'Request Berhasil diupdate!',
-        content: requestCreateContent,
+        title: 'Status Request Berubah!',
+        content: requestUpdateContent,
         color: 'blue',
         user_id: session.id,
       });
@@ -211,6 +218,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  @Transactional()
   public async arriveRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -223,17 +231,17 @@ export class RequestItemsService implements IRequestItems {
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      Object.assign(request, {
+      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
         status: RequestStatus.ARRIVED,
         arrive_date: new Date(),
         is_arrive: true,
       });
 
-      const resultData = await this.requestItemRepository.save(request);
+      const resultData = await this.requestItemRepository.save(mergeData);
 
       await this.notificationService.sendNotification({
-        title: 'Request Berhasil diupdate!',
-        content: requestCreateContent,
+        title: 'Status Request Berubah!',
+        content: requestUpdateContent,
         color: 'blue',
         user_id: session.id,
       });
@@ -248,6 +256,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  @Transactional()
   public async onTheWayRequest(id: number): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
 
@@ -260,16 +269,16 @@ export class RequestItemsService implements IRequestItems {
 
       if (!request) throw new NotFoundException('Request tidak ditemukan');
 
-      Object.assign(request, {
+      const mergeData: RequestItem = this.requestItemRepository.merge(request, {
         status: RequestStatus.ON_THE_WAY,
         is_arrive: false,
       });
 
-      const resultData = await this.requestItemRepository.save(request);
+      const resultData = await this.requestItemRepository.save(mergeData);
 
       await this.notificationService.sendNotification({
-        title: 'Request Berhasil diupdate!',
-        content: requestCreateContent,
+        title: 'Status Request Berubah!',
+        content: requestUpdateContent,
         color: 'blue',
         user_id: session.id,
       });

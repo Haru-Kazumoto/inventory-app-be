@@ -13,6 +13,7 @@ import {
   Query,
   Put,
   ParseIntPipe,
+  HttpException,
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
@@ -41,6 +42,15 @@ import { StatusItem } from 'src/enums/status_item.enum';
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
+
+  public validationQueryIsNumber(query: string): void {
+    if (query) {
+      parseInt(query, 10); // Parse string to integer
+      if (isNaN(query as unknown as number)) {
+        throw new HttpException('Class must be an integer', 400);
+      }
+    }
+  }
 
   @ApiOkResponse({
     description: 'Creating one item record',
@@ -133,6 +143,7 @@ export class ItemsController {
     name: 'category',
     description: 'Category of item',
     required: false,
+    enum: ItemCategory
   })
   @ApiQuery({
     name: 'status',
@@ -145,20 +156,23 @@ export class ItemsController {
     required: false,
   })
   @ApiQuery({
-    name: 'class',
-    description: 'Class of item',
+    name: 'classId',
+    description: 'Class Id of class item',
     required: false,
+    type: Number,
   })
   public async findManyItem(
     @Query('category') category: ItemCategory,
     @Query('status') status: StatusItem,
     @Query('name') itemName: string,
-    @Query('class') className: string,
+    @Query('classId') classId: string,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
+    this.validationQueryIsNumber(classId);
+
     return this.itemsService.findMany(
       category,
-      className,
+      classId as unknown as number,
       itemName,
       status,
       pageOptionsDto,

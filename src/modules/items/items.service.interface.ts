@@ -10,7 +10,7 @@ export interface IItemsService {
   createOne(body: CreateItemDto): Promise<Item>;
   findMany(
     category: ItemCategory,
-    className: string,
+    classId: number,
     itemName: string,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,

@@ -28,7 +28,7 @@ export function CreateRequestDecorator() {
         properties: {
           error: {
             type: 'array',
-            example: ['username cannot be empty', 'email pattern not valid'],
+            example: ['item name is required'],
           },
         },
       },

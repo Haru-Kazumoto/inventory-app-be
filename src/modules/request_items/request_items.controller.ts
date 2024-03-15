@@ -21,7 +21,7 @@ import { UpdateStatusAcceptDecorator } from './decorator/update-status-accept.de
 import { UpdateStatusRejectDecorator } from './decorator/update-status-reject.decorator';
 import { UpdateStatusArriveDecorator } from './decorator/update-status-arrive.decorator';
 import { UpdateStatusOnTheWayDecorator } from './decorator/update-status-on-the-way.decorator';
-import { ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Request Items')
 @NestCommon.Controller('request-items')
@@ -30,6 +30,7 @@ export class RequestItemsController {
 
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
   @NestCommon.Post('create')
   @CreateRequestDecorator()
   public async createRequest(
@@ -48,19 +49,8 @@ export class RequestItemsController {
   }
 
   @NestCommon.UseGuards(AuthenticatedGuard)
-  @Roles('SUPERADMIN')
   @NestCommon.Get('find-all')
   @FindAllRequestDecorator()
-  @ApiQuery({
-    name: 'status',
-    description: 'Status of item',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'class',
-    description: 'Class of item',
-    required: false,
-  })
   public findAll(
     @NestCommon.Query('class') className: string,
     @NestCommon.Query('status') status: RequestStatus,
@@ -69,6 +59,7 @@ export class RequestItemsController {
     return this.requestItemsService.findMany(className, status, pageOptionsDto);
   }
 
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
   @NestCommon.Put('update')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
@@ -86,6 +77,7 @@ export class RequestItemsController {
     });
   }
 
+  @Roles('SUPERADMIN')
   @NestCommon.Put('accept')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
@@ -102,6 +94,7 @@ export class RequestItemsController {
     });
   }
 
+  @Roles('SUPERADMIN')
   @NestCommon.Put('reject')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
@@ -118,6 +111,7 @@ export class RequestItemsController {
     });
   }
 
+  @Roles('SUPERADMIN')
   @NestCommon.Put('arrive')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
@@ -134,6 +128,7 @@ export class RequestItemsController {
     });
   }
 
+  @Roles('SUPERADMIN')
   @NestCommon.Put('on-the-way')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)

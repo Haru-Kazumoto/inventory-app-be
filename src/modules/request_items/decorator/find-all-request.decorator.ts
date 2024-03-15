@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiInternalServerErrorResponse, ApiOkResponse } from '@nestjs/swagger';
+import { ApiInternalServerErrorResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { RequestItem } from '../entities/request_item.entity';
 
@@ -25,6 +25,16 @@ export function FindAllRequestDecorator() {
           message: { type: 'string', example: 'Internal server error' },
         },
       },
+    }),
+    ApiQuery({
+      name: 'status',
+      description: 'Status of item',
+      required: false,
+    }),
+    ApiQuery({
+      name: 'class',
+      description: 'Class of item',
+      required: false,
     }),
     ApiPaginatedResponse(RequestItem),
   );

@@ -1,11 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
-  IsDate,
-  IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
 } from 'class-validator';
 import { RequestStatus } from 'src/enums/request_status.enum';

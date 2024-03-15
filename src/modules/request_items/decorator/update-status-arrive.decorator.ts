@@ -44,7 +44,7 @@ export function UpdateStatusArriveDecorator() {
     }),
     ApiQuery({
       name: 'id',
-      description: 'Id request item for update',
+      description: 'Id request item for update status',
       type: Number,
       required: true,
     }),

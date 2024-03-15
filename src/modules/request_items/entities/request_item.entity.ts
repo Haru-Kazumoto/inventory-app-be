@@ -1,6 +1,7 @@
 import { RequestStatus } from 'src/enums/request_status.enum';
 import { Class } from 'src/modules/class/entitites/class.entity';
 import {
+  BeforeInsert,
   Column,
   Entity,
   JoinColumn,
@@ -49,4 +50,14 @@ export class RequestItem extends BaseEntity {
   })
   @JoinColumn()
   public class: Class;
+
+  @BeforeInsert()
+  public setDate() {
+    this.request_date = new Date();
+  }
+
+  @BeforeInsert()
+  public setStatus() {
+    this.status = RequestStatus.PENDING;
+  }
 }
