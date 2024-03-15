@@ -26,6 +26,9 @@ export class ExitLogs extends BaseEntity {
     // @Column({name: "item_detail_id", nullable: false})
     // public item_detail_id: number;
 
+    @Column({name: "exit_class", default: null, nullable: true})
+    public exit_class: string;
+
     @Column({name: "status_exit", enum: StatusExit, default: null, nullable: false})
     public status_exit: StatusExit;
 
