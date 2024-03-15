@@ -42,6 +42,8 @@ export class RedeemCodeService implements IRedeemCodeService {
 
             await Promise.all(newLog.item_details.map(async (itemDetail: ItemDetails) => {
                 const itemChoosen: Item = await this.itemRepository.findById(itemDetail.item_id);
+                
+                if (!itemChoosen) throw new NotFoundException(`Barang dengan item id ${itemDetail.item_id} tidak ditemukan`)
 
                 if (itemChoosen.status_item !== StatusItem.TERSEDIA) {
                     throw new BadRequestException("Barang sedang tidak tersedia di inventory.");
