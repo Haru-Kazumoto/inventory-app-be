@@ -1,10 +1,11 @@
-import { DataSource, Repository } from "typeorm";
+import { DataSource, Repository, SelectQueryBuilder } from "typeorm";
 import { ExitLogs } from "../entities/exit_logs.entity";
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { RedeemCode } from "src/modules/redeem_code/entities/redeem_code.entity";
 import { PageDto, PageOptionsDto } from "src/utils/pagination.utils";
 import { pagination } from "src/utils/modules_utils/pagination.utils";
+import { ItemCategory } from "src/enums/item_category.enum";
 
 @Injectable()
 export class ExitLogsRepository extends Repository<ExitLogs>{
@@ -22,8 +23,14 @@ export class ExitLogsRepository extends Repository<ExitLogs>{
             .getOne();
     }
 
-    async findManyLogs(pageOptionsDto: PageOptionsDto): Promise<PageDto<ExitLogs>>{
-        return pagination<ExitLogs>(this, pageOptionsDto, "exit_logs");
+    async findManyLogs(filterCategory: ItemCategory,pageOptionsDto: PageOptionsDto): Promise<PageDto<ExitLogs>>{
+        const queryAlias: string = "exit_logs";
+
+        const whereCondition = (qb: SelectQueryBuilder<ExitLogs>) => {
+            qb.andWhere(`${queryAlias}.item_category = :filterCategory`, {filterCategory});
+        }
+
+        return pagination<ExitLogs>(this, pageOptionsDto, queryAlias, whereCondition);
     }
 
 }

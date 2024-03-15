@@ -13,8 +13,8 @@ import { ExitLogsModule } from '../exit_logs/exit_logs.module';
   imports: [
     TypeOrmModule.forFeature([RedeemCode, Item, ExitLogs]),
     ItemsModule,
-    ExitLogsModule
-    // forwardRef(() => ExitLogsModule)
+    // ExitLogsModule
+    forwardRef(() => ExitLogsModule)
   ],
   controllers: [RedeemCodeController],
   providers: [RedeemCodeService, RedeemCodeRepository],

@@ -1,7 +1,8 @@
 import { PageDto, PageOptionsDto } from "src/utils/pagination.utils";
 import { ExitLogs } from "./entities/exit_logs.entity";
-import { CreateExitLogDto } from "./dtos/exit_logs.dto";
+import { CreateExitLogDto, UpdateExitLogDto } from "./dtos/exit_logs.dto";
 import { RedeemCode } from "../redeem_code/entities/redeem_code.entity";
+import { ItemCategory } from "src/enums/item_category.enum";
 
 export enum FilterParam {
     NAME="NAME",
@@ -10,7 +11,10 @@ export enum FilterParam {
 }
 
 export interface IExitLogsService {
+    
     findLogById(logId: number): Promise<ExitLogs>;
     findLogByBorrowerName(borrowerName: string): Promise<ExitLogs>;
-    findAllLogs(pageOptionsDto: PageOptionsDto, filter?: FilterParam): Promise<PageDto<ExitLogs>>;
+    findAllLogs(filterCagory: ItemCategory,pageOptionsDto: PageOptionsDto, filter?: FilterParam): Promise<PageDto<ExitLogs>>;
+    updateExitLog(redeemCode: string, body: UpdateExitLogDto): Promise<RedeemCode>;
+    
 }

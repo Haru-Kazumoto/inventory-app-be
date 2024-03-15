@@ -32,6 +32,10 @@ export class CreateExitLogDto {
   @IsNotEmpty()
   item_category: ItemCategory;
 
+  @ApiProperty({ example: 'Lab - 1' })
+  @IsString()
+  exit_class: string;
+
   @ApiProperty({ example: StatusExit.PEMINJAMAN })
   @IsEnum(StatusExit)
   @IsNotEmpty()
@@ -82,6 +86,10 @@ export class UpdateExitLogDto {
   @IsEnum(ItemCategory)
   @IsNotEmpty()
   item_category: ItemCategory;
+
+  @ApiProperty({ example: 'Lab - 1' })
+  @IsString()
+  exit_class: string;
 
   @ApiProperty({ example: StatusExit.PEMINJAMAN })
   @IsEnum(StatusExit)
