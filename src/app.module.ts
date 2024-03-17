@@ -14,6 +14,7 @@ import { ItemsModule } from './modules/items/items.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './exceptions/filters/exception.filter';
 import { AuthSessionMiddleware } from './middleware/auth-session.middleware';
+import { RequestItemsModule } from './modules/request_items/request_items.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AuthSessionMiddleware } from './middleware/auth-session.middleware';
     ItemDetailsModule,
     ItemsModule,
     ExitLogsModule,
+    RequestItemsModule,
   ],
   providers: [
     // {
