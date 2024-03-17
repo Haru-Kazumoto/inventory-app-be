@@ -1,6 +1,6 @@
 import { Controller, Get, HttpStatus, Inject, Post, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { ResponseHttp } from 'src/utils/response.http.utils';
+import { ResponseHttp } from '../../utils/response.http.utils';
 import { Response } from 'express';
 import { RoleCreateDto } from './dto/role.dto';
 

@@ -2,20 +2,19 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
-import { PageDto, PageMetaDto, PageOptionsDto } from 'src/utils/pagination.utils';
-import { pagination } from 'src/utils/modules_utils/pagination.utils';
-import { Roles } from 'src/modules/role/entities/roles.entity';
+import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
+import { pagination } from '../../../utils/modules_utils/pagination.utils';
+import { Roles } from '../../role/entities/roles.entity';
 
 @Injectable()
 export class UserRepository extends Repository<User>{
-    @InjectRepository(User) userRepository: Repository<User>
 
-    constructor(public dataSource: DataSource){
-        super(User, dataSource.createEntityManager());
-    }
+    // constructor(public dataSource: DataSource){
+    //     super(User, dataSource.createEntityManager());
+    // }
 
     async findUserByUsername(username: string): Promise<User> {
-        return await this.userRepository.findOne({
+        return await this.findOne({
             where: {
                 username: username
             }
@@ -23,7 +22,7 @@ export class UserRepository extends Repository<User>{
     }
 
     async findUserByRole(role: "SUPERADMIN" | "ADMIN"): Promise<User[]>{
-        return this.userRepository.createQueryBuilder("user")
+        return this.createQueryBuilder("user")
             .where("user.role.name = :role", {role})
             .getMany();
     }
@@ -43,7 +42,7 @@ export class UserRepository extends Repository<User>{
     }
 
     public async findById(id: number): Promise<User | undefined>{
-        return await this.userRepository.findOne({
+        return await this.findOne({
             where: {
                 id: id
             },
@@ -54,7 +53,7 @@ export class UserRepository extends Repository<User>{
     }
 
     public async findUserById(userId: number):Promise<User | undefined>{
-        return await this.userRepository.findOne({
+        return await this.findOne({
             where: {
                 id: userId
             },

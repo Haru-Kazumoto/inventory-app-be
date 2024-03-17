@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
-import { DuplicateDataException } from 'src/exceptions/duplicate_data.exception';
-import { Class } from 'src/modules/class/entitites/class.entity';
-import { User } from 'src/modules/user/entities/user.entity';
+import { DataNotFoundException } from '../../exceptions/data_not_found.exception';
+import { DuplicateDataException } from '../../exceptions/duplicate_data.exception';
+import { User } from '../../modules/user/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()

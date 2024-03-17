@@ -1,5 +1,5 @@
 import { User } from "src/modules/user/entities/user.entity";
-import { BaseEntity } from "src/utils/base.entity";
+import { BaseEntity } from "../../../entities/base.entity";
 import { BeforeInsert, BeforeRemove, BeforeUpdate, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: "notifications"})

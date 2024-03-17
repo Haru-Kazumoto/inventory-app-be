@@ -36,6 +36,8 @@ import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 import { Status } from 'src/enums/response.enum';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
+import { GetAllItemResponse } from './dto/response-item.dto';
+import { plainToInstance } from 'class-transformer';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
@@ -177,6 +179,40 @@ export class ItemsController {
       status,
       pageOptionsDto,
     );
+  }
+
+  @ApiQuery({
+    name: "item-category",
+    description: "Find all items with filtering by item category",
+    required: false
+  })
+  @Get('get-all-items')
+  public async findManyItemsWithNoPagination(
+    @Query('item-category') filterCategory: ItemCategory, 
+    @Res() response: Response
+  ) {
+      const items = await this.itemsService.findAllItems(filterCategory);
+
+      const responseDto = items.map(item => new GetAllItemResponse(
+        item.id,
+        item.name,
+        item.item_code,
+        item.status_item
+      ));
+
+      console.log(responseDto);
+      /*
+       * note: if the return response is a object, u can use plainToInstance. 
+       *       Otherwise use this way
+       */
+
+      // return plainToInstance(GetAllItemResponse, items);
+
+      return response.status(200).json({
+        statusCode: response.statusCode,
+        message: "OK",
+        data: {items: [responseDto]}
+      });
   }
 
   @UseGuards(AuthenticatedGuard)

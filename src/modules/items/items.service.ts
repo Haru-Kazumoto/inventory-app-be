@@ -22,6 +22,8 @@ import { StatusItem } from 'src/enums/status_item.enum';
 import { itemDeleteContent } from '../notification/notification.constant';
 import { Class } from '../class/entitites/class.entity';
 import { User } from '../user/entities/user.entity';
+import {  GetAllItemResponse } from './dto/response-item.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -70,10 +72,24 @@ export class ItemsService implements IItemsService {
       return resultData;
     } catch (error) {
       await queryRunner.rollbackTransaction();
+
       throw error;
     } finally {
       await queryRunner.release();
     }
+  }
+
+  //ini ada bug nih, dia gak mau meresponse selalu muter muter. Ganti metode mapping nya cuy
+  async findAllItems(filterCategory: ItemCategory): Promise<Item[]> {
+    const findItems: Item[] = await this.itemRepository.find(
+      {
+        where: {
+          category_item: filterCategory
+        }
+      }
+    );
+
+    return findItems;
   }
 
   async findMany(

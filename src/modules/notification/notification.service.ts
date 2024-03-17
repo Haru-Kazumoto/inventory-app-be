@@ -3,7 +3,7 @@ import { CreateNotificationDto } from './dto/create-notification.dto';
 import { INotificationService } from './notification.service.interface';
 import { NotificationRepository } from './repository/notification.repository';
 import { UserRepository } from '../user/repository/user.repository';
-import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
+import { DataNotFoundException } from '../../exceptions/data_not_found.exception';
 import { User } from '../user/entities/user.entity';
 import { Transactional } from 'typeorm-transactional';
 import { Notification } from './entities/notification.entity';

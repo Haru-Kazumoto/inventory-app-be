@@ -4,7 +4,7 @@ import { Roles } from './entities/roles.entity';
 import { RoleService } from './role.service';
 import { RoleController } from './role.controller';
 import { RoleRepository } from './repository/role.repository';
-import { ResponseHttp } from 'src/utils/response.http.utils';
+import { ResponseHttp } from '../../utils/response.http.utils';
 
 @Module({
     imports: [

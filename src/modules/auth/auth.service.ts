@@ -1,4 +1,4 @@
-import { UserService } from 'src/modules/user/user.service';
+import { UserService } from '../../modules/user/user.service';
 import { ForbiddenException, HttpStatus, Inject, Injectable, Req } from '@nestjs/common';
 import { IAuthService } from './auth.service.interface';
 import { User } from '../user/entities/user.entity';
@@ -7,8 +7,8 @@ import { AuthRequest } from './auth.dto';
 import { Transactional } from 'typeorm-transactional';
 import { UserRepository } from '../user/repository/user.repository';
 import { RoleRepository } from '../role/repository/role.repository';
-import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
-import { UserUtils } from 'src/utils/modules_utils/user.utils';
+import { DataNotFoundException } from '../../exceptions/data_not_found.exception';
+import { UserUtils } from '../../utils/modules_utils/user.utils';
 
 import * as bcrypt from "bcrypt";
 import * as cls from "cls-hooked";

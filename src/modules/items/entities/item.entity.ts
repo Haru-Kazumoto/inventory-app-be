@@ -4,7 +4,7 @@ import { ItemType } from 'src/enums/item_type.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { AuditLogs } from 'src/modules/audit-logs/entities/audit_logs.entity';
 import { Class } from 'src/modules/class/entitites/class.entity';
-import { BaseEntity } from 'src/utils/base.entity';
+import { BaseEntity } from 'src/entities/base.entity';
 import {
   BeforeInsert,
   BeforeUpdate,

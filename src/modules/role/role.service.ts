@@ -4,7 +4,7 @@ import { RoleCreateDto } from './dto/role.dto';
 import { Roles } from './entities/roles.entity';
 import { RoleRepository } from './repository/role.repository';
 import { Transactional } from 'typeorm-transactional';
-import { DuplicateDataException } from 'src/exceptions/duplicate_data.exception';
+import { DuplicateDataException } from '../../exceptions/duplicate_data.exception';
 
 @Injectable()
 export class RoleService implements IRoleService{

@@ -2,7 +2,7 @@ import { ItemCategory } from "src/enums/item_category.enum";
 import { StatusExit } from "src/enums/status_exit.enum";
 import { ItemDetails } from "src/modules/item_details/entities/item_details.entity";
 import { RedeemCode } from "src/modules/redeem_code/entities/redeem_code.entity";
-import { BaseEntity } from "src/utils/base.entity";
+import { BaseEntity } from "src/entities/base.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()

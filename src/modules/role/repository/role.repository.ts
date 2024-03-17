@@ -1,13 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { DataSource, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { Roles } from "../entities/roles.entity";
 
 @Injectable()
 export class RoleRepository extends Repository<Roles>{
-
-    constructor(public dataSource: DataSource){
-        super(Roles, dataSource.createEntityManager());
-    }
 
     public async findRoleByName(name: string): Promise<Roles | undefined>{
         return await this.findOne({
