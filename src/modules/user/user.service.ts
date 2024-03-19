@@ -3,19 +3,18 @@ import { User } from './entities/user.entity';
 import { UserCreateDto } from './dto/user.dto';
 import { IUserService } from './user.service.interface';
 import { Transactional } from 'typeorm-transactional/dist/decorators/transactional';
-import { DataNotFoundException } from '../../exceptions/data_not_found.exception';
 import { UserRepository } from './repository/user.repository';
-import { UserUtils } from '../../utils/modules_utils/user.utils';
-import { RoleRepository } from '../role/repository/role.repository';
-import { UnauthorizedException } from '../../exceptions/unauthorized.exception';
-import { PageDto, PageOptionsDto } from '../../utils/pagination.utils';
-import { NotificationService } from '../notification/notification.service';
-import { userCreateContent } from '../notification/notification.constant';
+import { UserUtils } from 'src/utils/modules_utils/user.utils';
+import { RoleRepository } from 'src/modules/role/repository/role.repository';
+import { UnauthorizedException } from 'src/exceptions/unauthorized.exception';
+import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
+import { NotificationService } from 'src/modules/notification/notification.service';
+import { userCreateContent } from 'src/modules/notification/notification.constant';
+import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
 import { Request } from 'express';
-
-import * as bcrypt from "bcrypt";
 import { AuthService } from '../auth/auth.service';
 import { UpdateUserDto } from './dto';
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService implements IUserService{

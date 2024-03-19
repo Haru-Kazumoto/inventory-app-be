@@ -82,7 +82,7 @@ export class RequestItemsController {
 
   // Mengizinkan role superadmin untuk mengupdate status request
   @Roles('SUPERADMIN')
-  @NestCommon.Put('accept')
+  @NestCommon.Put('update-status/to-accept')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
   @UpdateStatusAcceptDecorator()
@@ -100,7 +100,7 @@ export class RequestItemsController {
 
   // Mengizinkan role superadmin untuk mengupdate status request
   @Roles('SUPERADMIN')
-  @NestCommon.Put('reject')
+  @NestCommon.Put('update-status/to-reject')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
   @UpdateStatusRejectDecorator()
@@ -116,9 +116,9 @@ export class RequestItemsController {
     });
   }
 
-  // Mengizinkan role superadmin untuk mengupdate status request
-  @Roles('SUPERADMIN')
-  @NestCommon.Put('arrive')
+  // Mengizinkan role admin untuk mengupdate status request
+  @Roles('ADMIN_TJKT','ADMIN_AK','ADMIN_TO','ADMIN_TE')
+  @NestCommon.Put('update-status/to-arrive')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
   @UpdateStatusArriveDecorator()
@@ -136,7 +136,7 @@ export class RequestItemsController {
 
   // Mengizinkan role superadmin untuk mengupdate status request
   @Roles('SUPERADMIN')
-  @NestCommon.Put('on-the-way')
+  @NestCommon.Put('update-status/to-on-the-way')
   @NestCommon.UseInterceptors(new TransformInterceptor())
   @NestCommon.UseGuards(AuthenticatedGuard)
   @UpdateStatusOnTheWayDecorator()

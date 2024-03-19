@@ -1,3 +1,4 @@
+import { BaseEntity } from 'src/entities/base.entity';
 import { RequestStatus } from 'src/enums/request_status.enum';
 import { Class } from 'src/modules/class/entitites/class.entity';
 import {
@@ -8,7 +9,6 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { BaseEntity } from 'src/utils/base.entity';
 
 @Entity({ name: 'request_items' })
 export class RequestItem extends BaseEntity {

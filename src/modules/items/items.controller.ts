@@ -200,7 +200,6 @@ export class ItemsController {
         item.status_item
       ));
 
-      console.log(responseDto);
       /*
        * note: if the return response is a object, u can use plainToInstance. 
        *       Otherwise use this way

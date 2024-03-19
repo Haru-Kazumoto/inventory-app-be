@@ -8,13 +8,14 @@ import { Roles } from '../../role/entities/roles.entity';
 
 @Injectable()
 export class UserRepository extends Repository<User>{
+    @InjectRepository(User) userRepository: Repository<User>;
 
-    // constructor(public dataSource: DataSource){
-    //     super(User, dataSource.createEntityManager());
-    // }
+    constructor(public dataSource: DataSource){
+        super(User, dataSource.createEntityManager());
+    }
 
     async findUserByUsername(username: string): Promise<User> {
-        return await this.findOne({
+        return await this.userRepository.findOne({
             where: {
                 username: username
             }
@@ -42,7 +43,7 @@ export class UserRepository extends Repository<User>{
     }
 
     public async findById(id: number): Promise<User | undefined>{
-        return await this.findOne({
+        return await this.userRepository.findOne({
             where: {
                 id: id
             },
@@ -53,7 +54,7 @@ export class UserRepository extends Repository<User>{
     }
 
     public async findUserById(userId: number):Promise<User | undefined>{
-        return await this.findOne({
+        return await this.userRepository.findOne({
             where: {
                 id: userId
             },
