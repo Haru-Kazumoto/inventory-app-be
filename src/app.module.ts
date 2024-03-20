@@ -11,10 +11,10 @@ import { RedeemCodeModule } from './modules/redeem_code/redeem_code.module';
 import { ItemDetailsModule } from './modules/item_details/item_details.module';
 import { ExitLogsModule } from './modules/exit_logs/exit_logs.module';
 import { ItemsModule } from './modules/items/items.module';
-import { APP_FILTER } from '@nestjs/core';
-import { HttpExceptionFilter } from './exceptions/filters/exception.filter';
 import { AuthSessionMiddleware } from './middleware/auth-session.middleware';
 import { RequestItemsModule } from './modules/request_items/request_items.module';
+import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -32,10 +32,10 @@ import { RequestItemsModule } from './modules/request_items/request_items.module
     RequestItemsModule,
   ],
   providers: [
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: HttpExceptionFilter,
-    // },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformResponseInterceptor
+    }
   ],
 })
 export class AppModule implements NestModule{

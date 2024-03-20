@@ -6,13 +6,18 @@ export async function pagination<T>(
   pageOptionsDto: PageOptionsDto,
   queryAlias: string | any,
   whereCondition?: (qb: SelectQueryBuilder<T>) => void,
+  // relations?: string[],
 ): Promise<PageDto<T>> {
   const { skip, take, order } = pageOptionsDto;
   const queryBuilder = repository.createQueryBuilder(queryAlias);
 
   if (whereCondition) whereCondition(queryBuilder);
 
-  queryBuilder.orderBy(`${queryAlias}.created_at`, order).skip(skip).take(take)
+  queryBuilder
+    .orderBy(`${queryAlias}.created_at`, order)
+    .skip(skip)
+    .take(take)
+    // .loadAllRelationIds({relations: [`${relations}`]})
     .withDeleted;
 
   const itemCount = await queryBuilder.getCount();

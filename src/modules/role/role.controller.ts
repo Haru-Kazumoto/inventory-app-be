@@ -1,31 +1,37 @@
-import { Controller, Get, HttpStatus, Inject, Post, Req, Res, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get,Post, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RoleService } from './role.service';
-import { ResponseHttp } from '../../utils/response.http.utils';
-import { Response } from 'express';
 import { RoleCreateDto } from './dto/role.dto';
+import { RolesGuard } from 'src/security/guards/roles.guard';
+import { Roles } from 'src/security/decorator/roles.decorator';
+import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
+import { ApiCreateOneRole } from './decorators/api-create-one-role.decorator';
+import { ApiGetAllRoles } from './decorators/api-get-all-roles.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Role')
+@UseGuards(RolesGuard, AuthenticatedGuard)
+@Roles('SUPERADMIN')
 @Controller('role')
 export class RoleController {
 
     constructor(
         private readonly roleService: RoleService,
-        private readonly http: ResponseHttp
     ){}
 
+    @ApiCreateOneRole()
     @UsePipes(new ValidationPipe({transform: true}))
     @Post('create')
-    async createRole(@Res() res: Response, request: RoleCreateDto): Promise<any>{
+    async createRole(@Body() request: RoleCreateDto) {
         const data = await this.roleService.createRole(request);
-        const response = this.http.createResponse(HttpStatus.OK,data);
 
-        return this.http.sendResponse(res, response);
+        return {[this.createRole.name]: data}
     }
 
+    @ApiGetAllRoles()
     @Get('get')
-    async findAllRoles(@Res() res: Response){
+    async findAllRoles(){
         const data = await this.roleService.indexRole();
-        const response = this.http.createResponse(HttpStatus.OK,data);
 
-        return this.http.sendResponse(res, response);
+        return {[this.findAllRoles.name]: data}
     }
 }

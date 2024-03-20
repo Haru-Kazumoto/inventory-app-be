@@ -1,13 +1,12 @@
 import { Body, Controller, Get, HttpStatus, Post, Query, Res, UseGuards } from '@nestjs/common';
 import { ExitLogsService } from './exit_logs.service';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
-import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { CreateExitLogDto } from './dtos/exit_logs.dto';
-import { Response } from 'express';
+import { ApiBody, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { ExitLogs } from './entities/exit_logs.entity';
 import { PageOptionsDto } from 'src/utils/pagination.utils';
 import { ItemCategory } from 'src/enums/item_category.enum';
+import { ApiFindManyLogs } from './decorator/api-find-many-logs.decorator';
 
 @ApiTags('ExitLogs')
 @UseGuards(AuthenticatedGuard)
@@ -15,14 +14,9 @@ import { ItemCategory } from 'src/enums/item_category.enum';
 export class ExitLogsController {
   constructor(private readonly exitLogsService: ExitLogsService) {}
 
-  @Get('find-all')
   @ApiPaginatedResponse(ExitLogs)
-  @ApiQuery({
-    name: "category",
-    description: "Find exit log by item category",
-    enum: ItemCategory,
-    required: true
-  })
+  @ApiFindManyLogs()
+  @Get('find-all')
   async findManyLogsWithPagination(@Query('category') filterCategory: ItemCategory,@Query() pageOptionsDto: PageOptionsDto) {
     return await this.exitLogsService.findAllLogs(filterCategory,pageOptionsDto);
   }

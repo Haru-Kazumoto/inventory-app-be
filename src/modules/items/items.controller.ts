@@ -32,12 +32,11 @@ import { Request, Response } from 'express';
 import { Item } from './entities/item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
-import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 import { Status } from 'src/enums/response.enum';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { GetAllItemResponse } from './dto/response-item.dto';
-import { plainToInstance } from 'class-transformer';
+import { TransformResponseInterceptor } from 'src/interceptors/transform-response.interceptor';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
@@ -186,10 +185,10 @@ export class ItemsController {
     description: "Find all items with filtering by item category",
     required: false
   })
+  @UseInterceptors(TransformResponseInterceptor)
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
     @Query('item-category') filterCategory: ItemCategory, 
-    @Res() response: Response
   ) {
       const items = await this.itemsService.findAllItems(filterCategory);
 
@@ -200,18 +199,9 @@ export class ItemsController {
         item.status_item
       ));
 
-      /*
-       * note: if the return response is a object, u can use plainToInstance. 
-       *       Otherwise use this way
-       */
-
-      // return plainToInstance(GetAllItemResponse, items);
-
-      return response.status(200).json({
-        statusCode: response.statusCode,
-        message: "OK",
-        data: {items: [responseDto]}
-      });
+      return {
+        [this.findManyItemsWithNoPagination.name]: responseDto
+      }
   }
 
   @UseGuards(AuthenticatedGuard)
@@ -245,7 +235,6 @@ export class ItemsController {
     return this.itemsService.findAllItemCodeByItemName(name, pageOptionsDto);
   }
 
-  @UseInterceptors(new TransformInterceptor())
   @Put('update')
   @UseGuards(AuthenticatedGuard)
   @ApiOkResponse({

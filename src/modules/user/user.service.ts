@@ -28,7 +28,7 @@ export class UserService implements IUserService{
     ){}
 
     @Transactional()
-    public async createUser(request: Request, body: UserCreateDto): Promise<User> {
+    public async createUser(body: UserCreateDto): Promise<User> {
         const user = await this.authService.getSession();
         
         await this

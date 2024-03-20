@@ -10,11 +10,9 @@ export class CreateItemDetailsDto {
 
     @ApiProperty({example: ItemCategory.BARANG_HABIS_PAKAI})
     @IsEnum(ItemCategory)
-    // @IsNotEmpty()
     public category_item?: ItemCategory;
 
     @ApiProperty({example: 5})
     @IsNumber()
-    // @IsNotEmpty()
     public total_exit_item?: number;
 }

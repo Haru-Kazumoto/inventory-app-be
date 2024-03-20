@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { CreateUserDto } from '../dto/createuser.dto';
 
-export function CreateOneUserDecorator() {
+export function ApiCreateOneUser() {
   return applyDecorators(
     ApiOkResponse({
       description: 'Record has successfully created',

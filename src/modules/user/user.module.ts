@@ -2,7 +2,6 @@ import { Module, forwardRef } from '@nestjs/common';
 import { UserController } from './user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { ResponseHttp } from 'src/utils/response.http.utils';
 import { UserRepository } from './repository/user.repository';
 import { UserService } from './user.service';
 import { UserUtils } from 'src/utils/modules_utils/user.utils';
@@ -16,12 +15,11 @@ import { AuthModule } from '../auth/auth.module';
     TypeOrmModule.forFeature([User, Roles]),
     forwardRef(() => AuthModule),
     forwardRef(() => NotificationModule),
-    RoleModule,
+    forwardRef(() => RoleModule),
   ],
   controllers: [UserController],
   providers: [
     UserService,
-    ResponseHttp,
     UserRepository,
     UserUtils,
     {

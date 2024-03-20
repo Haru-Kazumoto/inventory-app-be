@@ -27,7 +27,6 @@ import { Class } from './entitites/class.entity';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { Status } from 'src/enums/response.enum';
-import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
 import { Response } from 'express';
 import { UpdateClassDto } from './dto/update-class.dto';
 
@@ -133,7 +132,6 @@ export class ClassController {
     });
   }
 
-  @UseInterceptors(new TransformInterceptor())
   @Put('update')
   @UseGuards(AuthenticatedGuard)
   @ApiOkResponse({

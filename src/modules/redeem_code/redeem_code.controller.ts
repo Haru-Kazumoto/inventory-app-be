@@ -1,12 +1,14 @@
-import { Body, Controller, Get, HttpStatus, Patch, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Post, Query, Res, UseGuards, UseInterceptors } from '@nestjs/common';
 import { RedeemCodeService } from './redeem_code.service';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
-import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBody, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateExitLogDto, UpdateExitLogDto } from '../exit_logs/dtos/exit_logs.dto';
 import { Response } from 'express';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
 import { PageOptionsDto } from 'src/utils/pagination.utils';
+import { ApiGenerateRedeemCode } from './decorator/api-generate-redeem-code.decorator';
+import { TransformResponseInterceptor } from 'src/interceptors/transform-response.interceptor';
 
 @ApiTags('RedeemCode')
 @UseGuards(AuthenticatedGuard)
@@ -14,16 +16,14 @@ import { PageOptionsDto } from 'src/utils/pagination.utils';
 export class RedeemCodeController {
   constructor(private readonly redeemCodeService: RedeemCodeService) {}
 
-  @ApiBody({type: CreateExitLogDto, description: "DTO Structure for exit logs"})
+  @ApiGenerateRedeemCode()
   @Post('generate-code')
-  async createRedeemCode(@Body() body: CreateExitLogDto, @Res() response: Response) {
+  async createRedeemCode(@Body() body: CreateExitLogDto) {
     const data = await this.redeemCodeService.createRedeemCode(body);
 
-    return response.status(201).json({
-      statusCode: response.statusCode,
-      message: HttpStatus.CREATED,
-      data: {redeem_code: data}
-    });
+    return { 
+      [this.createRedeemCode.name]: data
+    }
   }
 
   @ApiQuery({

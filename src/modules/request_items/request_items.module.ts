@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ClassModule } from '../class/class.module';
 import { NotificationModule } from '../notification/notification.module';
 import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from '../auth/auth.module';
     ClassModule,
     NotificationModule,
     AuthModule,
+    UserModule
   ],
   controllers: [RequestItemsController],
   providers: [RequestItemsService, RequestItemsRepository],

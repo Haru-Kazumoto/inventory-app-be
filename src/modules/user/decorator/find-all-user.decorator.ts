@@ -6,7 +6,7 @@ import {
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { User } from '../entities/user.entity';
 
-export function FindAllUserDecorator() {
+export function ApiFindAllUser() {
   return applyDecorators(
     ApiOkResponse({
       description: 'Success get all users',
