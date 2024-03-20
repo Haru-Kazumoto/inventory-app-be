@@ -28,8 +28,12 @@ export class ExitLogsController {
     required: true
   })
   @Get('find-log-by-name')
-  async findLogByBorrowerName(@Query("borrower-name") borrowerName: string) {
-    return await this.exitLogsService.findLogByBorrowerName(borrowerName);
+  public async findLogByBorrowerName(@Query("borrower-name") borrowerName: string) {
+    const data = await this.exitLogsService.findLogByBorrowerName(borrowerName);
+
+    return {
+      [this.findLogByBorrowerName.name]: data
+    }
   }
 
 }

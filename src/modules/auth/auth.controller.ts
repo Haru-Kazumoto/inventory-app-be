@@ -121,12 +121,8 @@ export class AuthController {
     async getSession(@Res() res: ExpressResponse) {
         const data = await this.authService.getSession();
         
-        return res.status(200).json({  
-            statusCode: res.statusCode,
-            message: "Hasil User",
-            data: {
-                user: data
-            }
-        });
+        return {
+            [this.getSession.name]: data
+        }
     }
 }

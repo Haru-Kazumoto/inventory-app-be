@@ -25,11 +25,11 @@ import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 import { CreateClassDto } from './dto/create-class.dto';
 import { Class } from './entitites/class.entity';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
-import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { Status } from 'src/enums/response.enum';
 import { Response } from 'express';
 import { UpdateClassDto } from './dto/update-class.dto';
 
+@UseGuards(AuthenticatedGuard)
 @ApiTags('Class')
 @Controller('class')
 export class ClassController {
@@ -88,17 +88,14 @@ export class ClassController {
     description: 'DTO Structure response from create one class',
   })
   @Post('create')
-  async createOneClass(@Body() dto: CreateClassDto, @Res() response: Response) {
+  async createOneClass(@Body() dto: CreateClassDto) {
     const data = await this.classService.createOne(dto);
 
-    return response.status(response.statusCode).json({
-      statusCode: response.statusCode,
-      message: 'OK',
-      data: { class: data },
-    });
+    return {
+      [this.createOneClass.name]: data
+    }
   }
 
-  @UseGuards(AuthenticatedGuard)
   @Get('find-all')
   @ApiOkResponse({
     description: 'Success get all class',
@@ -122,18 +119,15 @@ export class ClassController {
     },
   })
   @ApiPaginatedResponse(Class)
-  public async findManyClass(@Res() response: Response) {
+  public async findManyClass() {
     const classData = await this.classService.findMany();
 
-    return response.status(response.statusCode).json({
-      statusCode: response.statusCode,
-      message: 'OK',
-      data: classData,
-    });
+    return {
+      [this.findManyClass.name]: classData
+    }
   }
 
   @Put('update')
-  @UseGuards(AuthenticatedGuard)
   @ApiOkResponse({
     description: 'Success to update one record of class',
     schema: {
@@ -180,18 +174,15 @@ export class ClassController {
   public async updateClass(
     @Query('id', ParseIntPipe) id: number,
     @Body() dto: UpdateClassDto,
-    @Res() res: Response,
   ) {
     const instance = await this.classService.updateOne(id, dto);
-    return res.status(200).json({
-      statusCode: res.statusCode,
-      message: Status.SUCCESS,
-      data: { class: instance },
-    });
+    
+    return {
+      [this.updateClass.name]: instance
+    }
   }
 
   @Delete('delete')
-  @UseGuards(AuthenticatedGuard)
   @ApiQuery({
     name: 'id',
     description: 'Id for delete class',

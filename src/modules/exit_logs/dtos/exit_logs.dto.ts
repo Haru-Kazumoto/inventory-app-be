@@ -46,7 +46,7 @@ export class CreateExitLogDto {
   @IsNotEmpty()
   total: number;
 
-  @ApiProperty({example: { item_id: 1 }})
+  @ApiProperty({example: [{ item_id: 1 }]})
   @IsArray()
   @IsNotEmpty()
   item_details: CreateItemDetailsDto[];

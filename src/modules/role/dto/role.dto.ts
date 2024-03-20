@@ -3,13 +3,12 @@ import { IsArray, IsNotEmpty } from "class-validator";
 
 export class RoleCreateDto {
     
-    @ApiProperty({example: "LAB - 1"})
+    @ApiProperty({example: "ADMIN_TJKT"})
     @IsNotEmpty()
     public name: string;
 
     @ApiProperty({example: "TJKT"})
     @IsNotEmpty()
-    @IsArray()
     public major: string;
 
 }

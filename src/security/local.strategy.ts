@@ -26,7 +26,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     }
 
     async findRole(roleName: string): Promise<Roles>{
-        const role = await this.roleRepository.findRoleByName(roleName);
+        const role = await this.roleRepository.findOne({where: {name: roleName}});
         if(!role) throw new DataNotFoundException("Role not found.", 400);
 
         return role;

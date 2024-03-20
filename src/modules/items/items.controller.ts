@@ -101,22 +101,15 @@ export class ItemsController {
     type: CreateItemDto,
     description: 'DTO Structure response from create one item',
   })
-  @ApiBody({
-    type: CreateItemDto,
-    description: 'DTO Structure response from create one item',
-  })
   @Post('create')
-  async createOneItem(@Body() dto: CreateItemDto, @Res() response: Response) {
+  async createOneItem(@Body() dto: CreateItemDto) {
     const data = await this.itemsService.createOne(dto);
 
-    return response.status(response.statusCode).json({
-      statusCode: response.statusCode,
-      message: 'OK',
-      data: { item: data },
-    });
+    return {
+      [this.createOneItem.name]: data
+    }
   }
 
-  @UseGuards(AuthenticatedGuard)
   @Get('find-all')
   @ApiOkResponse({
     description: 'Success get all items',
@@ -183,9 +176,9 @@ export class ItemsController {
   @ApiQuery({
     name: "item-category",
     description: "Find all items with filtering by item category",
+    enum: ItemCategory,
     required: false
   })
-  @UseInterceptors(TransformResponseInterceptor)
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
     @Query('item-category') filterCategory: ItemCategory, 
@@ -204,8 +197,6 @@ export class ItemsController {
       }
   }
 
-  @UseGuards(AuthenticatedGuard)
-  @Get('find-by-item-name')
   @ApiOkResponse({
     description: 'Success get all items',
     schema: {
@@ -228,15 +219,12 @@ export class ItemsController {
     },
   })
   @ApiPaginatedResponse(Item)
-  public async findAllItemCodeByItemName(
-    @Query('name') name: string,
-    @Query() pageOptionsDto: PageOptionsDto,
-  ): Promise<PageDto<Item>> {
+  @Get('find-by-item-name')
+  public async findAllItemCodeByItemName(@Query('name') name: string,@Query() pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
     return this.itemsService.findAllItemCodeByItemName(name, pageOptionsDto);
   }
 
   @Put('update')
-  @UseGuards(AuthenticatedGuard)
   @ApiOkResponse({
     description: 'Success to update one record of item',
     schema: {
@@ -280,21 +268,14 @@ export class ItemsController {
     type: Number,
     required: true,
   })
-  public async updateItem(
-    @Query('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateItemDto,
-    @Res() res: Response,
-  ) {
+  public async updateItem(@Query('id', ParseIntPipe) id: number,@Body() dto: UpdateItemDto) {
     const instance = await this.itemsService.updateOne(id, dto);
-    return res.status(200).json({
-      statusCode: res.statusCode,
-      message: Status.SUCCESS,
-      data: { item: instance },
-    });
+
+    return {
+      [this.updateItem.name]: instance
+    }
   }
 
-  @Delete('delete')
-  @UseGuards(AuthenticatedGuard)
   @ApiQuery({
     name: 'id',
     description: 'Id for delete item',
@@ -311,6 +292,7 @@ export class ItemsController {
       },
     },
   })
+  @Delete('delete')
   public async deleteItem(@Query('id', ParseIntPipe) id: number) {
     await this.itemsService.deleteById(id);
   }

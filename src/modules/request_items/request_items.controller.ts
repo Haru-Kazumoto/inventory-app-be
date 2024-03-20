@@ -18,13 +18,14 @@ import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, ParseIntPipe, Post, Patch, Query, Res, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 
-@UseGuards(AuthenticatedGuard, RolesGuard)
+@UseGuards(AuthenticatedGuard)
 @ApiTags('Request Items')
 @Controller('request-items')
 export class RequestItemsController {
   constructor(private readonly requestItemsService: RequestItemsService) {}
 
   // Menginzinkan role selain superadmin untuk membuat request
+  @UseGuards(RolesGuard)
   @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
   @CreateRequestDecorator()
   @Post('create')
@@ -51,6 +52,7 @@ export class RequestItemsController {
 
   // Mengizinkan role selain superadmin untuk mengupdate request
   @UsePipes(new ValidationPipe({transform: true}))
+  @UseGuards(RolesGuard)
   @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
   @UpdateRequestDecorator()
   @Patch('update')
@@ -67,6 +69,7 @@ export class RequestItemsController {
 
   // Mengizinkan role superadmin untuk mengupdate status request
   @UsePipes(new ValidationPipe({transform: true}))
+  @UseGuards(RolesGuard)
   @Roles('SUPERADMIN')
   @Patch('update-status/to-accept')
   @UpdateStatusAcceptDecorator()
@@ -79,6 +82,7 @@ export class RequestItemsController {
   }
 
   // Mengizinkan role superadmin untuk mengupdate status request
+  @UseGuards(RolesGuard)
   @Roles('SUPERADMIN')
   @UpdateStatusRejectDecorator()
   @Patch('update-status/to-reject')
@@ -91,6 +95,7 @@ export class RequestItemsController {
   }
 
   // Mengizinkan role admin untuk mengupdate status request
+  @UseGuards(RolesGuard)
   @Roles('ADMIN_TJKT','ADMIN_AK','ADMIN_TO','ADMIN_TE')
   @UpdateStatusArriveDecorator()
   @Patch('update-status/to-arrive')
@@ -103,6 +108,7 @@ export class RequestItemsController {
   }
 
   // Mengizinkan role superadmin untuk mengupdate status request
+  @UseGuards(RolesGuard)
   @Roles('SUPERADMIN')
   @UpdateStatusOnTheWayDecorator()
   @Patch('update-status/to-on-the-way')

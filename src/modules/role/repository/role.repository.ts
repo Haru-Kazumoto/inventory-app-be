@@ -1,38 +1,43 @@
 import { Injectable } from "@nestjs/common";
-import { Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { Roles } from "../entities/roles.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import dataSource from "src/db/data-source";
 
 @Injectable()
 export class RoleRepository extends Repository<Roles>{
 
-    public async findRoleByName(name: string): Promise<Roles | undefined>{
-        return await this.findOne({
-            where:{
-                name: name
-            }
-        });
+    constructor(public dataSource: DataSource){
+        super(Roles, dataSource.createEntityManager());
     }
 
-    public async findRole(role: "ADMIN" | "SUPERADMIN"): Promise<Roles[] | any>{
-        return this.createQueryBuilder("role")
-            .where("role.name = :role ", {role})
-            .getMany();
-    }
+    // public async findRoleByName(name: string): Promise<Roles | undefined>{
+    //     const queryRunner = this.dataSource.createQueryRunner();
+    //     const queryBuilder = this.dataSource.createQueryBuilder(queryRunner);
 
-    public async findAllRoles(): Promise<Roles[]>{
-        return await this.find({
-            select: {
-                name: true,
-                major: true
-            }
-        });
-    }    
+    //     return queryBuilder.where({
+            
+    //     });
+    // }
+
+    // public async findRole(role: "ADMIN" | "SUPERADMIN"): Promise<Roles[] | any>{
+    //     return this.createQueryBuilder("role")
+    //         .where("role.name = :role ", {role})
+    //         .getMany();
+    // }
+
+    // public async findAllRoles(): Promise<Roles[]>{
+    //     return await this.roleRepository.find({
+    //         select: {
+    //             name: true,
+    //             major: true
+    //         }
+    //     });
+    // }    
 
     public async findRoleById(id: number): Promise<Roles>{
-        return await this.findOne({
-            where: {
-                id: id
-            }
-        });
+        return this.createQueryBuilder("role")
+            .where("role.id = :id", {id})
+            .getOne();
     }
 }

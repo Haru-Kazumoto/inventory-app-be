@@ -28,7 +28,7 @@ export class RoleService implements IRoleService{
     }
 
     public async indexRole(): Promise<Roles[]> {
-        return await this.roleRepository.findAllRoles();
+        return await this.roleRepository.find({});
     }
 
     updateRole(id: number, requestBody: RoleCreateDto): Promise<Roles> {
@@ -42,7 +42,11 @@ export class RoleService implements IRoleService{
     // UTILS METHOD
 
     private async checkRoleNameIsExists(nameToCheck: string): Promise<Roles>{
-        const isNameIsExists = await this.roleRepository.findRoleByName(nameToCheck);
+        const isNameIsExists = await this.roleRepository.findOne({
+            where: {
+                name: nameToCheck
+            }
+        });
         if(isNameIsExists) throw new DuplicateDataException("Role name has already register");
 
         return isNameIsExists;

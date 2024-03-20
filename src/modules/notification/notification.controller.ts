@@ -10,6 +10,7 @@ import { Response } from 'express';
 import { Status } from 'src/enums/response.enum';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 
+@UseGuards(AuthenticatedGuard)
 @ApiTags('Notification')
 @Controller('notification')
 export class NotificationController {
@@ -43,16 +44,13 @@ export class NotificationController {
       },
     },
   })
-  @UseGuards(AuthenticatedGuard)
   @Get('get-notifications')
-  async getNotifications(userId: number, @Res() res: Response): Promise<any> {
-    return res.status(200).json({
-      statusCode: res.statusCode,
-      message: Status.SUCCESS,
-      data: {
-        notifications: await this.notificationService.getNotifications(userId),
-      },
-    });
+  async getNotifications(@Query("id") userId: number): Promise<any> {
+    const data = await this.notificationService.getNotifications(userId);
+
+    return {
+      [this.getNotifications.name]: data
+    }
   }
 
   @ApiQuery({
@@ -61,17 +59,8 @@ export class NotificationController {
     type: Number,
     required: true,
   })
-  @UseGuards(AuthenticatedGuard)
   @Delete('delete-notification')
-  async deleteNotification(
-    @Query('notif-id') notifId: number,
-    @Res() response: Response,
-  ) {
+  async deleteNotification(@Query('notif-id') notifId: number) {
     await this.notificationService.deleteNotification(notifId);
-
-    return response.status(200).json({
-      statusCode: 200,
-      message: 'DELETED',
-    });
   }
 }

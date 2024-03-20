@@ -13,6 +13,7 @@ import { Item } from '../items/entities/item.entity';
 import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
 import { ItemDetails } from '../item_details/entities/item_details.entity';
 import { ItemCategory } from 'src/enums/item_category.enum';
+import { StatusCode } from 'src/enums/status_code.enum';
 
 @Injectable()
 export class RedeemCodeService implements IRedeemCodeService {
@@ -249,7 +250,7 @@ export class RedeemCodeService implements IRedeemCodeService {
         });
     }
 
-    async findAllRedeemCodes(filterStatus: "VALID" | "NOT VALID",pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
+    async findAllRedeemCodes(filterStatus: StatusCode,pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
         return this.redeemCodeRepository.findManyCode(filterStatus,pageOptions);
     }
 
