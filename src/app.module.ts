@@ -15,6 +15,7 @@ import { AuthSessionMiddleware } from './middleware/auth-session.middleware';
 import { RequestItemsModule } from './modules/request_items/request_items.module';
 import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { ExcelService } from './utils/excel/excel.service';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     {
       provide: APP_INTERCEPTOR,
       useClass: TransformResponseInterceptor
-    }
+    },
+    ExcelService
   ],
 })
 export class AppModule implements NestModule{

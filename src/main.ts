@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestApplication, NestFactory } from '@nestjs/core';
 import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { initializeTransactionalContext } from 'typeorm-transactional/dist/common';
@@ -13,6 +13,7 @@ import config, {
 } from "./config/application.config";
 import * as session from 'express-session';
 import * as dotenv from "dotenv";
+import { ExcelService } from './utils/excel/excel.service';
 
 async function bootstrap() {
   dotenv.config();
@@ -55,8 +56,11 @@ async function bootstrap() {
     await app.listen(process.env.APP_PORT);
     
     if(process.env.NODE_STATUS == "DEV"){
-      Logger.log(`Nest running on port ${process.env.APP_PORT}`, "Application")
-      Logger.log(`Swagger available at ${process.env.APP_URL}/api`, "Swagger")
+      Logger.log(`Nest running on port ${process.env.APP_PORT}`, NestApplication.name);
+      Logger.log(`Swagger available at ${process.env.APP_URL}/api`, "Swagger");
+
+      // ----------------- TESTING EXPORT EXCEL
+      Logger.log(`Export link available at http://localhost:8000/items/export-data-item`, ExcelService.name);
     }
 
   } catch(error) {

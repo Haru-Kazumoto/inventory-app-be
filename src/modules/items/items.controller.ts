@@ -28,21 +28,26 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
-import { Request, Response } from 'express';
 import { Item } from './entities/item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
-import { Status } from 'src/enums/response.enum';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { GetAllItemResponse } from './dto/response-item.dto';
-import { TransformResponseInterceptor } from 'src/interceptors/transform-response.interceptor';
+import { ExcelService } from 'src/utils/excel/excel.service';
+import { Response } from 'express';
+import { ItemsRepository } from './repository/items.repository';
+import { Major } from 'src/enums/majors.enum';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
 @Controller('items')
 export class ItemsController {
-  constructor(private readonly itemsService: ItemsService) {}
+  constructor(
+    private readonly itemsService: ItemsService,
+    private readonly itemsRepository: ItemsRepository,
+    private readonly excelService: ExcelService
+  ) {}
 
   public validationQueryIsNumber(query: string): void {
     if (query) {
@@ -295,5 +300,73 @@ export class ItemsController {
   @Delete('delete')
   public async deleteItem(@Query('id', ParseIntPipe) id: number) {
     await this.itemsService.deleteById(id);
+  }
+
+  // -------------------------- TESTING
+
+  @ApiQuery({
+    name: "item_category",
+    description: "Mengambil data berdasarkan kategory dari barang",
+    enum: ItemCategory,
+    required: true
+  })
+  @ApiQuery({
+    name: "major",
+    description: "Mengambil data berdasarkan tempat barang berada",
+    enum: Major,
+    required: true
+  })
+  @Get('export-data-item')
+  async exportExcel(
+    @Query('item_category') item_category: ItemCategory,
+    @Query('major') major: Major,
+    @Res() response: Response
+  ): Promise<void> {
+    const data: Item[] = await this.itemsRepository.find({
+      where: {
+        category_item: item_category,
+        class: {
+          major: major
+        }
+      },
+      relations: ['class'],
+      select: [
+        'name',
+        'item_code',
+        'status_item',
+        'source_fund',
+        'unit_price',
+        'item_condition',
+        'category_item',
+        'item_type',
+        'class'
+      ]
+    });
+
+    //initialize column
+    const columns: Record<string, string>[] = [
+      {header: "Nama Barang", key: "name"},
+      {header: "Kode Barang", key: "item_code"},
+      {header: "Status Barang", key: "status_item"},
+      {header: "Sumber Dana", key: "source_fund"},
+      {header: "Harga Per-Unit", key: "unit_price"},
+      {header: "Kondisi Barang", key: "item_condition"},
+      {header: "Kategori Barang", key: "category_item"},
+      {header: "Tipe Barang", key: "item_type"},
+      {header: "Kelas Barang", key: "class"}
+    ]
+
+    const date = new Date();
+    const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+    const fileName: string = `data_item_${formattedDate}`;
+
+    const buffer = await this.excelService.exportXLSX(data, columns);
+
+    response.set({
+      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "Content-Disposition": `attachment; filename=${fileName}.xlsx`
+    });
+
+    response.send(buffer);
   }
 }
