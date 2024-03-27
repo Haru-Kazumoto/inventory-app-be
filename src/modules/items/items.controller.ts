@@ -46,7 +46,7 @@ export class ItemsController {
   constructor(
     private readonly itemsService: ItemsService,
     private readonly itemsRepository: ItemsRepository,
-    private readonly excelService: ExcelService
+    private readonly excelService: ExcelService,
   ) {}
 
   public validationQueryIsNumber(query: string): void {
@@ -111,8 +111,8 @@ export class ItemsController {
     const data = await this.itemsService.createOne(dto);
 
     return {
-      [this.createOneItem.name]: data
-    }
+      [this.createOneItem.name]: data,
+    };
   }
 
   @Get('find-all')
@@ -142,7 +142,7 @@ export class ItemsController {
     name: 'category',
     description: 'Category of item',
     required: false,
-    enum: ItemCategory
+    enum: ItemCategory,
   })
   @ApiQuery({
     name: 'status',
@@ -179,27 +179,30 @@ export class ItemsController {
   }
 
   @ApiQuery({
-    name: "item-category",
-    description: "Find all items with filtering by item category",
+    name: 'item-category',
+    description: 'Find all items with filtering by item category',
     enum: ItemCategory,
-    required: false
+    required: false,
   })
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
-    @Query('item-category') filterCategory: ItemCategory, 
+    @Query('item-category') filterCategory: ItemCategory,
   ) {
-      const items = await this.itemsService.findAllItems(filterCategory);
+    const items = await this.itemsService.findAllItems(filterCategory);
 
-      const responseDto = items.map(item => new GetAllItemResponse(
-        item.id,
-        item.name,
-        item.item_code,
-        item.status_item
-      ));
+    const responseDto = items.map(
+      (item) =>
+        new GetAllItemResponse(
+          item.id,
+          item.name,
+          item.item_code,
+          item.status_item,
+        ),
+    );
 
-      return {
-        [this.findManyItemsWithNoPagination.name]: responseDto
-      }
+    return {
+      [this.findManyItemsWithNoPagination.name]: responseDto,
+    };
   }
 
   @ApiOkResponse({
@@ -225,7 +228,10 @@ export class ItemsController {
   })
   @ApiPaginatedResponse(Item)
   @Get('find-by-item-name')
-  public async findAllItemCodeByItemName(@Query('name') name: string,@Query() pageOptionsDto: PageOptionsDto): Promise<PageDto<Item>> {
+  public async findAllItemCodeByItemName(
+    @Query('name') name: string,
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Item>> {
     return this.itemsService.findAllItemCodeByItemName(name, pageOptionsDto);
   }
 
@@ -273,12 +279,15 @@ export class ItemsController {
     type: Number,
     required: true,
   })
-  public async updateItem(@Query('id', ParseIntPipe) id: number,@Body() dto: UpdateItemDto) {
+  public async updateItem(
+    @Query('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateItemDto,
+  ) {
     const instance = await this.itemsService.updateOne(id, dto);
 
     return {
-      [this.updateItem.name]: instance
-    }
+      [this.updateItem.name]: instance,
+    };
   }
 
   @ApiQuery({
@@ -305,29 +314,29 @@ export class ItemsController {
   // -------------------------- TESTING
 
   @ApiQuery({
-    name: "item_category",
-    description: "Mengambil data berdasarkan kategory dari barang",
+    name: 'item_category',
+    description: 'Mengambil data berdasarkan kategory dari barang',
     enum: ItemCategory,
-    required: true
+    required: true,
   })
   @ApiQuery({
-    name: "major",
-    description: "Mengambil data berdasarkan tempat barang berada",
+    name: 'major',
+    description: 'Mengambil data berdasarkan tempat barang berada',
     enum: Major,
-    required: true
+    required: true,
   })
   @Get('export-data-item')
   async exportExcel(
     @Query('item_category') item_category: ItemCategory,
     @Query('major') major: Major,
-    @Res() response: Response
+    @Res() response: Response,
   ): Promise<void> {
     const data: Item[] = await this.itemsRepository.find({
       where: {
         category_item: item_category,
         class: {
-          major: major
-        }
+          major: major,
+        },
       },
       relations: ['class'],
       select: [
@@ -339,32 +348,40 @@ export class ItemsController {
         'item_condition',
         'category_item',
         'item_type',
-        'class'
-      ]
+      ],
+    });
+
+    data.forEach((item) => {
+      item['major'] = item.class.major;
+      item['class_name'] = item.class.class_name;
     });
 
     //initialize column
-    const columns = [
-      {header: "Nama Barang", key: "name"},
-      {header: "Kode Barang", key: "item_code"},
-      {header: "Status Barang", key: "status_item"},
-      {header: "Sumber Dana", key: "source_fund"},
-      {header: "Harga Per-Unit", key: "unit_price"},
-      {header: "Kondisi Barang", key: "item_condition"},
-      {header: "Kategori Barang", key: "category_item"},
-      {header: "Tipe Barang", key: "item_type"},
-      {header: "Kelas Barang", key: "class"}
-    ]
+    const columns: Record<string, string>[] = [
+      { header: 'Nama Barang', key: 'name' },
+      { header: 'Kode Barang', key: 'item_code' },
+      { header: 'Status Barang', key: 'status_item' },
+      { header: 'Sumber Dana', key: 'source_fund' },
+      { header: 'Harga Per-Unit', key: 'unit_price' },
+      { header: 'Kondisi Barang', key: 'item_condition' },
+      { header: 'Kategori Barang', key: 'category_item' },
+      { header: 'Tipe Barang', key: 'item_type' },
+      { header: 'Kelas Barang', key: 'class_name' },
+      { header: 'Jurusan', key: 'major' },
+    ];
 
     const date = new Date();
-    const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+    const formattedDate = `${date.getDate()}-${
+      date.getMonth() + 1
+    }-${date.getFullYear()}`;
     const fileName: string = `data_item_${formattedDate}`;
 
     const buffer = await this.excelService.exportXLSX(data, columns);
 
     response.set({
-      "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      "Content-Disposition": `attachment; filename=${fileName}.xlsx`
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename=${fileName}.xlsx`,
     });
 
     response.send(buffer);
