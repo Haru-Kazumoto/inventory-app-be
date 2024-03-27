@@ -344,7 +344,7 @@ export class ItemsController {
     });
 
     //initialize column
-    const columns: Record<string, string>[] = [
+    const columns = [
       {header: "Nama Barang", key: "name"},
       {header: "Kode Barang", key: "item_code"},
       {header: "Status Barang", key: "status_item"},
