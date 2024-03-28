@@ -184,7 +184,8 @@ export class ItemsController {
   @ApiQuery({
     name: "item-category",
     description: "Find all items with filtering by item category",
-    required: false
+    required: false,
+    enum: ItemCategory
   })
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
