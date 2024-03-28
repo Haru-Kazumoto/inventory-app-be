@@ -8,7 +8,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateUserDto } from '../dto/updateuser.dto';
 
-export function UpdateUserDecorator() {
+export function ApiUpdateUser() {
   return applyDecorators(
     ApiOkResponse({
       description: 'Success to update one record of user',

@@ -28,22 +28,26 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
-import { Request, Response } from 'express';
 import { Item } from './entities/item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
-import { TransformInterceptor } from 'src/interceptors/transform.interceptor';
-import { Status } from 'src/enums/response.enum';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { GetAllItemResponse } from './dto/response-item.dto';
-import { plainToInstance } from 'class-transformer';
+import { ExcelService } from 'src/utils/excel/excel.service';
+import { Response } from 'express';
+import { ItemsRepository } from './repository/items.repository';
+import { Major } from 'src/enums/majors.enum';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
 @Controller('items')
 export class ItemsController {
-  constructor(private readonly itemsService: ItemsService) {}
+  constructor(
+    private readonly itemsService: ItemsService,
+    private readonly itemsRepository: ItemsRepository,
+    private readonly excelService: ExcelService,
+  ) {}
 
   public validationQueryIsNumber(query: string): void {
     if (query) {
@@ -102,22 +106,15 @@ export class ItemsController {
     type: CreateItemDto,
     description: 'DTO Structure response from create one item',
   })
-  @ApiBody({
-    type: CreateItemDto,
-    description: 'DTO Structure response from create one item',
-  })
   @Post('create')
-  async createOneItem(@Body() dto: CreateItemDto, @Res() response: Response) {
+  async createOneItem(@Body() dto: CreateItemDto) {
     const data = await this.itemsService.createOne(dto);
 
-    return response.status(response.statusCode).json({
-      statusCode: response.statusCode,
-      message: 'OK',
-      data: { item: data },
-    });
+    return {
+      [this.createOneItem.name]: data,
+    };
   }
 
-  @UseGuards(AuthenticatedGuard)
   @Get('find-all')
   @ApiOkResponse({
     description: 'Success get all items',
@@ -145,7 +142,7 @@ export class ItemsController {
     name: 'category',
     description: 'Category of item',
     required: false,
-    enum: ItemCategory
+    enum: ItemCategory,
   })
   @ApiQuery({
     name: 'status',
@@ -182,41 +179,32 @@ export class ItemsController {
   }
 
   @ApiQuery({
-    name: "item-category",
-    description: "Find all items with filtering by item category",
+    name: 'item-category',
+    description: 'Find all items with filtering by item category',
+    enum: ItemCategory,
     required: false,
-    enum: ItemCategory
   })
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
-    @Query('item-category') filterCategory: ItemCategory, 
-    @Res() response: Response
+    @Query('item-category') filterCategory: ItemCategory,
   ) {
-      const items = await this.itemsService.findAllItems(filterCategory);
+    const items = await this.itemsService.findAllItems(filterCategory);
 
-      const responseDto = items.map(item => new GetAllItemResponse(
-        item.id,
-        item.name,
-        item.item_code,
-        item.status_item
-      ));
+    const responseDto = items.map(
+      (item) =>
+        new GetAllItemResponse(
+          item.id,
+          item.name,
+          item.item_code,
+          item.status_item,
+        ),
+    );
 
-      /*
-       * note: if the return response is a object, u can use plainToInstance. 
-       *       Otherwise use this way
-       */
-
-      // return plainToInstance(GetAllItemResponse, items);
-
-      return response.status(200).json({
-        statusCode: response.statusCode,
-        message: "OK",
-        data: {items: [responseDto]}
-      });
+    return {
+      [this.findManyItemsWithNoPagination.name]: responseDto,
+    };
   }
 
-  @UseGuards(AuthenticatedGuard)
-  @Get('find-by-item-name')
   @ApiOkResponse({
     description: 'Success get all items',
     schema: {
@@ -239,6 +227,7 @@ export class ItemsController {
     },
   })
   @ApiPaginatedResponse(Item)
+  @Get('find-by-item-name')
   public async findAllItemCodeByItemName(
     @Query('name') name: string,
     @Query() pageOptionsDto: PageOptionsDto,
@@ -246,9 +235,7 @@ export class ItemsController {
     return this.itemsService.findAllItemCodeByItemName(name, pageOptionsDto);
   }
 
-  @UseInterceptors(new TransformInterceptor())
   @Put('update')
-  @UseGuards(AuthenticatedGuard)
   @ApiOkResponse({
     description: 'Success to update one record of item',
     schema: {
@@ -295,18 +282,14 @@ export class ItemsController {
   public async updateItem(
     @Query('id', ParseIntPipe) id: number,
     @Body() dto: UpdateItemDto,
-    @Res() res: Response,
   ) {
     const instance = await this.itemsService.updateOne(id, dto);
-    return res.status(200).json({
-      statusCode: res.statusCode,
-      message: Status.SUCCESS,
-      data: { item: instance },
-    });
+
+    return {
+      [this.updateItem.name]: instance,
+    };
   }
 
-  @Delete('delete')
-  @UseGuards(AuthenticatedGuard)
   @ApiQuery({
     name: 'id',
     description: 'Id for delete item',
@@ -323,7 +306,84 @@ export class ItemsController {
       },
     },
   })
+  @Delete('delete')
   public async deleteItem(@Query('id', ParseIntPipe) id: number) {
     await this.itemsService.deleteById(id);
+  }
+
+  // -------------------------- TESTING
+
+  @ApiQuery({
+    name: 'item_category',
+    description: 'Mengambil data berdasarkan kategory dari barang',
+    enum: ItemCategory,
+    required: true,
+  })
+  @ApiQuery({
+    name: 'major',
+    description: 'Mengambil data berdasarkan tempat barang berada',
+    enum: Major,
+    required: true,
+  })
+  @Get('export-data-item')
+  async exportExcel(
+    @Query('item_category') item_category: ItemCategory,
+    @Query('major') major: Major,
+    @Res() response: Response,
+  ): Promise<void> {
+    const data: Item[] = await this.itemsRepository.find({
+      where: {
+        category_item: item_category,
+        class: {
+          major: major,
+        },
+      },
+      relations: ['class'],
+      select: [
+        'name',
+        'item_code',
+        'status_item',
+        'source_fund',
+        'unit_price',
+        'item_condition',
+        'category_item',
+        'item_type',
+      ],
+    });
+
+    data.forEach((item) => {
+      item['major'] = item.class.major;
+      item['class_name'] = item.class.class_name;
+    });
+
+    //initialize column
+    const columns: Record<string, string>[] = [
+      { header: 'Nama Barang', key: 'name' },
+      { header: 'Kode Barang', key: 'item_code' },
+      { header: 'Status Barang', key: 'status_item' },
+      { header: 'Sumber Dana', key: 'source_fund' },
+      { header: 'Harga Per-Unit', key: 'unit_price' },
+      { header: 'Kondisi Barang', key: 'item_condition' },
+      { header: 'Kategori Barang', key: 'category_item' },
+      { header: 'Tipe Barang', key: 'item_type' },
+      { header: 'Kelas Barang', key: 'class_name' },
+      { header: 'Jurusan', key: 'major' },
+    ];
+
+    const date = new Date();
+    const formattedDate = `${date.getDate()}-${
+      date.getMonth() + 1
+    }-${date.getFullYear()}`;
+    const fileName: string = `data_item_${formattedDate}`;
+
+    const buffer = await this.excelService.exportXLSX(data, columns);
+
+    response.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename=${fileName}.xlsx`,
+    });
+
+    response.send(buffer);
   }
 }

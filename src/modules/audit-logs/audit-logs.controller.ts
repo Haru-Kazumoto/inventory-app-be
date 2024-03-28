@@ -22,8 +22,6 @@ import {
 } from '@nestjs/swagger';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 import { CreateAuditLogsDto } from './dto/create-auditlogs.dto';
-import { Request, Response } from 'express';
-import { AuditLogs } from './entities/audit_logs.entity';
 
 @ApiTags('AuditLog')
 @UseGuards(AuthenticatedGuard)
@@ -80,20 +78,14 @@ export class AuditLogsController {
     description: 'DTO Structure response from create audit log',
   })
   @Post('create')
-  async createAuditLogReport(
-    @Body() dto: CreateAuditLogsDto,
-    @Res() response: Response,
-  ) {
+  async createAuditLogReport(@Body() dto: CreateAuditLogsDto) {
     const data = await this.auditLogsService.createReport(dto);
 
-    return response.status(response.statusCode).json({
-      statusCode: response.statusCode,
-      message: 'OK',
-      data: { auditLog: data },
-    });
+    return {
+      [this.createAuditLogReport.name]: data
+    }
   }
 
-  @UseGuards(AuthenticatedGuard)
   @Get('find-all')
   @ApiOkResponse({
     description: 'Success get all audit log reports',
@@ -116,17 +108,15 @@ export class AuditLogsController {
       },
     },
   })
-  public async findManyAuditLogReport(@Res() response: Response) {
+  public async findManyAuditLogReport() {
     const reportData = await this.auditLogsService.getAllReport();
-    return response.status(response.statusCode).json({
-      statusCode: response.statusCode,
-      message: 'OK',
-      data: reportData,
-    });
+
+    return {
+      [this.findManyAuditLogReport.name]: reportData
+    }
   }
 
   @Delete('delete')
-  @UseGuards(AuthenticatedGuard)
   @ApiQuery({
     name: 'id',
     description: 'Id for delete audit log',
@@ -143,9 +133,7 @@ export class AuditLogsController {
       },
     },
   })
-  public async deleteAuditLogReport(
-    @Query('id', ParseIntPipe) id: number,
-  ): Promise<any> {
+  public async deleteAuditLogReport(@Query('id', ParseIntPipe) id: number): Promise<any> {
     return this.auditLogsService.deleteOneReport(id);
   }
 }

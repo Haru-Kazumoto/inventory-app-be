@@ -30,7 +30,6 @@ export class ItemSeeder implements Seeder {
                 category_item: ItemCategory.BARANG_HABIS_PAKAI,
                 unit_price: 50000,
                 source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
                 total_unit: "10 PACK",
                 class_id: 1
             },
@@ -41,7 +40,6 @@ export class ItemSeeder implements Seeder {
                 category_item: ItemCategory.BARANG_HABIS_PAKAI,
                 unit_price: 150000,
                 source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
                 total_unit: "1 ROLL",
                 class_id: 1
             },
@@ -52,18 +50,12 @@ export class ItemSeeder implements Seeder {
                 category_item: ItemCategory.BARANG_HABIS_PAKAI,
                 unit_price: 200000,
                 source_fund: "BOSDA",
-                status_item: StatusItem.TERSEDIA,
                 total_unit: "2 ROLL",
                 class_id: 1
             },
         ];
         
         try{
-            // await Promise.all(
-            //     classData.map(classDataParam => this.classRepository.save(
-            //         this.classRepository.create(classDataParam))
-            //     )
-            // );
             await Promise.all(
                 itemData.map((item) => {
                     const newItem = this.itemRepository.create(item);

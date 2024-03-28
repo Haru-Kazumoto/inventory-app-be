@@ -22,7 +22,6 @@ import { NotificationModule } from '../notification/notification.module';
         ],
         providers: [
             AuthService,
-            // UserService,
             UserRepository,
             LocalStrategy,
             SessionSerializer,

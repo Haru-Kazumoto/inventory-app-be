@@ -15,9 +15,11 @@ export function CreateRequestDecorator() {
       schema: {
         type: 'object',
         properties: {
-          status: { type: 'number', example: 200 },
-          message: { type: 'string', example: 'OK' },
-          data: { type: 'object', example: { user: {} } },
+          statusCode: { type: 'number', example: 200 },
+          timestamp: { type: 'date', example: new Date() },
+          payload: { type: 'object', example: { 
+            createRequest: {}
+          }},
         },
       },
     }),

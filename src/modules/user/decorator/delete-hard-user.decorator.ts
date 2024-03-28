@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBadRequestResponse, ApiQuery } from '@nestjs/swagger';
 
-export function DeleteHardUserDecorator() {
+export function ApiDeleteHardUser() {
   return applyDecorators(
     ApiQuery({
       name: 'id',

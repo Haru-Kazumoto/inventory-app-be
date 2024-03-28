@@ -27,7 +27,7 @@ export class CreateExitLogDto {
   @IsNotEmpty()
   major_class: string;
 
-  @ApiProperty({ example: ItemCategory.BARANG_HABIS_PAKAI })
+  @ApiProperty({ example: ItemCategory.BARANG_TIDAK_HABIS_PAKAI })
   @IsEnum(ItemCategory)
   @IsNotEmpty()
   item_category: ItemCategory;
@@ -36,31 +36,17 @@ export class CreateExitLogDto {
   @IsString()
   exit_class: string;
 
-  @ApiProperty({ example: StatusExit.PEMINJAMAN })
+  @ApiProperty({ example: StatusExit.PRODUKTIF })
   @IsEnum(StatusExit)
   @IsNotEmpty()
   status_exit: StatusExit;
 
-  @ApiProperty({ example: 2 })
+  @ApiProperty({ example: 1 })
   @IsNumber()
   @IsNotEmpty()
   total: number;
 
-  @ApiProperty({
-    type: [ItemDetails],
-    example: [
-      {
-        item_id: 1,
-        category_item: ItemCategory.BARANG_HABIS_PAKAI,
-        total_exit_item: 5,
-      },
-      {
-        item_id: 2,
-        category_item: ItemCategory.BARANG_HABIS_PAKAI,
-        total_exit_item: 5,
-      },
-    ] as CreateItemDetailsDto[],
-  })
+  @ApiProperty({example: [{ item_id: 1 }]})
   @IsArray()
   @IsNotEmpty()
   item_details: CreateItemDetailsDto[];

@@ -9,6 +9,7 @@ import { ClassModule } from '../class/class.module';
 import { NotificationModule } from '../notification/notification.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { AuthModule } from '../auth/auth.module';
+import { ExcelService } from 'src/utils/excel/excel.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { AuthModule } from '../auth/auth.module';
     forwardRef(() => AuditLogsModule),
   ],
   controllers: [ItemsController],
-  providers: [ItemsService, ItemsRepository],
+  providers: [ItemsService, ItemsRepository, ExcelService],
   exports: [ItemsService, ItemsRepository],
 })
 export class ItemsModule {}

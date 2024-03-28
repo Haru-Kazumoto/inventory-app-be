@@ -15,11 +15,11 @@ export class CreateItemDto {
     @ApiProperty({example: "MKT-123456789"})
     public item_code: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @IsEnum(StatusItem)
-    @ApiProperty({example: StatusItem.TERSEDIA})
-    public status_item: StatusItem; //lookup type STATUS
+    // @IsString()
+    // @IsNotEmpty()
+    // @IsEnum(StatusItem)
+    // @ApiProperty({example: StatusItem.TERSEDIA})
+    // public status_item: StatusItem; //lookup type STATUS
 
     @IsString()
     @IsNotEmpty()

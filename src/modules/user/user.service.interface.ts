@@ -4,7 +4,7 @@ import { User } from "./entities/user.entity";
 import { PageDto, PageOptionsDto } from "src/utils/pagination.utils";
 
 export interface IUserService {
-    createUser(request: Request, body: UserCreateDto): Promise<User>;
+    createUser(body: UserCreateDto): Promise<User>;
     findMany(pageOptions: PageOptionsDto): Promise<PageDto<User>>;
     update(id: number, body: UserCreateDto): Promise<User>;
     hardDeleteById(id: number): any;
