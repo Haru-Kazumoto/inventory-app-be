@@ -15,6 +15,7 @@ export interface IExitLogsService {
     findLogById(logId: number): Promise<ExitLogs>;
     findLogByBorrowerName(borrowerName: string): Promise<ExitLogs>;
     findAllLogs(filterCagory: ItemCategory,pageOptionsDto: PageOptionsDto, filter?: FilterParam): Promise<PageDto<ExitLogs>>;
+    findExitLogById(logId: number): Promise<ExitLogs>;
     updateExitLog(redeemCode: string, body: UpdateExitLogDto): Promise<RedeemCode>;
     
 }

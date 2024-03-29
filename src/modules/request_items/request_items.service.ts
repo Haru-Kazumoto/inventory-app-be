@@ -21,6 +21,7 @@ import {
   requestUpdateContent,
 } from '../notification/notification.constant';
 import { User } from '../user/entities/user.entity';
+import { ItemType } from 'src/enums/item_type.enum';
 
 @Injectable()
 export class RequestItemsService implements IRequestItems {
@@ -72,11 +73,13 @@ export class RequestItemsService implements IRequestItems {
   public findMany(
     className: string,
     status: RequestStatus,
+    item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>> {
     return this.requestItemRepository.findMany(
       className,
       status,
+      item_type,
       pageOptionsDto,
     );
   }

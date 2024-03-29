@@ -1,14 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsBoolean,
-  IsDate,
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
 } from 'class-validator';
-import { RequestStatus } from 'src/enums/request_status.enum';
+import { ItemType } from 'src/enums/item_type.enum';
 
 export class CreateRequestItemDto {
   @IsString()
@@ -20,6 +17,11 @@ export class CreateRequestItemDto {
   @IsNotEmpty()
   @ApiProperty({ example: 10 })
   public total_request: number;
+
+  @IsEnum(ItemType)
+  @IsNotEmpty()
+  @ApiProperty({ example: ItemType.NON_ATK })
+  public item_type: ItemType;
 
   @IsString()
   @IsNotEmpty()

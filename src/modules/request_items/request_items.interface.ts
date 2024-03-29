@@ -3,12 +3,14 @@ import { CreateRequestItemDto } from './dto/create-request_item.dto';
 import { RequestItem } from './entities/request_item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { UpdateRequestItemDto } from './dto/update-request_item.dto';
+import { ItemType } from 'src/enums/item_type.enum';
 
 export interface IRequestItems {
   createRequest(body: CreateRequestItemDto): Promise<RequestItem>;
   findMany(
     className: string,
     status: RequestStatus,
+    item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>>;
   updateRequest(

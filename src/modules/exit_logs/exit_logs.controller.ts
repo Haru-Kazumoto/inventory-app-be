@@ -36,4 +36,19 @@ export class ExitLogsController {
     }
   }
 
+  @ApiQuery({
+    name: "log-id",
+    description: "log id",
+    type: Number,
+    required: true
+  })
+  @Get("find-log-by-id")
+  async findLogById(@Query('log-id') logId: number) {
+    const data = await this.exitLogsService.findLogById(logId);
+
+    return {
+      [this.findLogById.name]: data
+    }
+  }
+
 }
