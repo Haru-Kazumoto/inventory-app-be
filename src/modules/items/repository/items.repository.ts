@@ -1,7 +1,7 @@
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
 import { Item } from '../entities/item.entity';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
@@ -79,11 +79,15 @@ export class ItemsRepository extends Repository<Item> {
   }
 
   async findById(id: number): Promise<Item> {
-    return await this.itemRepository.findOne({
+    const findItem: Item = await this.itemRepository.findOne({
       where: {
         id: id,
       },
-    });
+    })
+
+    if(!findItem) throw new BadRequestException("Id barang tidak di temukan");
+
+    return findItem;
   }
 
   async findItemByItemCode(item_code: string): Promise<Item> {

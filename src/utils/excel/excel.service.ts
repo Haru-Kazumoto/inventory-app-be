@@ -4,7 +4,7 @@ import * as ExcelJS from "exceljs";
 
 @Injectable()
 export class ExcelService {
-    async exportXLSX(data: Record<string, any>[], columns: Record<string, string>[]) {
+    async exportXLSX(data: Record<string, any>[], columns: any[]) {
         const workBook = new ExcelJS.Workbook();
         const workSheet = workBook.addWorksheet("Data");
 
