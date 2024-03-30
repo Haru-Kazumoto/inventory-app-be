@@ -4,6 +4,7 @@ import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { RequestItem } from '../entities/request_item.entity';
 import { ItemType } from 'src/enums/item_type.enum';
 import { Major } from 'src/enums/majors.enum';
+import { RequestStatus } from 'src/enums/request_status.enum';
 
 export function FindAllRequestDecorator() {
   return applyDecorators(
@@ -32,6 +33,7 @@ export function FindAllRequestDecorator() {
       name: 'status',
       description: 'Status of item',
       required: false,
+      enum: RequestStatus
     }),
     ApiQuery({
       name: 'major',
