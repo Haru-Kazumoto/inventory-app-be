@@ -6,6 +6,7 @@ import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ItemType } from 'src/enums/item_type.enum';
+import { Major } from 'src/enums/majors.enum';
 
 @Injectable()
 export class RequestItemsRepository extends Repository<RequestItem> {
@@ -16,7 +17,7 @@ export class RequestItemsRepository extends Repository<RequestItem> {
   }
 
   public async findMany(
-    className: string,
+    majorName: Major,
     status: RequestStatus,
     item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
@@ -29,11 +30,11 @@ export class RequestItemsRepository extends Repository<RequestItem> {
           status,
         });
       }
-      if (className) {
+      if (majorName) {
         qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
-          `class.class_name = :className`,
+          `class.major = :majorName`,
           {
-            className,
+            majorName,
           },
         );
       }

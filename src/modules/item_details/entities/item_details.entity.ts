@@ -11,6 +11,8 @@ export class ItemDetails {
     @Column({name: "item_id", nullable: false})
     public item_id: number;
 
+    //adding item name, item code from item id
+     
     @Column({name: "category_item", nullable: true, enum: ItemCategory, default: null})
     public category_item: ItemCategory;
 

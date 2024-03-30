@@ -3,6 +3,7 @@ import { ApiInternalServerErrorResponse, ApiOkResponse, ApiQuery } from '@nestjs
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { RequestItem } from '../entities/request_item.entity';
 import { ItemType } from 'src/enums/item_type.enum';
+import { Major } from 'src/enums/majors.enum';
 
 export function FindAllRequestDecorator() {
   return applyDecorators(
@@ -33,9 +34,10 @@ export function FindAllRequestDecorator() {
       required: false,
     }),
     ApiQuery({
-      name: 'class',
-      description: 'Class of item',
+      name: 'major',
+      description: 'Major of item',
       required: false,
+      enum: Major
     }),
     ApiQuery({
       name: "item_type",

@@ -18,6 +18,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, ParseIntPipe, Post, Patch, Query, Res, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { ItemType } from 'src/enums/item_type.enum';
+import { Major } from 'src/enums/majors.enum';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Request Items')
@@ -44,12 +45,12 @@ export class RequestItemsController {
   @FindAllRequestDecorator()
   @Get('find-all')
   public findAll(
-    @Query('class') className: string,
+    @Query('major') majorName: Major,
     @Query('status') status: RequestStatus,
     @Query('item_type') item_type: ItemType,
     @Query() pageOptionsDto: PageOptionsDto,
   ) {
-    return this.requestItemsService.findMany(className, status, item_type, pageOptionsDto);
+    return this.requestItemsService.findMany(majorName, status, item_type, pageOptionsDto);
   }
 
   // Mengizinkan role selain superadmin untuk mengupdate request
