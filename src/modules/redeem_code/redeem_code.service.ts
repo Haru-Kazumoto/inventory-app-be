@@ -64,7 +64,10 @@ export class RedeemCodeService implements IRedeemCodeService {
                         : StatusItem.SEDANG_DIPAKAI;
                 }
 
+                //initialize
                 itemDetail.category_item = itemChoosen.category_item;
+                itemDetail.item_name = itemChoosen.name;
+                itemDetail.item_code = itemChoosen.item_code;
 
                 await queryRunner.manager.save(Item, itemChoosen);
             }));
