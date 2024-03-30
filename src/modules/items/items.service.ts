@@ -85,7 +85,8 @@ export class ItemsService implements IItemsService {
     const findItems: Item[] = await this.itemRepository.find(
       {
         where: {
-          category_item: filterCategory
+          category_item: filterCategory,
+          status_item: StatusItem.TERSEDIA
         }
       }
     );
