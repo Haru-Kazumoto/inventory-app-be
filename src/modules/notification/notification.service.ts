@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { INotificationService } from './notification.service.interface';
 import { NotificationRepository } from './repository/notification.repository';
@@ -41,6 +41,24 @@ export class NotificationService implements INotificationService{
     }
   
     await this.notificationRepository.save(notifObject);
+  }
+
+  async findNotificationById(notifId: number): Promise<Notification> {
+    const findNotif: Notification = await this.notificationRepository.findOne({
+      where: {
+        id: notifId
+      }
+    });
+
+    const mergingData = this.notificationRepository.merge(findNotif, {
+      hasRead: true
+    });
+
+    await this.notificationRepository.save(mergingData);
+
+    if(!findNotif) throw new BadRequestException("ID not found");
+
+    return findNotif;
   }
 
   async getNotifications(userId: number): Promise<Notification[]> {

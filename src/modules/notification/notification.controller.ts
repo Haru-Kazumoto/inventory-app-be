@@ -63,4 +63,19 @@ export class NotificationController {
   async deleteNotification(@Query('notif-id') notifId: number) {
     await this.notificationService.deleteNotification(notifId);
   }
+
+  @ApiQuery({
+    name: "notif-id",
+    description: "get notification by id",
+    type: Number,
+    required: true
+  })
+  @Get("find-notif-by-id")
+  async findNotifById(@Query('notif-id') notifId: number){
+    const data = await this.notificationService.findNotificationById(notifId);
+
+    return {
+      [this.findNotifById.name]: data
+    }
+  }
 }
