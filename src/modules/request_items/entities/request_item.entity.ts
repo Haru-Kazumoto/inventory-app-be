@@ -1,4 +1,5 @@
 import { BaseEntity } from 'src/entities/base.entity';
+import { ItemType } from 'src/enums/item_type.enum';
 import { RequestStatus } from 'src/enums/request_status.enum';
 import { Class } from 'src/modules/class/entitites/class.entity';
 import {
@@ -23,6 +24,10 @@ export class RequestItem extends BaseEntity {
 
   @Column({ name: 'status', nullable: false })
   public status: RequestStatus;
+
+  //new
+  @Column({ name: "item_type", nullable: true})
+  public item_type: ItemType;
 
   @Column({ name: 'description', nullable: false })
   public description: string;

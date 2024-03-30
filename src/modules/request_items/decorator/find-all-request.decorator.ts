@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiInternalServerErrorResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { RequestItem } from '../entities/request_item.entity';
+import { ItemType } from 'src/enums/item_type.enum';
 
 export function FindAllRequestDecorator() {
   return applyDecorators(
@@ -35,6 +36,12 @@ export function FindAllRequestDecorator() {
       name: 'class',
       description: 'Class of item',
       required: false,
+    }),
+    ApiQuery({
+      name: "item_type",
+      description:"type of item",
+      required: false,
+      enum: ItemType
     }),
     ApiPaginatedResponse(RequestItem),
   );

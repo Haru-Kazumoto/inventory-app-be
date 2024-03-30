@@ -5,6 +5,7 @@ import { RequestStatus } from 'src/enums/request_status.enum';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ItemType } from 'src/enums/item_type.enum';
 
 @Injectable()
 export class RequestItemsRepository extends Repository<RequestItem> {
@@ -17,6 +18,7 @@ export class RequestItemsRepository extends Repository<RequestItem> {
   public async findMany(
     className: string,
     status: RequestStatus,
+    item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>> {
     const queryAlias = 'request_item';
@@ -34,6 +36,9 @@ export class RequestItemsRepository extends Repository<RequestItem> {
             className,
           },
         );
+      }
+      if(item_type) {
+        qb.andWhere(`${queryAlias}.item_type = :item_type`, {item_type});
       }
     };
 

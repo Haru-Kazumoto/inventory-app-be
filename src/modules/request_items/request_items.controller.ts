@@ -17,6 +17,7 @@ import { UpdateStatusOnTheWayDecorator } from './decorator/update-status-on-the-
 import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, ParseIntPipe, Post, Patch, Query, Res, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from '@nestjs/common';
 import { RolesGuard } from 'src/security/guards/roles.guard';
+import { ItemType } from 'src/enums/item_type.enum';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Request Items')
@@ -26,7 +27,7 @@ export class RequestItemsController {
 
   // Menginzinkan role selain superadmin untuk membuat request
   @UseGuards(RolesGuard)
-  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'SUPERADMIN')
   @CreateRequestDecorator()
   @Post('create')
   public async createRequest(@Body() body: CreateRequestItemDto) {
@@ -45,9 +46,10 @@ export class RequestItemsController {
   public findAll(
     @Query('class') className: string,
     @Query('status') status: RequestStatus,
+    @Query('item_type') item_type: ItemType,
     @Query() pageOptionsDto: PageOptionsDto,
   ) {
-    return this.requestItemsService.findMany(className, status, pageOptionsDto);
+    return this.requestItemsService.findMany(className, status, item_type, pageOptionsDto);
   }
 
   // Mengizinkan role selain superadmin untuk mengupdate request

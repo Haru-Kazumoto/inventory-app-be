@@ -2,9 +2,9 @@ import { DataSource, DataSourceOptions } from "typeorm";
 
 export const dataSourceOptions: DataSourceOptions = {
     type: 'postgres',
-    database: "database_inventory",
+    database: "Inventory-app DB",
     username: "postgres",
-    password: "Akbar_123",
+    password: "admin",
     entities: ["dist/**/*.entity.js"],
     //MIGRATIONS
     migrations: ["dist/db/migrations/*.js"],

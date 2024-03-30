@@ -39,6 +39,8 @@ import { Response } from 'express';
 import { ItemsRepository } from './repository/items.repository';
 import { Major } from 'src/enums/majors.enum';
 
+import * as ExcelJs from "exceljs";
+
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
 @Controller('items')
@@ -205,6 +207,21 @@ export class ItemsController {
     };
   }
 
+  @ApiQuery({
+    name: "id-item",
+    description: "Id item to update",
+    type: Number,
+    required: true
+  })
+  @Patch('update-status-item-to-unavailable')
+  public async updateStatusItem(@Query('id-item') id: number) {
+    const result = await this.itemsService.updateStatusItem(id);
+
+    return {
+      [this.updateStatusItem.name]: result
+    }
+  }
+
   @ApiOkResponse({
     description: 'Success get all items',
     schema: {
@@ -357,17 +374,17 @@ export class ItemsController {
     });
 
     //initialize column
-    const columns: Record<string, string>[] = [
-      { header: 'Nama Barang', key: 'name' },
-      { header: 'Kode Barang', key: 'item_code' },
-      { header: 'Status Barang', key: 'status_item' },
-      { header: 'Sumber Dana', key: 'source_fund' },
-      { header: 'Harga Per-Unit', key: 'unit_price' },
-      { header: 'Kondisi Barang', key: 'item_condition' },
-      { header: 'Kategori Barang', key: 'category_item' },
-      { header: 'Tipe Barang', key: 'item_type' },
-      { header: 'Kelas Barang', key: 'class_name' },
-      { header: 'Jurusan', key: 'major' },
+    const columns = [
+      { header: 'Nama Barang', key: 'name', width: 50 },
+      { header: 'Kode Barang', key: 'item_code', width: 40 },
+      { header: 'Status Barang', key: 'status_item', width: 35 },
+      { header: 'Sumber Dana', key: 'source_fund', width: 30 },
+      { header: 'Harga Per-Unit', key: 'unit_price', width: 50 },
+      { header: 'Kondisi Barang', key: 'item_condition', width: 30 },
+      { header: 'Kategori Barang', key: 'category_item', width: 35 },
+      { header: 'Tipe Barang', key: 'item_type', width: 40 },
+      { header: 'Kelas Barang', key: 'class_name', width: 20 },
+      { header: 'Jurusan', key: 'major', width: 15 },
     ];
 
     const date = new Date();

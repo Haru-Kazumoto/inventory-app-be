@@ -19,14 +19,9 @@ import { ItemCategory } from 'src/enums/item_category.enum';
 import { DataSource } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { StatusItem } from 'src/enums/status_item.enum';
-import {
-  itemCreateContent,
-  itemDeleteContent,
-} from '../notification/notification.constant';
+import {itemCreateContent,itemDeleteContent} from '../notification/notification.constant';
 import { Class } from '../class/entitites/class.entity';
 import { User } from '../user/entities/user.entity';
-import {  GetAllItemResponse } from './dto/response-item.dto';
-import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -130,6 +125,40 @@ export class ItemsService implements IItemsService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async updateStatusItem(id: number): Promise<Item> {
+      const queryRunner = this.dataSource.createQueryRunner();
+
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        const session: User = await this.authService.getSession();
+
+        const findItemToUpdate: Item = await this.itemRepository.findById(id);
+
+        await this.notificationService.sendNotification({
+          title: 'Item Berhasil diupdate!',
+          content: `Item ${findItemToUpdate.name} berhasil update status barang`,
+          color: 'red',
+          user_id: session.id,
+        });
+
+        const mergeData: Item = this.itemRepository.merge(findItemToUpdate, {status_item: StatusItem.TIDAK_TERSEDIA});
+
+        const resultData: Item = await queryRunner.manager.save(mergeData);
+
+        await queryRunner.commitTransaction();
+
+        return resultData;
+      } catch (err) {
+        await queryRunner.rollbackTransaction();
+
+        throw err;
+      } finally {
+        await queryRunner.release();
+      }
   }
 
   public async updateOne(id: number, body: UpdateItemDto): Promise<Item> {

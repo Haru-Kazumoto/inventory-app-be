@@ -5,14 +5,12 @@ import { ExitLogsRepository } from './repositories/exit_logs.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ExitLogs } from './entities/exit_logs.entity';
 import { ItemDetails } from '../item_details/entities/item_details.entity';
-import { ItemDetailsModule } from '../item_details/item_details.module';
 import { ItemsModule } from '../items/items.module';
 import { RedeemCodeModule } from '../redeem_code/redeem_code.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([ExitLogs,ItemDetails]),
-    ItemDetailsModule,
     ItemsModule,
     forwardRef(() => RedeemCodeModule)
   ],
