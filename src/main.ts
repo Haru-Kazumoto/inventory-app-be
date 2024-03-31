@@ -13,6 +13,7 @@ import config, {
 } from "./config/application.config";
 import * as session from 'express-session';
 import * as dotenv from "dotenv";
+import * as compression from 'compression';
 import { ExcelService } from './utils/excel/excel.service';
 
 async function bootstrap() {
@@ -21,14 +22,14 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, 
     // {cors: config.corsOption}
-    );
+  );
+
   const sessionRepository = app.get(DataSource).getRepository(Session);
 
   app.enableCors({
     credentials: true,
-    origin: "http://localhost:5173",
-    
-  })
+    origin: "http://localhost:5173"
+  });
   app.setGlobalPrefix(config.globalPrefix);
   app.use(
     session(
@@ -44,7 +45,8 @@ async function bootstrap() {
           secret: process.env.COOKIE_SECRET_KEY as string
         }).connect(sessionRepository)
       }
-    )
+    ),
+    compression()
   );
 
   setupSwagger(app);
