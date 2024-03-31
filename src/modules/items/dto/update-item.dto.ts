@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { ItemType } from 'src/enums/item_type.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
@@ -11,9 +11,10 @@ export class UpdateItemDto {
   public name: string; //items name
 
   @IsString()
-  @IsNotEmpty()
+  // @IsNotEmpty()
+  @IsOptional()
   @ApiProperty({ example: 'MKT-123456789' })
-  public item_code: string;
+  public item_code?: string;
 
   @IsString()
   @IsNotEmpty()

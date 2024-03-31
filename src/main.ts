@@ -48,7 +48,7 @@ async function bootstrap() {
     ),
     compression(),
     helmet(),
-    csurf()
+    // csurf()
   );
 
   setupSwagger(app);
