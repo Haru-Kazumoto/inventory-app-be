@@ -11,9 +11,10 @@ export class CreateItemDto {
     public name: string; //items name
 
     @IsString()
-    @IsNotEmpty()
+    // @IsNotEmpty()
+    @IsOptional()
     @ApiProperty({example: "MKT-123456789"})
-    public item_code: string;
+    public item_code?: string;
 
     @IsString()
     @IsNotEmpty()
