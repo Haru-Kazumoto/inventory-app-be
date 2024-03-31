@@ -8,11 +8,13 @@ import { Item } from '../items/entities/item.entity';
 import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
 import { ItemsModule } from '../items/items.module';
 import { ExitLogsModule } from '../exit_logs/exit_logs.module';
+import { ItemDetailsModule } from '../item_details/item_details.module';
   
 @Module({
   imports: [
     TypeOrmModule.forFeature([RedeemCode, Item, ExitLogs]),
     ItemsModule,
+    ItemDetailsModule,
     // ExitLogsModule
     forwardRef(() => ExitLogsModule)
   ],

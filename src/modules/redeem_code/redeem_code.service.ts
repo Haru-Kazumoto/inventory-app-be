@@ -14,6 +14,7 @@ import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
 import { ItemDetails } from '../item_details/entities/item_details.entity';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusCode } from 'src/enums/status_code.enum';
+import { ItemDetailsRepository } from '../item_details/repositories/item_details.repository';
 
 @Injectable()
 export class RedeemCodeService implements IRedeemCodeService {
@@ -22,9 +23,10 @@ export class RedeemCodeService implements IRedeemCodeService {
         private readonly exitlogRepository: ExitLogsRepository,
         private readonly itemRepository: ItemsRepository,
         private readonly redeemCodeRepository: RedeemCodeRepository,
+        private readonly itemDetailRepository: ItemDetailsRepository,
         private dataSource: DataSource
     ){}
-        
+
     async createRedeemCode(body: CreateExitLogDto): Promise<RedeemCode> {
         const queryRunner = this.dataSource.createQueryRunner();
     
@@ -65,9 +67,17 @@ export class RedeemCodeService implements IRedeemCodeService {
                 }
 
                 //initialize
-                itemDetail.category_item = itemChoosen.category_item;
-                itemDetail.item_name = itemChoosen.name;
-                itemDetail.item_code = itemChoosen.item_code;
+                // itemDetail.category_item = itemChoosen.category_item;
+                // itemDetail.item_name = itemChoosen.name;
+                // itemDetail.item_code = itemChoosen.item_code;
+
+                const mergingItemDetails: ItemDetails = this.itemDetailRepository.merge(itemDetail, {
+                    category_item: itemChoosen.category_item,
+                    item_name: itemChoosen.name,
+                    item_code: itemChoosen.item_code
+                });
+
+                await queryRunner.manager.save(mergingItemDetails);
 
                 await queryRunner.manager.save(Item, itemChoosen);
             }));
