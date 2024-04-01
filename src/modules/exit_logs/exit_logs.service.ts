@@ -4,12 +4,11 @@ import { ExitLogsRepository } from './repositories/exit_logs.repository';
 import { UpdateExitLogDto } from './dtos/exit_logs.dto';
 import { ExitLogs } from './entities/exit_logs.entity';
 import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
-import { ItemDetailsRepository } from '../item_details/repositories/item_details.repository';
 import { DataSource } from 'typeorm';
-import { ItemsRepository } from '../items/repository/items.repository';
 import { RedeemCode } from '../redeem_code/entities/redeem_code.entity';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { RedeemCodeRepository } from '../redeem_code/repositories/redeem_code.repository';
+import { Major } from 'src/enums/majors.enum';
 
 @Injectable()
 export class ExitLogsService implements IExitLogsService {
@@ -42,8 +41,8 @@ export class ExitLogsService implements IExitLogsService {
         return findLog;
     }
 
-    async findAllLogs(filterCategory: ItemCategory, pageOptionsDto: PageOptionsDto): Promise<PageDto<ExitLogs>> {
-        return await this.exitlogRepository.findManyLogs(filterCategory,pageOptionsDto);
+    async findAllLogs(filterCategory: ItemCategory,major: Major, pageOptionsDto: PageOptionsDto): Promise<PageDto<ExitLogs>> {
+        return await this.exitlogRepository.findManyLogs(filterCategory,major,pageOptionsDto);
     }
 
     async findExitLogById(logId: number): Promise<ExitLogs> {

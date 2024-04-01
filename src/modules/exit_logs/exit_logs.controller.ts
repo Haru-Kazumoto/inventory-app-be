@@ -23,8 +23,14 @@ export class ExitLogsController {
   @ApiPaginatedResponse(ExitLogs)
   @ApiFindManyLogs()
   @Get('find-all')
-  async findManyLogsWithPagination(@Query('category') filterCategory: ItemCategory,@Query() pageOptionsDto: PageOptionsDto) {
-    return await this.exitLogsService.findAllLogs(filterCategory,pageOptionsDto);
+  async findManyLogsWithPagination(
+    @Query('category') filterCategory: ItemCategory,
+    @Query('major') major: Major,
+    @Query() pageOptionsDto: PageOptionsDto
+  ) {
+    return await this.exitLogsService.findAllLogs(
+      filterCategory,major,pageOptionsDto
+    );
   }
 
   @ApiQuery({

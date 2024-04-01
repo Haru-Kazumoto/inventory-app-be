@@ -4,11 +4,13 @@ import { RequestItem } from './entities/request_item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { UpdateRequestItemDto } from './dto/update-request_item.dto';
 import { ItemType } from 'src/enums/item_type.enum';
+import { Major } from 'src/enums/majors.enum';
 
 export interface IRequestItems {
   createRequest(body: CreateRequestItemDto): Promise<RequestItem>;
   findMany(
     className: string,
+    // major: Major,
     status: RequestStatus,
     item_type: ItemType,
     pageOptionsDto: PageOptionsDto,

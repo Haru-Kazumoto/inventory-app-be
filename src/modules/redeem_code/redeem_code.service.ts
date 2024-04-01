@@ -1,3 +1,4 @@
+import { Major } from './../../enums/majors.enum';
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { IRedeemCodeService } from './interfaces/redeem_code.service.interface';
 import { RedeemCodeRepository } from './repositories/redeem_code.repository';
@@ -272,8 +273,8 @@ export class RedeemCodeService implements IRedeemCodeService {
         });
     }
 
-    async findAllRedeemCodes(filterStatus: StatusCode,pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
-        return this.redeemCodeRepository.findManyCode(filterStatus,pageOptions);
+    async findAllRedeemCodes(major: Major,filterStatus: StatusCode,pageOptions: PageOptionsDto): Promise<PageDto<RedeemCode>> {
+        return this.redeemCodeRepository.findManyCode(major,filterStatus,pageOptions);
     }
 
     async findExitLogByRedeemCode(redeemCode: string): Promise<ExitLogs> {
