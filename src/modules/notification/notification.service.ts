@@ -81,4 +81,22 @@ export class NotificationService implements INotificationService{
     await this.notificationRepository.delete(notifId);
   }
 
+  async readAllNotification(userId: number): Promise<void> {
+    const findIdUser = await this.userRepository.findById(userId);
+
+    const findNotification: Notification[] = await this.notificationRepository.find({
+      where: {
+        user_id: findIdUser.id
+      }
+    });
+
+    await Promise.all(findNotification.map(async (notification: Notification) => {
+      notification.hasRead = true;
+      
+      const merging = this.notificationRepository.merge(notification);
+
+      await this.notificationRepository.save(merging);
+    }));
+  }
+
 }

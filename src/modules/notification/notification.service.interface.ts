@@ -6,4 +6,5 @@ export interface INotificationService {
     getNotifications(userId: number): Promise<Notification[]>;
     findNotificationById(notifId: number): Promise<Notification>;
     deleteNotification(notifId: number): Promise<void>;
+    readAllNotification(userId: number): Promise<void>;
 }

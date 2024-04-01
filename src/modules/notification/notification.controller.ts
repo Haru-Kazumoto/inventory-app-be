@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Res, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Delete, Res, Query, UseGuards, Patch } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import {
   ApiBadRequestResponse,
@@ -77,5 +77,16 @@ export class NotificationController {
     return {
       [this.findNotifById.name]: data
     }
+  }
+
+  @ApiQuery({
+    name: "user-id",
+    description: "Change all notification to has read by user id",
+    required: true,
+    type: Number
+  })
+  @Patch('read-all')
+  async readAllNotification(@Query('user-id') userId: number) {
+    await this.notificationService.readAllNotification(userId);
   }
 }
