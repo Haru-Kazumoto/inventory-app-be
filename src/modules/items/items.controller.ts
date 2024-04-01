@@ -147,6 +147,12 @@ export class ItemsController {
     enum: ItemCategory,
   })
   @ApiQuery({
+    name: 'major',
+    description: 'Major of item',
+    required: false,
+    enum: Major,
+  })
+  @ApiQuery({
     name: 'status',
     description: 'Status of item',
     required: false,
@@ -166,6 +172,7 @@ export class ItemsController {
     @Query('category') category: ItemCategory,
     @Query('status') status: StatusItem,
     @Query('name') itemName: string,
+    @Query('major') major: Major,
     @Query('classId') classId: string,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
@@ -175,6 +182,7 @@ export class ItemsController {
       category,
       classId as unknown as number,
       itemName,
+      major,
       status,
       pageOptionsDto,
     );

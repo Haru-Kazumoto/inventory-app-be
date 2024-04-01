@@ -6,6 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
 import { StatusItem } from 'src/enums/status_item.enum';
+import { Major } from 'src/enums/majors.enum';
 
 @Injectable()
 export class ItemsRepository extends Repository<Item> {
@@ -19,6 +20,7 @@ export class ItemsRepository extends Repository<Item> {
     category: ItemCategory,
     classId: number,
     itemName: string,
+    major: Major,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
@@ -29,6 +31,13 @@ export class ItemsRepository extends Repository<Item> {
         qb.andWhere(`${queryAlias}.category_item = :category`, {
           category,
         });
+      }
+      if(major) {
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+          `class.major = :major`,{
+            major
+          }
+        )
       }
       if (status) {
         qb.andWhere(`${queryAlias}.status_item = :status`, {

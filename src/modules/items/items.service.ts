@@ -22,6 +22,7 @@ import { StatusItem } from 'src/enums/status_item.enum';
 import {itemCreateContent,itemDeleteContent} from '../notification/notification.constant';
 import { Class } from '../class/entitites/class.entity';
 import { User } from '../user/entities/user.entity';
+import { Major } from 'src/enums/majors.enum';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -93,6 +94,7 @@ export class ItemsService implements IItemsService {
     category: ItemCategory,
     classId: number,
     itemName: string,
+    major: Major,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
@@ -101,6 +103,7 @@ export class ItemsService implements IItemsService {
         category,
         classId,
         itemName,
+        major,
         status,
         pageOptionsDto,
       );

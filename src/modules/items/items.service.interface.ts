@@ -4,6 +4,7 @@ import { Item } from './entities/item.entity';
 import { UpdateItemDto } from './dto/update-item.dto';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
+import { Major } from 'src/enums/majors.enum';
 
 export interface IItemsService {
   createOne(body: CreateItemDto): Promise<Item>;
@@ -11,6 +12,7 @@ export interface IItemsService {
     category: ItemCategory,
     classId: number,
     itemName: string,
+    major: Major,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>>;
