@@ -21,6 +21,7 @@ import {
   requestUpdateContent,
 } from '../notification/notification.constant';
 import { User } from '../user/entities/user.entity';
+import { ItemType } from 'src/enums/item_type.enum';
 import { Major } from 'src/enums/majors.enum';
 
 @Injectable()
@@ -71,13 +72,15 @@ export class RequestItemsService implements IRequestItems {
 
   // Mencari semua request items, dengan filter nama class dan status request
   public findMany(
-    className: string,
+    majorName: Major,
     status: RequestStatus,
+    item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>> {
     return this.requestItemRepository.findMany(
-      className,
+      majorName,
       status,
+      item_type,
       pageOptionsDto,
     );
   }

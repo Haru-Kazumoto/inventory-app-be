@@ -1,7 +1,7 @@
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { DataSource, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { Item } from '../entities/item.entity';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
@@ -22,6 +22,7 @@ export class ItemsRepository extends Repository<Item> {
     category: ItemCategory,
     classId: number,
     itemName: string,
+    major: Major,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
@@ -32,6 +33,14 @@ export class ItemsRepository extends Repository<Item> {
         qb.andWhere(`${queryAlias}.category_item = :category`, {
           category,
         });
+      }
+      if (major) {
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+          `class.major = :major`,
+          {
+            major,
+          },
+        );
       }
       if (status) {
         qb.andWhere(`${queryAlias}.status_item = :status`, {
@@ -69,7 +78,12 @@ export class ItemsRepository extends Repository<Item> {
     const queryAlias = 'item';
     const whereCondition = (qb: SelectQueryBuilder<Item>) => {
       if (major) {
-        qb.andWhere(`${queryAlias}.class = :major`, { major });
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+          `class.major = :major`,
+          {
+            major,
+          },
+        );
       }
 
       switch (status) {
@@ -124,12 +138,16 @@ export class ItemsRepository extends Repository<Item> {
     );
   }
 
-  public async findById(id: number): Promise<Item> {
-    return await this.itemRepository.findOne({
+  async findById(id: number): Promise<Item> {
+    const findItem: Item = await this.itemRepository.findOne({
       where: {
         id: id,
       },
     });
+
+    if (!findItem) throw new BadRequestException('Id barang tidak di temukan');
+
+    return findItem;
   }
 
   public async findItemByItemCode(item_code: string): Promise<Item> {

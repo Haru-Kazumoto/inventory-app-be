@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { INotificationService } from './notification.service.interface';
 import { NotificationRepository } from './repository/notification.repository';
@@ -43,6 +43,24 @@ export class NotificationService implements INotificationService{
     await this.notificationRepository.save(notifObject);
   }
 
+  async findNotificationById(notifId: number): Promise<Notification> {
+    const findNotif: Notification = await this.notificationRepository.findOne({
+      where: {
+        id: notifId
+      }
+    });
+
+    const mergingData = this.notificationRepository.merge(findNotif, {
+      hasRead: true
+    });
+
+    await this.notificationRepository.save(mergingData);
+
+    if(!findNotif) throw new BadRequestException("ID not found");
+
+    return findNotif;
+  }
+
   async getNotifications(userId: number): Promise<Notification[]> {
     await this.checkUserIdIsExists(userId);
 
@@ -61,6 +79,24 @@ export class NotificationService implements INotificationService{
     if(!findNotif) throw new NotFoundException("Id notifikasi tidak di temukan");
 
     await this.notificationRepository.delete(notifId);
+  }
+
+  async readAllNotification(userId: number): Promise<void> {
+    const findIdUser = await this.userRepository.findById(userId);
+
+    const findNotification: Notification[] = await this.notificationRepository.find({
+      where: {
+        user_id: findIdUser.id
+      }
+    });
+
+    await Promise.all(findNotification.map(async (notification: Notification) => {
+      notification.hasRead = true;
+      
+      const merging = this.notificationRepository.merge(notification);
+
+      await this.notificationRepository.save(merging);
+    }));
   }
 
 }

@@ -19,10 +19,7 @@ import { ItemCategory } from 'src/enums/item_category.enum';
 import { DataSource } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { StatusItem } from 'src/enums/status_item.enum';
-import {
-  itemCreateContent,
-  itemDeleteContent,
-} from '../notification/notification.constant';
+import {itemCreateContent,itemDeleteContent} from '../notification/notification.constant';
 import { Class } from '../class/entitites/class.entity';
 import { User } from '../user/entities/user.entity';
 import { RequestItemsRepository } from '../request_items/repository/request_items.repository';
@@ -85,11 +82,14 @@ export class ItemsService implements IItemsService {
 
   //ini ada bug nih, dia gak mau meresponse selalu muter muter. Ganti metode mapping nya cuy
   async findAllItems(filterCategory: ItemCategory): Promise<Item[]> {
-    const findItems: Item[] = await this.itemRepository.find({
-      where: {
-        category_item: filterCategory,
-      },
-    });
+    const findItems: Item[] = await this.itemRepository.find(
+      {
+        where: {
+          category_item: filterCategory,
+          status_item: StatusItem.TERSEDIA
+        }
+      }
+    );
 
     return findItems;
   }
@@ -98,6 +98,7 @@ export class ItemsService implements IItemsService {
     category: ItemCategory,
     classId: number,
     itemName: string,
+    major: Major,
     status: StatusItem,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
@@ -106,6 +107,7 @@ export class ItemsService implements IItemsService {
         category,
         classId,
         itemName,
+        major,
         status,
         pageOptionsDto,
       );
@@ -165,6 +167,40 @@ export class ItemsService implements IItemsService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async updateStatusItem(id: number): Promise<Item> {
+      const queryRunner = this.dataSource.createQueryRunner();
+
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      try {
+        const session: User = await this.authService.getSession();
+
+        const findItemToUpdate: Item = await this.itemRepository.findById(id);
+
+        await this.notificationService.sendNotification({
+          title: 'Item Berhasil diupdate!',
+          content: `Item ${findItemToUpdate.name} berhasil update status barang`,
+          color: 'red',
+          user_id: session.id,
+        });
+
+        const mergeData: Item = this.itemRepository.merge(findItemToUpdate, {status_item: StatusItem.TIDAK_TERSEDIA});
+
+        const resultData: Item = await queryRunner.manager.save(mergeData);
+
+        await queryRunner.commitTransaction();
+
+        return resultData;
+      } catch (err) {
+        await queryRunner.rollbackTransaction();
+
+        throw err;
+      } finally {
+        await queryRunner.release();
+      }
   }
 
   public async updateOne(id: number, body: UpdateItemDto): Promise<Item> {

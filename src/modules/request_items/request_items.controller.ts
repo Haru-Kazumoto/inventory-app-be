@@ -32,6 +32,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { RolesGuard } from 'src/security/guards/roles.guard';
+import { ItemType } from 'src/enums/item_type.enum';
 import { Major } from 'src/enums/majors.enum';
 
 @UseGuards(AuthenticatedGuard)
@@ -42,7 +43,7 @@ export class RequestItemsController {
 
   // Menginzinkan role selain superadmin untuk membuat request
   @UseGuards(RolesGuard)
-  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'SUPERADMIN')
   @CreateRequestDecorator()
   @Post('create')
   public async createRequest(@Body() body: CreateRequestItemDto) {
@@ -59,11 +60,17 @@ export class RequestItemsController {
   @FindAllRequestDecorator()
   @Get('find-all')
   public findAll(
-    @Query('class') className: string,
+    @Query('major') majorName: Major,
     @Query('status') status: RequestStatus,
+    @Query('item_type') item_type: ItemType,
     @Query() pageOptionsDto: PageOptionsDto,
   ) {
-    return this.requestItemsService.findMany(className, status, pageOptionsDto);
+    return this.requestItemsService.findMany(
+      majorName,
+      status,
+      item_type,
+      pageOptionsDto,
+    );
   }
 
   @RequestItemsByStatusDecorator()

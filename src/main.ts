@@ -1,5 +1,5 @@
 import { NestApplication, NestFactory } from '@nestjs/core';
-import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { initializeTransactionalContext } from 'typeorm-transactional/dist/common';
 import { TypeormStore } from 'connect-typeorm';
@@ -8,12 +8,13 @@ import { Session } from './modules/auth/session/session.entity';
 import config, { 
   passportConfig, 
   globalPipesRegistrar,
-  // globalInterceptorRegistrar,
   setupSwagger 
 } from "./config/application.config";
 import * as session from 'express-session';
 import * as dotenv from "dotenv";
-import { ExcelService } from './utils/excel/excel.service';
+import * as compression from 'compression';
+import * as csurf from 'csurf';
+import helmet from 'helmet';
 
 async function bootstrap() {
   dotenv.config();
@@ -21,14 +22,14 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, 
     // {cors: config.corsOption}
-    );
+  );
+
   const sessionRepository = app.get(DataSource).getRepository(Session);
 
   app.enableCors({
     credentials: true,
-    origin: "http://localhost:5173",
-    
-  })
+    origin: "http://localhost:5173"
+  });
   app.setGlobalPrefix(config.globalPrefix);
   app.use(
     session(
@@ -44,7 +45,10 @@ async function bootstrap() {
           secret: process.env.COOKIE_SECRET_KEY as string
         }).connect(sessionRepository)
       }
-    )
+    ),
+    compression(),
+    helmet(),
+    // csurf()
   );
 
   setupSwagger(app);
@@ -58,9 +62,6 @@ async function bootstrap() {
     if(process.env.NODE_STATUS == "DEV"){
       Logger.log(`Nest running on port ${process.env.APP_PORT}`, NestApplication.name);
       Logger.log(`Swagger available at ${process.env.APP_URL}/api`, "Swagger");
-
-      // ----------------- TESTING EXPORT EXCEL
-      Logger.log(`Export link available at http://localhost:8000/items/export-data-item`, ExcelService.name);
     }
 
   } catch(error) {

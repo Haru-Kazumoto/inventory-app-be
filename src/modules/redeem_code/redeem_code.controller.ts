@@ -8,6 +8,7 @@ import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
 import { PageOptionsDto } from 'src/utils/pagination.utils';
 import { ApiGenerateRedeemCode } from './decorator/api-generate-redeem-code.decorator';
 import { StatusCode } from 'src/enums/status_code.enum';
+import { Major } from 'src/enums/majors.enum';
 
 @ApiTags('RedeemCode')
 @UseGuards(AuthenticatedGuard)
@@ -41,6 +42,12 @@ export class RedeemCodeController {
   }
 
   @ApiQuery({
+    name: "major",
+    description: "Find all redeem code by major",
+    required: false,
+    enum: Major
+  })
+  @ApiQuery({
     name: "status-code",
     description: "Filtering find codes with status code",
     required: false,
@@ -48,8 +55,12 @@ export class RedeemCodeController {
   })
   @Get('find-all-codes')
   @ApiPaginatedResponse(ExitLogs)
-  async findAllRedeemCodes(@Query('status-code') statusCode: StatusCode, @Query() pageOptionsDto: PageOptionsDto) {
-    return await this.redeemCodeService.findAllRedeemCodes(statusCode, pageOptionsDto);
+  async findAllRedeemCodes(
+    @Query('major') major: Major,
+    @Query('status-code') statusCode: StatusCode, 
+    @Query() pageOptionsDto: PageOptionsDto
+  ) {
+    return await this.redeemCodeService.findAllRedeemCodes(major,statusCode, pageOptionsDto);
   }
 
   @ApiQuery({

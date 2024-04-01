@@ -4,8 +4,7 @@ import {
   ApiOkResponse,
   ApiQuery,
 } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
-import { RequestItem } from '../entities/request_item.entity';
+import { Major } from 'src/enums/majors.enum';
 
 export function RequestItemsByStatusDecorator() {
   return applyDecorators(
@@ -30,6 +29,11 @@ export function RequestItemsByStatusDecorator() {
         },
       },
     }),
-    ApiPaginatedResponse(RequestItem),
+    ApiQuery({
+      name: 'major',
+      description: 'Major of item',
+      required: false,
+      enum: Major,
+    }),
   );
 }

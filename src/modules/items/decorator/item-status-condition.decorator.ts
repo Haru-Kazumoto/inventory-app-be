@@ -1,5 +1,11 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiInternalServerErrorResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
+import { Major } from 'src/enums/majors.enum';
 
 export function ItemsStatusConditionDecorator() {
   return applyDecorators(
@@ -23,6 +29,18 @@ export function ItemsStatusConditionDecorator() {
           message: { type: 'string', example: 'Internal server error' },
         },
       },
+    }),
+    ApiQuery({
+      name: 'major',
+      description: 'Major of item',
+      required: false,
+      enum: Major,
+    }),
+    ApiQuery({
+      name: 'status',
+      description: 'Status of item',
+      required: false,
+      enum: ItemStatusCondition,
     }),
   );
 }

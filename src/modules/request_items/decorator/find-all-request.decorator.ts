@@ -1,7 +1,12 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiInternalServerErrorResponse, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
-import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
-import { RequestItem } from '../entities/request_item.entity';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { ItemType } from 'src/enums/item_type.enum';
+import { Major } from 'src/enums/majors.enum';
+import { RequestStatus } from 'src/enums/request_status.enum';
 
 export function FindAllRequestDecorator() {
   return applyDecorators(
@@ -30,12 +35,19 @@ export function FindAllRequestDecorator() {
       name: 'status',
       description: 'Status of item',
       required: false,
+      enum: RequestStatus,
     }),
     ApiQuery({
-      name: 'class',
-      description: 'Class of item',
+      name: 'major',
+      description: 'Major of item',
       required: false,
+      enum: Major,
     }),
-    ApiPaginatedResponse(RequestItem),
+    ApiQuery({
+      name: 'item_type',
+      description: 'type of item',
+      required: false,
+      enum: ItemType,
+    }),
   );
 }

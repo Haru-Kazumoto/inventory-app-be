@@ -11,15 +11,10 @@ export class CreateItemDto {
     public name: string; //items name
 
     @IsString()
-    @IsNotEmpty()
-    @ApiProperty({example: "MKT-123456789"})
-    public item_code: string;
-
-    // @IsString()
     // @IsNotEmpty()
-    // @IsEnum(StatusItem)
-    // @ApiProperty({example: StatusItem.TERSEDIA})
-    // public status_item: StatusItem; //lookup type STATUS
+    @IsOptional()
+    @ApiProperty({example: "MKT-123456789"})
+    public item_code?: string;
 
     @IsString()
     @IsNotEmpty()
@@ -30,9 +25,9 @@ export class CreateItemDto {
     @IsNotEmpty()
     @IsEnum(ItemCategory)
     @ApiProperty({example: ItemCategory.BARANG_HABIS_PAKAI})
-    public category_item: ItemCategory; 
+    public category_item: ItemCategory;
 
-    @IsNotEmpty()
+    // @IsNotEmpty()
     @IsOptional()
     @ApiProperty({example: "1 PACK / 1 PCS"})
     public total_unit?: string;

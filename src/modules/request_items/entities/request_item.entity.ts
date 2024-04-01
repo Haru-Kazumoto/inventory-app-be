@@ -1,4 +1,5 @@
 import { BaseEntity } from 'src/entities/base.entity';
+import { ItemType } from 'src/enums/item_type.enum';
 import { RequestStatus } from 'src/enums/request_status.enum';
 import { Class } from 'src/modules/class/entitites/class.entity';
 import {
@@ -24,6 +25,10 @@ export class RequestItem extends BaseEntity {
   @Column({ name: 'status', nullable: false })
   public status: RequestStatus;
 
+  //new
+  @Column({ name: "item_type", nullable: true})
+  public item_type: ItemType;
+
   @Column({ name: 'description', nullable: false })
   public description: string;
 
@@ -42,7 +47,7 @@ export class RequestItem extends BaseEntity {
   @Column({ name: 'class_id', nullable: false })
   public class_id: number;
 
-  @ManyToOne(() => Class, (classEntity) => classEntity.item, {
+  @ManyToOne(() => Class, (classEntity) => classEntity.request_item, {
     cascade: true,
     onDelete: 'CASCADE',
     eager: true,

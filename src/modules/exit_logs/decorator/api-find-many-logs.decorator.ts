@@ -1,6 +1,7 @@
 import { applyDecorators } from "@nestjs/common";
 import { ApiOkResponse, ApiQuery } from "@nestjs/swagger";
 import { ItemCategory } from "src/enums/item_category.enum";
+import { Major } from "src/enums/majors.enum";
 
 export function ApiFindManyLogs() {
     return applyDecorators(
@@ -41,6 +42,12 @@ export function ApiFindManyLogs() {
             description: "Find exit log by item category",
             enum: ItemCategory,
             required: true
+        }),
+        ApiQuery({
+            name: "major",
+            description: "find exit log by major",
+            enum: Major,
+            required: false
         })
     )
 }

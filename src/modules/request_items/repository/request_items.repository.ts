@@ -5,6 +5,7 @@ import { RequestStatus } from 'src/enums/request_status.enum';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ItemType } from 'src/enums/item_type.enum';
 import { Major } from 'src/enums/majors.enum';
 
 @Injectable()
@@ -16,8 +17,9 @@ export class RequestItemsRepository extends Repository<RequestItem> {
   }
 
   public async findMany(
-    className: string,
+    majorName: Major,
     status: RequestStatus,
+    item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>> {
     const queryAlias = 'request_item';
@@ -28,13 +30,16 @@ export class RequestItemsRepository extends Repository<RequestItem> {
           status,
         });
       }
-      if (className) {
+      if (majorName) {
         qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
-          `class.class_name = :className`,
+          `class.major = :majorName`,
           {
-            className,
+            majorName,
           },
         );
+      }
+      if (item_type) {
+        qb.andWhere(`${queryAlias}.item_type = :item_type`, { item_type });
       }
     };
 
@@ -69,12 +74,15 @@ export class RequestItemsRepository extends Repository<RequestItem> {
     pageOptionsDto: PageOptionsDto,
   ): Promise<any> {
     const queryAlias = 'request_item';
-
     const whereCondition = (qb: SelectQueryBuilder<RequestItem>) => {
       if (major) {
-        qb.andWhere(`${queryAlias}.class = :major`, { major });
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+          `class.major = :major`,
+          {
+            major,
+          },
+        );
       }
-
       qb.where(`${queryAlias}.status = :pending`, {
         pending: RequestStatus.PENDING,
       });

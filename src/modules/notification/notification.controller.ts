@@ -1,4 +1,4 @@
-import { Controller, Get, Delete, Res, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Delete, Res, Query, UseGuards, Patch } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import {
   ApiBadRequestResponse,
@@ -62,5 +62,31 @@ export class NotificationController {
   @Delete('delete-notification')
   async deleteNotification(@Query('notif-id') notifId: number) {
     await this.notificationService.deleteNotification(notifId);
+  }
+
+  @ApiQuery({
+    name: "notif-id",
+    description: "get notification by id",
+    type: Number,
+    required: true
+  })
+  @Get("find-notif-by-id")
+  async findNotifById(@Query('notif-id') notifId: number){
+    const data = await this.notificationService.findNotificationById(notifId);
+
+    return {
+      [this.findNotifById.name]: data
+    }
+  }
+
+  @ApiQuery({
+    name: "user-id",
+    description: "Change all notification to has read by user id",
+    required: true,
+    type: Number
+  })
+  @Patch('read-all')
+  async readAllNotification(@Query('user-id') userId: number) {
+    await this.notificationService.readAllNotification(userId);
   }
 }

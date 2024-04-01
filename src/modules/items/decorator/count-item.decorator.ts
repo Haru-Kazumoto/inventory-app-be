@@ -1,5 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiInternalServerErrorResponse, ApiOkResponse } from '@nestjs/swagger';
+import {
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
+import { Major } from 'src/enums/majors.enum';
 
 export function CountItemDecorator() {
   return applyDecorators(
@@ -23,6 +28,12 @@ export function CountItemDecorator() {
           message: { type: 'string', example: 'Internal server error' },
         },
       },
+    }),
+    ApiQuery({
+      name: 'major',
+      description: 'Major of item',
+      required: false,
+      enum: Major,
     }),
   );
 }
