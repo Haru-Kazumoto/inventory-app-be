@@ -23,7 +23,13 @@ export class RedeemCodeRepository extends Repository<RedeemCode> {
         const whereCondition = (qb: SelectQueryBuilder<RedeemCode>) => {
             if(filterStatus === StatusCode.VALID) {
                 qb.andWhere(`${queryAlias}.is_valid = true`)
-            };
+            } else if (filterStatus == StatusCode.NOT_VALID) {
+                qb.andWhere(`${queryAlias}.is_valid = false`)
+            } else {
+                qb.getMany()
+            }
+            qb.leftJoinAndSelect(`${queryAlias}.exitLog`, 'exitLog');
+            qb.leftJoinAndSelect('exitLog.item_details', 'item_details');
             // else qb.andWhere(`${queryAlias}.is_valid = false`);
         };
 

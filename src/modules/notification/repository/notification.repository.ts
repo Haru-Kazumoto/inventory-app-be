@@ -12,8 +12,13 @@ export class NotificationRepository extends Repository<Notification> {
     }
 
     async findAllNotifications(userId: number): Promise<Notification[] | undefined>{
-        return await this.notificationRepository.find({where: {
-            user_id: userId
-        }});
+        return await this.notificationRepository.find({
+        where: {
+            user_id: userId,
+        },
+        order: {
+            created_at: "DESC"
+        }
+    });
     }
 }
