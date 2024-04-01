@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { IRedeemCodeService } from './redeem_code.service.interface';
+import { IRedeemCodeService } from './interfaces/redeem_code.service.interface';
 import { RedeemCodeRepository } from './repositories/redeem_code.repository';
 import { RedeemCode } from './entities/redeem_code.entity';
 import { DataSource } from 'typeorm';
@@ -15,6 +15,8 @@ import { ItemDetails } from '../item_details/entities/item_details.entity';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusCode } from 'src/enums/status_code.enum';
 import { ItemDetailsRepository } from '../item_details/repositories/item_details.repository';
+import { User } from '../user/entities/user.entity';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class RedeemCodeService implements IRedeemCodeService {
@@ -24,10 +26,13 @@ export class RedeemCodeService implements IRedeemCodeService {
         private readonly itemRepository: ItemsRepository,
         private readonly redeemCodeRepository: RedeemCodeRepository,
         private readonly itemDetailRepository: ItemDetailsRepository,
+        private readonly authService: AuthService,
         private dataSource: DataSource
     ){}
 
     async createRedeemCode(body: CreateExitLogDto): Promise<RedeemCode> {
+        const session: User = await this.authService.getSession();
+
         const queryRunner = this.dataSource.createQueryRunner();
     
         await queryRunner.connect();
@@ -38,7 +43,10 @@ export class RedeemCodeService implements IRedeemCodeService {
             /**
              * The exit log data must be created first before redeem code
              */
-            const createLog = this.exitlogRepository.create(body);
+            const createLog = this.exitlogRepository.create({
+                ...body,
+                for_major: session.role.major
+            });
             const newLog = await queryRunner.manager.save(ExitLogs, createLog);
 
             if(body.total !== newLog.item_details.length) throw new BadRequestException("Total item tidak sama dengan yang diinginkan.");
@@ -207,13 +215,15 @@ export class RedeemCodeService implements IRedeemCodeService {
                 where: { redeem_code: redeemCode },
                 relations: { exitLog: true }
             });
-    
+
             const currentExitLog: ExitLogs = findRedeemCode.exitLog;
             
             await Promise.all(body.item_details.map(async (itemDetail: ItemDetails) => {
                 //check is availability on inventory
                 const itemChoosen: Item = await this.itemRepository.findById(itemDetail.item_id);
                 if(!itemChoosen) throw new BadRequestException("Item tidak ada di inventory!");
+
+                if(body.item_details.map((data) => {data.item_id}))
 
                 //check is the item availablel or not
                 if (itemChoosen.status_item !== StatusItem.TERSEDIA) {
@@ -254,7 +264,6 @@ export class RedeemCodeService implements IRedeemCodeService {
             await queryRunner.release();
         }
     }
-    
 
     async findByRedeemCode(redeemCode: string): Promise<RedeemCode> {
         return await this.redeemCodeRepository.findOne({

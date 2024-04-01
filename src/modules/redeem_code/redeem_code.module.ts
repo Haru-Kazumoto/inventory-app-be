@@ -9,12 +9,14 @@ import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
 import { ItemsModule } from '../items/items.module';
 import { ExitLogsModule } from '../exit_logs/exit_logs.module';
 import { ItemDetailsModule } from '../item_details/item_details.module';
+import { AuthModule } from '../auth/auth.module';
   
 @Module({
   imports: [
     TypeOrmModule.forFeature([RedeemCode, Item, ExitLogs]),
     ItemsModule,
     ItemDetailsModule,
+    AuthModule,
     // ExitLogsModule
     forwardRef(() => ExitLogsModule)
   ],

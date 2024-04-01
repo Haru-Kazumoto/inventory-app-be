@@ -16,6 +16,8 @@ import { RequestItemsModule } from './modules/request_items/request_items.module
 import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ExcelService } from './utils/excel/excel.service';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { CronModule } from './modules/cron/cron.module';
 
 @Module({
   imports: [
@@ -31,6 +33,8 @@ import { ExcelService } from './utils/excel/excel.service';
     ItemsModule,
     ExitLogsModule,
     RequestItemsModule,
+    DashboardModule,
+    CronModule,
   ],
   providers: [
     {

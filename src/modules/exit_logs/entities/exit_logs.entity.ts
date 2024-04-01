@@ -4,6 +4,7 @@ import { ItemDetails } from "src/modules/item_details/entities/item_details.enti
 import { RedeemCode } from "src/modules/redeem_code/entities/redeem_code.entity";
 import { BaseEntity } from "src/entities/base.entity";
 import { Column, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Major } from "src/enums/majors.enum";
 
 @Entity()
 export class ExitLogs extends BaseEntity {
@@ -23,14 +24,14 @@ export class ExitLogs extends BaseEntity {
     @Column({name: "item_category", enum: ItemCategory, default: ItemCategory.BARANG_HABIS_PAKAI, nullable: false})
     public item_category: ItemCategory;
 
-    // @Column({name: "item_detail_id", nullable: false})
-    // public item_detail_id: number;
-
     @Column({name: "exit_class", default: null, nullable: true})
     public exit_class: string;
 
     @Column({name: "status_exit", enum: StatusExit, default: null, nullable: false})
     public status_exit: StatusExit;
+
+    @Column({name: "for_major", nullable: true})
+    public for_major: string;
 
     // --------------- RELATIONS --------------- //
 
