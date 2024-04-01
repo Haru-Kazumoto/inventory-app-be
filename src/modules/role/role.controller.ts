@@ -9,8 +9,8 @@ import { ApiGetAllRoles } from './decorators/api-get-all-roles.decorator';
 import { ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Role')
-@UseGuards(RolesGuard, AuthenticatedGuard)
-@Roles('SUPERADMIN')
+@UseGuards(AuthenticatedGuard)
+// @Roles('SUPERADMIN')
 @Controller('role')
 export class RoleController {
 
