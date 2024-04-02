@@ -74,14 +74,16 @@ export class RequestItemsController {
   }
 
   @RequestItemsByStatusDecorator()
-  @Get('request-items-by-status')
-  public requestItemByStatus(
-    @Query() major: Major,
+  @Get('pending-request')
+  public pendingRequest(
+    @Query('major') majorName: Major,
     @Query() pageOptionsDto: PageOptionsDto,
   ) {
-    return this.requestItemsService.requestItemByStatus(major, pageOptionsDto);
+    return this.requestItemsService.pendingRequest(
+      majorName,
+      pageOptionsDto,
+    );
   }
-
   // Mengizinkan role selain superadmin untuk mengupdate request
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(RolesGuard)

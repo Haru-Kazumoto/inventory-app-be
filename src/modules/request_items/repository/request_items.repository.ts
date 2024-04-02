@@ -69,23 +69,24 @@ export class RequestItemsRepository extends Repository<RequestItem> {
     });
   }
 
-  public async requestItemByStatus(
-    major: Major,
+  public async pendingRequest(
+    majorName: Major,
     pageOptionsDto: PageOptionsDto,
-  ): Promise<any> {
+  ): Promise<PageDto<RequestItem>> {
     const queryAlias = 'request_item';
+
     const whereCondition = (qb: SelectQueryBuilder<RequestItem>) => {
-      if (major) {
+      qb.andWhere(`${queryAlias}.status = :pending`, {
+        pending: RequestStatus.PENDING,
+      });
+      if (majorName) {
         qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
-          `class.major = :major`,
+          `class.major = :majorName`,
           {
-            major,
+            majorName,
           },
         );
       }
-      qb.where(`${queryAlias}.status = :pending`, {
-        pending: RequestStatus.PENDING,
-      });
     };
 
     return await pagination<RequestItem>(

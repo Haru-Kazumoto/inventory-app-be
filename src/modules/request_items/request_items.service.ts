@@ -195,11 +195,11 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
-  public requestItemByStatus(
+  public pendingRequest(
     major: Major,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>> {
-    return this.requestItemRepository.requestItemByStatus(
+    return this.requestItemRepository.pendingRequest(
       major,
       pageOptionsDto,
     );

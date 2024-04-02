@@ -9,7 +9,7 @@ import { Major } from 'src/enums/majors.enum';
 export function RequestItemsByStatusDecorator() {
   return applyDecorators(
     ApiOkResponse({
-      description: 'Success get all request items by status pending',
+      description: 'Success get all request items by status',
       schema: {
         type: 'object',
         properties: {
