@@ -115,12 +115,12 @@ export class ItemsController {
 
   @ItemsStatusConditionDecorator()
   @Get('items-by-status')
-  public async itemByStatus(
+  public async itemStatusCondition(
     @Query('status') status: ItemStatusCondition,
     @Query('major') major: Major,
     @Query() pageOptionsDto: PageOptionsDto,
   ): Promise<any> {
-    return this.itemsService.itemByStatus(status, major, pageOptionsDto);
+    return this.itemsService.itemStatusCondition(status, major, pageOptionsDto);
   }
 
   @GetAllItemsDecorator()

@@ -139,12 +139,12 @@ export class ItemsService implements IItemsService {
     };
   }
 
-  public async itemByStatus(
+  public async itemStatusCondition(
     status: ItemStatusCondition,
     major: Major,
     pageOptionsDto: PageOptionsDto,
   ): Promise<any> {
-    const data = await this.itemRepository.itemByStatus(status, major, pageOptionsDto);
+    const data = await this.itemRepository.itemStatusCondition(status, major, pageOptionsDto);
     if (!data) throw new NotFoundException('Data tidak ditemukan');
     return data;
   }

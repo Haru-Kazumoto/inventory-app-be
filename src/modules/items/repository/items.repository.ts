@@ -70,7 +70,7 @@ export class ItemsRepository extends Repository<Item> {
     );
   }
 
-  public async itemByStatus(
+  public async itemStatusCondition(
     status: ItemStatusCondition,
     major: Major,
     pageOptionsDto: PageOptionsDto,
