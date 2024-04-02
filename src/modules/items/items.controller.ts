@@ -193,25 +193,46 @@ export class ItemsController {
     @Query('major') major: Major,
     @Res() response: Response,
   ): Promise<void> {
-    const data: Item[] = await this.itemsRepository.find({
-      where: {
-        category_item: item_category,
-        class: {
-          major: major,
+    let data: Item[];
+
+    if (major) {
+      data = await this.itemsRepository.find({
+        where: {
+          category_item: item_category,
+          class: {
+            major: major,
+          },
         },
-      },
-      relations: ['class'],
-      select: [
-        'name',
-        'item_code',
-        'status_item',
-        'source_fund',
-        'unit_price',
-        'item_condition',
-        'category_item',
-        'item_type',
-      ],
-    });
+        relations: ['class'],
+        select: [
+          'name',
+          'item_code',
+          'status_item',
+          'source_fund',
+          'unit_price',
+          'item_condition',
+          'category_item',
+          'item_type',
+        ],
+      });
+    } else {
+      data = await this.itemsRepository.find({
+        where: {
+          category_item: item_category,
+        },
+        relations: ['class'],
+        select: [
+          'name',
+          'item_code',
+          'status_item',
+          'source_fund',
+          'unit_price',
+          'item_condition',
+          'category_item',
+          'item_type',
+        ],
+      });
+    }
 
     data.forEach((item) => {
       item['major'] = item.class.major;
