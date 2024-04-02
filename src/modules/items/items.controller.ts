@@ -18,19 +18,10 @@ import {
 import { ItemsService } from './items.service';
 import { CreateItemDto } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import {
-  ApiBadRequestResponse,
-  ApiBody,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiOkResponse,
-  ApiQuery,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 import { Item } from './entities/item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
-import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { GetAllItemResponse } from './dto/response-item.dto';
@@ -38,7 +29,7 @@ import { ExcelService } from 'src/utils/excel/excel.service';
 import { Response } from 'express';
 import { ItemsRepository } from './repository/items.repository';
 import { Major } from 'src/enums/majors.enum';
-import { ItemStatusCount } from './interfaces/item_status_count.interface';
+import { ItemStatusCount } from './interfaces/item-status-count.interface';
 import { CreateItemDecorator } from './decorator/create-item.decorator';
 import { FindAllItemDecorator } from './decorator/find-all-item.decorator';
 import { CountItemDecorator } from './decorator/count-item.decorator';
@@ -53,6 +44,7 @@ import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
 
 import * as ExcelJs from 'exceljs';
 import { UpdateStatusItemDecorator } from './decorator/update-status-item.decorator';
+import { CountItemByMajorDecorator } from './decorator/count-item-by-major.decorator';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
@@ -107,14 +99,25 @@ export class ItemsController {
 
   @CountItemDecorator()
   @Get('count-items')
-  public async countItemByStatus(
-    @Query('major') major: Major,
-  ): Promise<ItemStatusCount> {
-    return this.itemsService.countItemByStatus(major);
+  public async countItemByStatus(@Query('major') major: Major) {
+    const countItemByStatus = await this.itemsService.countItemByStatus(major);
+
+    return {
+      [this.countItemByStatus.name]: countItemByStatus,
+    };
+  }
+
+  @CountItemByMajorDecorator()
+  @Get('count-items-by-major')
+  public async countItemByMajor() {
+    const countsByMajor = await this.itemsService.countItemByMajor();
+    return {
+      [this.countItemByMajor.name]: countsByMajor,
+    };
   }
 
   @ItemsStatusConditionDecorator()
-  @Get('items-by-status')
+  @Get('items-by-condition')
   public async itemStatusCondition(
     @Query('status') status: ItemStatusCondition,
     @Query('major') major: Major,

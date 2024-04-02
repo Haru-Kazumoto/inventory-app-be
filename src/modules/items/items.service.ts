@@ -19,13 +19,17 @@ import { ItemCategory } from 'src/enums/item_category.enum';
 import { DataSource } from 'typeorm';
 import { AuthService } from '../auth/auth.service';
 import { StatusItem } from 'src/enums/status_item.enum';
-import {itemCreateContent,itemDeleteContent} from '../notification/notification.constant';
+import {
+  itemCreateContent,
+  itemDeleteContent,
+} from '../notification/notification.constant';
 import { Class } from '../class/entitites/class.entity';
 import { User } from '../user/entities/user.entity';
 import { RequestItemsRepository } from '../request_items/repository/request_items.repository';
-import { ItemStatusCount } from './interfaces/item_status_count.interface';
+import { ItemStatusCount } from './interfaces/item-status-count.interface';
 import { Major } from 'src/enums/majors.enum';
 import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
+import { ItemCountByMajor } from './interfaces/item-count-by-major.interface';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -78,6 +82,22 @@ export class ItemsService implements IItemsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async countItemByMajor(): Promise<ItemCountByMajor> {
+    const classData: Class[] = await this.classRepository.find();
+    const result: ItemCountByMajor = {};
+
+    for (const cls of classData) {
+      const itemCount = await this.itemRepository.count({
+        where: {
+          class: cls,
+        },
+      });
+      result[cls.major] = itemCount;
+    }
+
+    return result;
   }
 
   //ini ada bug nih, dia gak mau meresponse selalu muter muter. Ganti metode mapping nya cuy
@@ -146,7 +166,11 @@ export class ItemsService implements IItemsService {
     major: Major,
     pageOptionsDto: PageOptionsDto,
   ): Promise<any> {
-    const data = await this.itemRepository.itemStatusCondition(status, major, pageOptionsDto);
+    const data = await this.itemRepository.itemStatusCondition(
+      status,
+      major,
+      pageOptionsDto,
+    );
     if (!data) throw new NotFoundException('Data tidak ditemukan');
     return data;
   }
@@ -172,37 +196,39 @@ export class ItemsService implements IItemsService {
   }
 
   async updateStatusItem(id: number): Promise<Item> {
-      const queryRunner = this.dataSource.createQueryRunner();
+    const queryRunner = this.dataSource.createQueryRunner();
 
-      await queryRunner.connect();
-      await queryRunner.startTransaction();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-      try {
-        const session: User = await this.authService.getSession();
+    try {
+      const session: User = await this.authService.getSession();
 
-        const findItemToUpdate: Item = await this.itemRepository.findById(id);
+      const findItemToUpdate: Item = await this.itemRepository.findById(id);
 
-        await this.notificationService.sendNotification({
-          title: 'Item Berhasil diupdate!',
-          content: `Item ${findItemToUpdate.name} berhasil update status barang`,
-          color: 'red',
-          user_id: session.id,
-        });
+      await this.notificationService.sendNotification({
+        title: 'Item Berhasil diupdate!',
+        content: `Item ${findItemToUpdate.name} berhasil update status barang`,
+        color: 'red',
+        user_id: session.id,
+      });
 
-        const mergeData: Item = this.itemRepository.merge(findItemToUpdate, {status_item: StatusItem.TIDAK_TERSEDIA});
+      const mergeData: Item = this.itemRepository.merge(findItemToUpdate, {
+        status_item: StatusItem.TIDAK_TERSEDIA,
+      });
 
-        const resultData: Item = await queryRunner.manager.save(mergeData);
+      const resultData: Item = await queryRunner.manager.save(mergeData);
 
-        await queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
 
-        return resultData;
-      } catch (err) {
-        await queryRunner.rollbackTransaction();
+      return resultData;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
 
-        throw err;
-      } finally {
-        await queryRunner.release();
-      }
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   public async updateOne(id: number, body: UpdateItemDto): Promise<Item> {
