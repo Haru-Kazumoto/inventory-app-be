@@ -24,7 +24,7 @@ export class RedeemCodeRepository extends Repository<RedeemCode> {
         const whereCondition = (qb: SelectQueryBuilder<RedeemCode>) => {
 
             if(major) {
-                qb.leftJoinAndSelect(`${queryAlias}.exit_log`, 'exit_log').andWhere(
+                qb.leftJoinAndSelect(`${queryAlias}.exitLog`, 'exit_log').andWhere(
                     'exit_log.for_major = :major',{
                         major
                     }

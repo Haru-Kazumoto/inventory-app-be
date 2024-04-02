@@ -127,8 +127,9 @@ export class ItemsController {
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
     @Query('item-category') filterCategory: ItemCategory,
+    @Query('major') major: Major,
   ) {
-    const items = await this.itemsService.findAllItems(filterCategory);
+    const items = await this.itemsService.findAllItems(filterCategory, major);
 
     const responseDto = items.map(
       (item) =>

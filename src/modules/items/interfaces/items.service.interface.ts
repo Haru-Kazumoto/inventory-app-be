@@ -22,7 +22,7 @@ export interface IItemsService {
     itemName: string,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>>;
-  findAllItems(filterCategory: ItemCategory): Promise<Item[]>;
+  findAllItems(filterCategory: ItemCategory, major: Major): Promise<Item[]>;
   itemStatusCondition(
     status: ItemStatusCondition,
     major: Major,
