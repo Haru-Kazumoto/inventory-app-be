@@ -4,12 +4,9 @@ import {
   Post,
   Body,
   Patch,
-  Param,
   Delete,
   UseGuards,
-  UseInterceptors,
   Res,
-  Req,
   Query,
   Put,
   ParseIntPipe,
@@ -29,11 +26,9 @@ import { ExcelService } from 'src/utils/excel/excel.service';
 import { Response } from 'express';
 import { ItemsRepository } from './repository/items.repository';
 import { Major } from 'src/enums/majors.enum';
-import { ItemStatusCount } from './interfaces/item-status-count.interface';
 import { CreateItemDecorator } from './decorator/create-item.decorator';
 import { FindAllItemDecorator } from './decorator/find-all-item.decorator';
 import { CountItemDecorator } from './decorator/count-item.decorator';
-import { RequestItemsByStatusDecorator } from '../request_items/decorator/request-items-by-status.decorator';
 import { ItemsStatusConditionDecorator } from './decorator/item-status-condition.decorator';
 import { GetAllItemsDecorator } from './decorator/get-all-items.decorator';
 import { FindByItemNameDecorator } from './decorator/find-by-item-name.decorator';

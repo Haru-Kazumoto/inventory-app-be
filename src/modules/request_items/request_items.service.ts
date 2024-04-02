@@ -38,6 +38,7 @@ export class RequestItemsService implements IRequestItems {
   // Membuat request item
   public async createRequest(body: CreateRequestItemDto): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
+
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -50,6 +51,7 @@ export class RequestItemsService implements IRequestItems {
       const newRequest = this.requestItemRepository.create({
         ...body,
         class: classEntity,
+        from_major: session.role.major
       });
       const resultData = await this.requestItemRepository.save(newRequest);
 
