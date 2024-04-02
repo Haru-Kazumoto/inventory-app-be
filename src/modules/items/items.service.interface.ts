@@ -20,7 +20,7 @@ export interface IItemsService {
     itemName: string,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>>;
-  findAllItems(filterCategory: ItemCategory): Promise<Item[]>;
+  findAllItems(filterCategory: ItemCategory, major: Major): Promise<Item[]>;
   updateOne(id: number, body: UpdateItemDto): Promise<Item>;
   deleteById(id: number): Promise<void>;
   updateStatusItem(id: number): Promise<Item>;

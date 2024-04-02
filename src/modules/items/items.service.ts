@@ -77,15 +77,17 @@ export class ItemsService implements IItemsService {
   }
 
   //ini ada bug nih, dia gak mau meresponse selalu muter muter. Ganti metode mapping nya cuy
-  async findAllItems(filterCategory: ItemCategory): Promise<Item[]> {
-    const findItems: Item[] = await this.itemRepository.find(
-      {
-        where: {
-          category_item: filterCategory,
-          status_item: StatusItem.TERSEDIA
-        }
-      }
-    );
+  async findAllItems(
+    filterCategory: ItemCategory,
+    major: Major,
+  ): Promise<Item[]> {
+    const findItems: Item[] = await this.itemRepository.find({
+      where: {
+        category_item: filterCategory,
+        status_item: StatusItem.TERSEDIA,
+        class: { major },
+      },
+    });
 
     return findItems;
   }

@@ -194,11 +194,18 @@ export class ItemsController {
     enum: ItemCategory,
     required: false,
   })
+  @ApiQuery({
+    name: 'major',
+    description: 'Major of item',
+    required: false,
+    enum: Major,
+  })
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
     @Query('item-category') filterCategory: ItemCategory,
+    @Query('major') major: Major,
   ) {
-    const items = await this.itemsService.findAllItems(filterCategory);
+    const items = await this.itemsService.findAllItems(filterCategory, major);
 
     const responseDto = items.map(
       (item) =>

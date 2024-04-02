@@ -32,12 +32,11 @@ export class ItemsRepository extends Repository<Item> {
           category,
         });
       }
-      if(major) {
-        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
-          `class.major = :major`,{
-            major
-          }
-        )
+      if (major) {
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class1').andWhere(
+          'class1.major = :major',
+          { major },
+        );
       }
       if (status) {
         qb.andWhere(`${queryAlias}.status_item = :status`, {
@@ -45,10 +44,10 @@ export class ItemsRepository extends Repository<Item> {
         });
       }
       if (classId) {
-        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
-          `class.id = :classId`,
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class2').andWhere(
+          `class2.id = :classId`,
           {
-            classId
+            classId,
           },
         );
       }
