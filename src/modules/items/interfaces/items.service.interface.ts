@@ -6,7 +6,7 @@ import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { Major } from 'src/enums/majors.enum';
 import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
-import { ItemStatusCount } from './item_status_count.interface';
+import { ItemStatusCount } from './item-status-count.interface';
 
 export interface IItemsService {
   createOne(body: CreateItemDto): Promise<Item>;
