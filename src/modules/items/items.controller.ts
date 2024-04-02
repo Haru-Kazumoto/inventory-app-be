@@ -342,13 +342,13 @@ export class ItemsController {
     name: 'item_category',
     description: 'Mengambil data berdasarkan kategory dari barang',
     enum: ItemCategory,
-    required: true,
+    required: false,
   })
   @ApiQuery({
     name: 'major',
     description: 'Mengambil data berdasarkan tempat barang berada',
     enum: Major,
-    required: true,
+    required: false,
   })
   @Get('export-data-item')
   async exportExcel(
