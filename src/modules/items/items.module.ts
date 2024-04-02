@@ -10,13 +10,17 @@ import { NotificationModule } from '../notification/notification.module';
 import { AuditLogsModule } from '../audit-logs/audit-logs.module';
 import { AuthModule } from '../auth/auth.module';
 import { ExcelService } from 'src/utils/excel/excel.service';
+import { RequestItemsRepository } from '../request_items/repository/request_items.repository';
+import { RequestItemsModule } from '../request_items/request_items.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Item, Class]),
     ClassModule,
+    RequestItemsModule,
     NotificationModule,
     AuthModule,
+    RequestItemsModule,
     forwardRef(() => AuditLogsModule),
   ],
   controllers: [ItemsController],

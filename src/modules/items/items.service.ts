@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateItemDto } from './dto/create-item.dto';
-import { IItemsService } from './items.service.interface';
+import { IItemsService } from './interfaces/items.service.interface';
 import { ItemsRepository } from './repository/items.repository';
 import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
 import { Item } from './entities/item.entity';
@@ -22,7 +22,10 @@ import { StatusItem } from 'src/enums/status_item.enum';
 import {itemCreateContent,itemDeleteContent} from '../notification/notification.constant';
 import { Class } from '../class/entitites/class.entity';
 import { User } from '../user/entities/user.entity';
+import { RequestItemsRepository } from '../request_items/repository/request_items.repository';
+import { ItemStatusCount } from './interfaces/item_status_count.interface';
 import { Major } from 'src/enums/majors.enum';
+import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
 
 @Injectable()
 export class ItemsService implements IItemsService {
@@ -31,6 +34,7 @@ export class ItemsService implements IItemsService {
     private readonly classRepository: ClassRepository,
     private readonly notificationService: NotificationService,
     private readonly auditLogService: AuditLogsService,
+    private readonly requestItemRepository: RequestItemsRepository,
     private readonly authService: AuthService,
     private readonly dataSource: DataSource,
   ) {}
@@ -77,15 +81,17 @@ export class ItemsService implements IItemsService {
   }
 
   //ini ada bug nih, dia gak mau meresponse selalu muter muter. Ganti metode mapping nya cuy
-  async findAllItems(filterCategory: ItemCategory): Promise<Item[]> {
-    const findItems: Item[] = await this.itemRepository.find(
-      {
-        where: {
-          category_item: filterCategory,
-          status_item: StatusItem.TERSEDIA
-        }
-      }
-    );
+  async findAllItems(
+    filterCategory: ItemCategory,
+    major: Major,
+  ): Promise<Item[]> {
+    const findItems: Item[] = await this.itemRepository.find({
+      where: {
+        category_item: filterCategory,
+        status_item: StatusItem.TERSEDIA,
+        class: { major },
+      },
+    });
 
     return findItems;
   }
@@ -113,6 +119,41 @@ export class ItemsService implements IItemsService {
       throw error;
     }
   }
+
+  public async countItemByStatus(major: Major): Promise<ItemStatusCount> {
+    const goodItemCount = await this.itemRepository.countGoodItems(major);
+    const lightlyDamagedItemCount =
+      await this.itemRepository.countLightlyDamagedItems(major);
+    const severelyDamagedItemCount =
+      await this.itemRepository.countSeverelyDamagedItems(major);
+    const outItemCount = await this.itemRepository.countOutItems(major);
+    const totalItemCount = await this.itemRepository.countItems(major);
+    const pendingRequestItemCount =
+      await this.requestItemRepository.countPendingRequest(major);
+
+    return {
+      goodItemCount,
+      lightlyDamagedItemCount,
+      severelyDamagedItemCount,
+      outItemCount,
+      totalItemCount,
+      pendingRequestItemCount,
+    };
+  }
+
+  public async itemStatusCondition(
+    status: ItemStatusCondition,
+    major: Major,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<any> {
+    const data = await this.itemRepository.itemStatusCondition(status, major, pageOptionsDto);
+    if (!data) throw new NotFoundException('Data tidak ditemukan');
+    return data;
+  }
+
+  // public async itemByStatus(status: ): Promise<any> {
+
+  // }
 
   async findAllItemCodeByItemName(
     itemName: string,
@@ -170,47 +211,51 @@ export class ItemsService implements IItemsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-        const session: User = await this.authService.getSession();
+      const session: User = await this.authService.getSession();
 
-        const findItem: Item = await this.itemRepository.findById(id);
-        if (!findItem) throw new NotFoundException('Item tidak ditemukan');
+      const findItem: Item = await this.itemRepository.findById(id);
+      if (!findItem) throw new NotFoundException('Item tidak ditemukan');
 
-        const findClass: Class = await this.classRepository.findOne({where: {id: body.class_id}});
-        if(!findClass) throw new NotFoundException("Class id tidak ditemukan");
+      const findClass: Class = await this.classRepository.findOne({
+        where: { id: body.class_id },
+      });
+      if (!findClass) throw new NotFoundException('Class id tidak ditemukan');
 
-        // Menggunakan merge untuk menggabungkan data yang baru dengan data yang ada di objek findItem
-        const mergeData: Item = this.itemRepository.merge(findItem, {...body, class: findClass});
+      // Menggunakan merge untuk menggabungkan data yang baru dengan data yang ada di objek findItem
+      const mergeData: Item = this.itemRepository.merge(findItem, {
+        ...body,
+        class: findClass,
+      });
 
-        const resultData = await this.itemRepository.save(mergeData);
+      const resultData = await this.itemRepository.save(mergeData);
 
-        //UPDATE AUDIT LOGS
-        await this.auditLogService.createReport({
-            edit_method: EditMethod.UPDATE,
-            edited_by: session.id,
-            item_id: resultData.id,
-        });
+      //UPDATE AUDIT LOGS
+      await this.auditLogService.createReport({
+        edit_method: EditMethod.UPDATE,
+        edited_by: session.id,
+        item_id: resultData.id,
+      });
 
-        //UPDATE NOTIFICATION
-        await this.notificationService.sendNotification({
-            title: 'Item Berhasil diupdate!',
-            content: `Item ${
-              body.name
-            } baru telah berhasil diupdate ke inventory pada waktu ${new Date()}`,
-            color: 'blue',
-            user_id: session.id,
-        });
+      //UPDATE NOTIFICATION
+      await this.notificationService.sendNotification({
+        title: 'Item Berhasil diupdate!',
+        content: `Item ${
+          body.name
+        } baru telah berhasil diupdate ke inventory pada waktu ${new Date()}`,
+        color: 'blue',
+        user_id: session.id,
+      });
 
-        await queryRunner.commitTransaction();
+      await queryRunner.commitTransaction();
 
-        return resultData;
+      return resultData;
     } catch (error) {
-        await queryRunner.rollbackTransaction();
-        throw error;
+      await queryRunner.rollbackTransaction();
+      throw error;
     } finally {
-        await queryRunner.release();
+      await queryRunner.release();
     }
-}
-
+  }
 
   public async deleteById(id: number): Promise<void> {
     const session = await this.authService.getSession();

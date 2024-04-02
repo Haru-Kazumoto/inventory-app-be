@@ -38,8 +38,21 @@ import { ExcelService } from 'src/utils/excel/excel.service';
 import { Response } from 'express';
 import { ItemsRepository } from './repository/items.repository';
 import { Major } from 'src/enums/majors.enum';
+import { ItemStatusCount } from './interfaces/item_status_count.interface';
+import { CreateItemDecorator } from './decorator/create-item.decorator';
+import { FindAllItemDecorator } from './decorator/find-all-item.decorator';
+import { CountItemDecorator } from './decorator/count-item.decorator';
+import { RequestItemsByStatusDecorator } from '../request_items/decorator/request-items-by-status.decorator';
+import { ItemsStatusConditionDecorator } from './decorator/item-status-condition.decorator';
+import { GetAllItemsDecorator } from './decorator/get-all-items.decorator';
+import { FindByItemNameDecorator } from './decorator/find-by-item-name.decorator';
+import { UpdateItemDecorator } from './decorator/update-item.decorator';
+import { DeleteItemDecorator } from './decorator/delete-item.decorator';
+import { ExportDataItemDecorator } from './decorator/export-data-item.decorator';
+import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
 
-import * as ExcelJs from "exceljs";
+import * as ExcelJs from 'exceljs';
+import { UpdateStatusItemDecorator } from './decorator/update-status-item.decorator';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
@@ -60,54 +73,7 @@ export class ItemsController {
     }
   }
 
-  @ApiOkResponse({
-    description: 'Creating one item record',
-    schema: {
-      type: 'object',
-      properties: {
-        status: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'OK' },
-        data: { type: 'object', example: { item: {} } },
-      },
-    },
-  })
-  @ApiBadRequestResponse({
-    description: 'Bad Request',
-    schema: {
-      type: 'object',
-      properties: {
-        error: {
-          type: 'array',
-          example: ['itemname cannot be empty', 'email pattern not valid'],
-        },
-      },
-    },
-  })
-  @ApiForbiddenResponse({
-    description: 'Forbidden resource or ability',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 401 },
-        message: { type: 'string', example: 'Not Authenticated' },
-        error: { type: 'string', example: 'Forbidden' },
-      },
-    },
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal Server Error',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Internal server error' },
-        status: { type: 'number', example: 500 },
-      },
-    },
-  })
-  @ApiBody({
-    type: CreateItemDto,
-    description: 'DTO Structure response from create one item',
-  })
+  @CreateItemDecorator()
   @Post('create')
   async createOneItem(@Body() dto: CreateItemDto) {
     const data = await this.itemsService.createOne(dto);
@@ -117,57 +83,8 @@ export class ItemsController {
     };
   }
 
+  @FindAllItemDecorator()
   @Get('find-all')
-  @ApiOkResponse({
-    description: 'Success get all items',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'OK' },
-        data: { type: 'array', example: { items: [{}] } },
-      },
-    },
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal Server Error',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 500 },
-        message: { type: 'string', example: 'Internal server error' },
-      },
-    },
-  })
-  @ApiPaginatedResponse(Item)
-  @ApiQuery({
-    name: 'category',
-    description: 'Category of item',
-    required: false,
-    enum: ItemCategory,
-  })
-  @ApiQuery({
-    name: 'major',
-    description: 'Major of item',
-    required: false,
-    enum: Major,
-  })
-  @ApiQuery({
-    name: 'status',
-    description: 'Status of item',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'name',
-    description: 'Name of item',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'classId',
-    description: 'Class Id of class item',
-    required: false,
-    type: Number,
-  })
   public async findManyItem(
     @Query('category') category: ItemCategory,
     @Query('status') status: StatusItem,
@@ -188,17 +105,31 @@ export class ItemsController {
     );
   }
 
-  @ApiQuery({
-    name: 'item-category',
-    description: 'Find all items with filtering by item category',
-    enum: ItemCategory,
-    required: false,
-  })
+  @CountItemDecorator()
+  @Get('count-items')
+  public async countItemByStatus(
+    @Query('major') major: Major,
+  ): Promise<ItemStatusCount> {
+    return this.itemsService.countItemByStatus(major);
+  }
+
+  @ItemsStatusConditionDecorator()
+  @Get('items-by-status')
+  public async itemStatusCondition(
+    @Query('status') status: ItemStatusCondition,
+    @Query('major') major: Major,
+    @Query() pageOptionsDto: PageOptionsDto,
+  ): Promise<any> {
+    return this.itemsService.itemStatusCondition(status, major, pageOptionsDto);
+  }
+
+  @GetAllItemsDecorator()
   @Get('get-all-items')
   public async findManyItemsWithNoPagination(
     @Query('item-category') filterCategory: ItemCategory,
+    @Query('major') major: Major,
   ) {
-    const items = await this.itemsService.findAllItems(filterCategory);
+    const items = await this.itemsService.findAllItems(filterCategory, major);
 
     const responseDto = items.map(
       (item) =>
@@ -215,43 +146,17 @@ export class ItemsController {
     };
   }
 
-  @ApiQuery({
-    name: "id-item",
-    description: "Id item to update",
-    type: Number,
-    required: true
-  })
+  @UpdateStatusItemDecorator()
   @Patch('update-status-item-to-unavailable')
   public async updateStatusItem(@Query('id-item') id: number) {
     const result = await this.itemsService.updateStatusItem(id);
 
     return {
-      [this.updateStatusItem.name]: result
-    }
+      [this.updateStatusItem.name]: result,
+    };
   }
 
-  @ApiOkResponse({
-    description: 'Success get all items',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'OK' },
-        data: { type: 'array', example: { items: [{}] } },
-      },
-    },
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal Server Error',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 500 },
-        message: { type: 'string', example: 'Internal server error' },
-      },
-    },
-  })
-  @ApiPaginatedResponse(Item)
+  @FindByItemNameDecorator()
   @Get('find-by-item-name')
   public async findAllItemCodeByItemName(
     @Query('name') name: string,
@@ -261,49 +166,7 @@ export class ItemsController {
   }
 
   @Put('update')
-  @ApiOkResponse({
-    description: 'Success to update one record of item',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 200 },
-        message: { type: 'string', example: 'SUCCESS' },
-        data: { type: 'object', example: { item: {} } },
-      },
-    },
-  })
-  @ApiBadRequestResponse({
-    description: 'There is something bad happend to request',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 400 },
-        message: { type: 'string', example: 'Not valid type' },
-        data: { type: 'object', example: null },
-      },
-    },
-  })
-  @ApiInternalServerErrorResponse({
-    description: 'Internal server error response',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 500 },
-        message: { type: 'string', example: 'Internal server error' },
-      },
-    },
-  })
-  @ApiBody({
-    type: UpdateItemDto,
-    description: 'DTO Request for update',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'id',
-    description: 'Id item for update',
-    type: Number,
-    required: true,
-  })
+  @UpdateItemDecorator()
   public async updateItem(
     @Query('id', ParseIntPipe) id: number,
     @Body() dto: UpdateItemDto,
@@ -315,22 +178,7 @@ export class ItemsController {
     };
   }
 
-  @ApiQuery({
-    name: 'id',
-    description: 'Id for delete item',
-    type: Number,
-    required: true,
-  })
-  @ApiBadRequestResponse({
-    description: 'Bad request response',
-    schema: {
-      type: 'object',
-      properties: {
-        statusCode: { type: 'number', example: 400 },
-        message: { type: 'string', example: 'Id item tidak ditemukan' },
-      },
-    },
-  })
+  @DeleteItemDecorator()
   @Delete('delete')
   public async deleteItem(@Query('id', ParseIntPipe) id: number) {
     await this.itemsService.deleteById(id);
@@ -338,18 +186,7 @@ export class ItemsController {
 
   // -------------------------- TESTING
 
-  @ApiQuery({
-    name: 'item_category',
-    description: 'Mengambil data berdasarkan kategory dari barang',
-    enum: ItemCategory,
-    required: false,
-  })
-  @ApiQuery({
-    name: 'major',
-    description: 'Mengambil data berdasarkan tempat barang berada',
-    enum: Major,
-    required: false,
-  })
+  @ExportDataItemDecorator()
   @Get('export-data-item')
   async exportExcel(
     @Query('item_category') item_category: ItemCategory,

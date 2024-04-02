@@ -38,8 +38,8 @@ export class RequestItemsRepository extends Repository<RequestItem> {
           },
         );
       }
-      if(item_type) {
-        qb.andWhere(`${queryAlias}.item_type = :item_type`, {item_type});
+      if (item_type) {
+        qb.andWhere(`${queryAlias}.item_type = :item_type`, { item_type });
       }
     };
 
@@ -53,6 +53,48 @@ export class RequestItemsRepository extends Repository<RequestItem> {
 
   public findById(id: number): Promise<RequestItem> {
     return this.requestItemRepository.findOneBy({ id });
+  }
+
+  public async countPendingRequest(major: Major) {
+    const whereCondition: any = {
+      status: RequestStatus.PENDING,
+    };
+
+    if (major) {
+      whereCondition.class = { major: major };
+    }
+
+    return this.requestItemRepository.count({
+      where: whereCondition,
+    });
+  }
+
+  public async pendingRequest(
+    majorName: Major,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<RequestItem>> {
+    const queryAlias = 'request_item';
+
+    const whereCondition = (qb: SelectQueryBuilder<RequestItem>) => {
+      qb.andWhere(`${queryAlias}.status = :pending`, {
+        pending: RequestStatus.PENDING,
+      });
+      if (majorName) {
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+          `class.major = :majorName`,
+          {
+            majorName,
+          },
+        );
+      }
+    };
+
+    return await pagination<RequestItem>(
+      this,
+      pageOptionsDto,
+      queryAlias,
+      whereCondition,
+    );
   }
 
   countRequestItemsBy(status: string): Promise<any> {

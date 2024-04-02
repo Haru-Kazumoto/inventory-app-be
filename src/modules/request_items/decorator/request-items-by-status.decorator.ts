@@ -4,14 +4,12 @@ import {
   ApiOkResponse,
   ApiQuery,
 } from '@nestjs/swagger';
-import { ItemType } from 'src/enums/item_type.enum';
 import { Major } from 'src/enums/majors.enum';
-import { RequestStatus } from 'src/enums/request_status.enum';
 
-export function FindAllRequestDecorator() {
+export function RequestItemsByStatusDecorator() {
   return applyDecorators(
     ApiOkResponse({
-      description: 'Success get all request items',
+      description: 'Success get all request items by status',
       schema: {
         type: 'object',
         properties: {
@@ -32,22 +30,10 @@ export function FindAllRequestDecorator() {
       },
     }),
     ApiQuery({
-      name: 'status',
-      description: 'Status of item',
-      required: false,
-      enum: RequestStatus,
-    }),
-    ApiQuery({
       name: 'major',
       description: 'Major of item',
       required: false,
       enum: Major,
-    }),
-    ApiQuery({
-      name: 'item_type',
-      description: 'type of item',
-      required: false,
-      enum: ItemType,
     }),
   );
 }

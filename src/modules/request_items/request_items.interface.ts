@@ -15,10 +15,11 @@ export interface IRequestItems {
     item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>>;
-  updateRequest(
-    id: number,
-    body: UpdateRequestItemDto,
-  ): Promise<RequestItem>;
+  updateRequest(id: number, body: UpdateRequestItemDto): Promise<RequestItem>;
+  pendingRequest(
+    major: Major,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<RequestItem>>;
   acceptRequest(id: number): Promise<RequestItem>;
   rejectRequest(id: number): Promise<RequestItem>;
   arriveRequest(id: number): Promise<RequestItem>;
