@@ -195,6 +195,15 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  public requestItemByStatus(
+    major: Major,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<RequestItem>> {
+    return this.requestItemRepository.requestItemByStatus(
+      major,
+      pageOptionsDto,
+    );
+  }
   // Mengupdate status request menjadi rejected
   @Transactional()
   public async rejectRequest(id: number): Promise<RequestItem> {

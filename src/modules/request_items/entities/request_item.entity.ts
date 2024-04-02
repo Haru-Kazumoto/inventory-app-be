@@ -47,7 +47,7 @@ export class RequestItem extends BaseEntity {
   @Column({ name: 'class_id', nullable: false })
   public class_id: number;
 
-  @ManyToOne(() => Class, (classEntity) => classEntity.item, {
+  @ManyToOne(() => Class, (classEntity) => classEntity.request_item, {
     cascade: true,
     onDelete: 'CASCADE',
     eager: true,

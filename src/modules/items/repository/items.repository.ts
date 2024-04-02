@@ -1,12 +1,14 @@
 import { ItemCategory } from 'src/enums/item_category.enum';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { DataSource, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { Item } from '../entities/item.entity';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { pagination } from 'src/utils/modules_utils/pagination.utils';
 import { StatusItem } from 'src/enums/status_item.enum';
+import { ItemCondition } from 'src/enums/item_condition.enum';
 import { Major } from 'src/enums/majors.enum';
+import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
 
 @Injectable()
 export class ItemsRepository extends Repository<Item> {
@@ -16,7 +18,7 @@ export class ItemsRepository extends Repository<Item> {
     super(Item, dataSource.createEntityManager());
   }
 
-  async findMany(
+  public async findMany(
     category: ItemCategory,
     classId: number,
     itemName: string,
@@ -66,7 +68,55 @@ export class ItemsRepository extends Repository<Item> {
     );
   }
 
-  async findAllItemCodeByItemName(
+  public async itemByStatus(
+    status: ItemStatusCondition,
+    major: Major,
+    pageOptionsDto: PageOptionsDto,
+  ): Promise<PageDto<Item>> {
+    const queryAlias = 'item';
+    const whereCondition = (qb: SelectQueryBuilder<Item>) => {
+      if (major) {
+        qb.leftJoinAndSelect(`${queryAlias}.class`, 'class').andWhere(
+          `class.major = :major`,
+          {
+            major,
+          },
+        );
+      }
+
+      switch (status) {
+        case ItemStatusCondition.GOOD_ITEMS:
+          qb.andWhere(`${queryAlias}.item_condition = :itemCondition`, {
+            itemCondition: ItemCondition.BAIK,
+          });
+          break;
+        case ItemStatusCondition.SEVERELY_DAMAGED_ITEMS:
+          qb.andWhere(`${queryAlias}.item_condition = :itemCondition`, {
+            itemCondition: ItemCondition.RUSAK_BERAT,
+          });
+          break;
+        case ItemStatusCondition.LIGHTLY_DAMAGED_ITEMS:
+          qb.andWhere(`${queryAlias}.item_condition = :itemCondition`, {
+            itemCondition: ItemCondition.RUSAK_RINGAN,
+          });
+          break;
+        case ItemStatusCondition.OUT_ITEMS:
+          qb.andWhere(`${queryAlias}.status_item != :statusItem`, {
+            statusItem: StatusItem.TERSEDIA,
+          });
+          break;
+      }
+    };
+
+    return await pagination<Item>(
+      this,
+      pageOptionsDto,
+      queryAlias,
+      whereCondition,
+    );
+  }
+
+  public async findAllItemCodeByItemName(
     itemName: string,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<Item>> {
@@ -91,19 +141,87 @@ export class ItemsRepository extends Repository<Item> {
       where: {
         id: id,
       },
-    })
+    });
 
-    if(!findItem) throw new BadRequestException("Id barang tidak di temukan");
+    if (!findItem) throw new BadRequestException('Id barang tidak di temukan');
 
     return findItem;
   }
 
-  async findItemByItemCode(item_code: string): Promise<Item> {
+  public async findItemByItemCode(item_code: string): Promise<Item> {
     return await this.itemRepository.findOne({
       where: {
         item_code: item_code,
       },
       withDeleted: true,
+    });
+  }
+
+  public async countGoodItems(major: Major) {
+    const whereCondition: any = {
+      item_condition: ItemCondition.BAIK,
+    };
+
+    if (major) {
+      whereCondition.class = { major: major };
+    }
+
+    return await this.itemRepository.count({
+      where: whereCondition,
+    });
+  }
+
+  public async countSeverelyDamagedItems(major: Major) {
+    const whereCondition: any = {
+      item_condition: ItemCondition.RUSAK_BERAT,
+    };
+
+    if (major) {
+      whereCondition.class = { major: major };
+    }
+
+    return await this.itemRepository.count({
+      where: whereCondition,
+    });
+  }
+
+  public async countLightlyDamagedItems(major: Major) {
+    const whereCondition: any = {
+      item_condition: ItemCondition.RUSAK_RINGAN,
+    };
+
+    if (major) {
+      whereCondition.class = { major: major };
+    }
+
+    return await this.itemRepository.count({
+      where: whereCondition,
+    });
+  }
+
+  public async countOutItems(major: Major) {
+    const whereCondition: any = {
+      status_item: Not(StatusItem.TERSEDIA),
+    };
+
+    if (major) {
+      whereCondition.class = { major: major };
+    }
+
+    return await this.itemRepository.count({
+      where: whereCondition,
+    });
+  }
+
+  public async countItems(major: Major): Promise<number> {
+    let whereCondition: any = {};
+
+    if (major) {
+      whereCondition.class = { major: major };
+    }
+
+    return await this.itemRepository.count({
+      where: whereCondition,
     });
   }
 
