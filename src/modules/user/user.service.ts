@@ -90,7 +90,9 @@ export class UserService implements IUserService{
             const findUser = await this.userRepository.findOne({where: {id: id}});
             if(!findUser) throw new BadRequestException("User tidak di temukan");
 
-            const newInstance = this.userRepository.merge(findUser, {password: newPassword.password});
+            const newInstance = this.userRepository.merge(findUser, {
+                password: await bcrypt.hash(newPassword.password, 10)
+            });
 
             queryRunner.commitTransaction();
 

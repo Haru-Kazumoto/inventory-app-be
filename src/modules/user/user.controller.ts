@@ -1,4 +1,4 @@
-import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/security/decorator/roles.decorator';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { PageOptionsDto } from 'src/utils/pagination.utils';
@@ -74,9 +74,13 @@ export class UserController {
     type: Number,
     description: "User id for update password"
   })
+  @ApiBody({
+    type: UpdateUserPassword,
+    description: "Password update field"
+  })
   @ApiOkResponse()
   @Patch('update-user')
-  public async updateUserPassword(@Query("id") id: number, dto: UpdateUserPassword) {
+  public async updateUserPassword(@Query('user-id', new ValidationPipe()) id: number, @Body() dto: UpdateUserPassword) {
     const data = await this.userService.updatePassword(id, dto);
 
     return {[this.updateUserPassword.name]: data}
