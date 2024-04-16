@@ -71,13 +71,17 @@ export class UserService implements IUserService{
         }
 
         const { password, ...rest } = body
+        let newUserObject: User;
+
         if (password) {
-            Object.assign(user, {...rest,password: await bcrypt.hash(password, 10)});
+            newUserObject = this.userRepository.merge(user, {...rest, password: await bcrypt.hash(password, 10)})
+            // Object.assign(user, {...rest,password: await bcrypt.hash(password, 10)});
         } else {
-            Object.assign(user, {...rest,password: user.password });
+            newUserObject = this.userRepository.merge(user, {...rest, password: user.password});
+            // Object.assign(user, {...rest,password: user.password });
         }
 
-        return await this.userRepository.save(user);    
+        return await this.userRepository.save(newUserObject);
     }
 
     async updatePassword(id: number, newPassword: UpdateUserPassword): Promise<User> {

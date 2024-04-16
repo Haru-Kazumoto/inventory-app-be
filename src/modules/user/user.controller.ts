@@ -79,7 +79,7 @@ export class UserController {
     description: "Password update field"
   })
   @ApiOkResponse()
-  @Patch('update-user')
+  @Patch('update-password')
   public async updateUserPassword(@Query('user-id', new ValidationPipe()) id: number, @Body() dto: UpdateUserPassword) {
     const data = await this.userService.updatePassword(id, dto);
 
