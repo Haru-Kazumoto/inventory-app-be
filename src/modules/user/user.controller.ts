@@ -1,4 +1,4 @@
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/security/decorator/roles.decorator';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { PageOptionsDto } from 'src/utils/pagination.utils';
@@ -20,6 +20,7 @@ import {
   Delete, 
   Get, 
   ParseIntPipe, 
+  Patch, 
   Post, 
   Put, 
   Query, 
@@ -28,6 +29,7 @@ import {
   UsePipes, 
   ValidationPipe 
 } from '@nestjs/common';
+import { UpdateUserPassword } from './dto/update-password-user.dto';
 
 @ApiTags('User')
 @Roles('SUPERADMIN')
@@ -63,6 +65,21 @@ export class UserController {
     const data = await this.userService.update(id, dto);
 
     return {[this.updateUser.name]: data}
+  }
+
+  @UsePipes(new ValidationPipe({transform: true}))
+  @ApiQuery({
+    name: "user-id",
+    required: true,
+    type: Number,
+    description: "User id for update password"
+  })
+  @ApiOkResponse()
+  @Patch('update-user')
+  public async updateUserPassword(@Query("id") id: number, dto: UpdateUserPassword) {
+    const data = await this.userService.updatePassword(id, dto);
+
+    return {[this.updateUserPassword.name]: data}
   }
 
   // Delete Hard

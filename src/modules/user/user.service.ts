@@ -1,4 +1,4 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, forwardRef } from '@nestjs/common';
 import { User } from './entities/user.entity';
 import { UserCreateDto } from './dto/user.dto';
 import { IUserService } from './user.service.interface';
@@ -11,10 +11,11 @@ import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { NotificationService } from 'src/modules/notification/notification.service';
 import { userCreateContent } from 'src/modules/notification/notification.constant';
 import { DataNotFoundException } from 'src/exceptions/data_not_found.exception';
-import { Request } from 'express';
 import { AuthService } from '../auth/auth.service';
 import { UpdateUserDto } from './dto';
 import * as bcrypt from "bcrypt";
+import { UpdateUserPassword } from './dto/update-password-user.dto';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UserService implements IUserService{
@@ -24,6 +25,7 @@ export class UserService implements IUserService{
         private readonly roleRepository: RoleRepository,
         private readonly notificationService: NotificationService,
         @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
+        private readonly dataSource: DataSource,
         private userUtils: UserUtils
     ){}
 
@@ -76,6 +78,30 @@ export class UserService implements IUserService{
         }
 
         return await this.userRepository.save(user);    
+    }
+
+    async updatePassword(id: number, newPassword: UpdateUserPassword): Promise<User> {
+        const queryRunner = this.dataSource.createQueryRunner();
+
+        queryRunner.connect();
+        queryRunner.startTransaction();
+
+        try {
+            const findUser = await this.userRepository.findOne({where: {id: id}});
+            if(!findUser) throw new BadRequestException("User tidak di temukan");
+
+            const newInstance = this.userRepository.merge(findUser, {password: newPassword.password});
+
+            queryRunner.commitTransaction();
+
+            return await this.userRepository.save(newInstance);
+        } catch (err) {
+            queryRunner.rollbackTransaction();
+
+            throw err;
+        } finally {
+            queryRunner.release();
+        }
     }
 
     public async hardDeleteById(id: number) {
