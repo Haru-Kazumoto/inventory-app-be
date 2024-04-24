@@ -45,12 +45,19 @@ export class UserService implements IUserService{
             password: await bcrypt.hash(body.password, 10)
         });
 
+        /**
+         * TODO : GANTI SISTEM NOTIFIKASI, BUAT KHUSUS UNTUK SUPERADMIN BIAR TERSTRUKTUR
+         * 
+         * TODO : UBAH VALIDASI DAN LOGIKA DI PERMINTAAN BARANG.
+         */
+
         //SEND NOTIFICATION
         await this.notificationService.sendNotification({
             title: "Pengguna baru",
             content: userCreateContent,
             color: "clay",
-            user_id: user.id
+            user_id: user.id,
+            // superadmin_content: "Pengguna baru telah ditambahkan"
         });
 
         return await this.userRepository.save(newUser);

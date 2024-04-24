@@ -19,21 +19,22 @@ export class NotificationService implements INotificationService{
   async sendNotification(options: CreateNotificationDto): Promise<void> {
     const adminId: User = await this.userRepository.findById(options.user_id);
     if(!adminId) throw new DataNotFoundException("User id not found", 400);
-  
+
     //If notification not send to superadmin 
     let notifObject: Notification = this.notificationRepository.create({
       ...options,
       // user: adminId,
     });
 
-    //If the notification must send to superadmins
+    // If the notification must send to superadmins
     if(options.toSuperadmin){
       const superadmins: User[] = await this.userRepository.findUserByRole("SUPERADMIN");
 
       for (const superadmin of superadmins) {
         notifObject = this.notificationRepository.create({
           ...options,
-          // user: superadmin,
+          user_id: superadmin.id,
+          superadmin_content: options.superadmin_content //if send to superadmin is true, fill the content of notification for superadmin side
         });
 
         await this.notificationRepository.save(notifObject);

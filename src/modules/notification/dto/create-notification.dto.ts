@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString } from "class-validator";
 
 export class CreateNotificationDto {
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     @ApiProperty()
-    public title: string;
+    public title?: string;
 
     @IsString()
     @IsNotEmpty()
@@ -14,12 +14,12 @@ export class CreateNotificationDto {
     public content: string;
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     @ApiProperty()
     public color?: string | null;
     
     @IsBoolean()
-    @IsNotEmpty()
+    @IsOptional()
     @ApiProperty()
     public hasRead?: boolean;
 
@@ -29,8 +29,30 @@ export class CreateNotificationDto {
     public user_id: number;
 
     @IsNumber()
-    @IsNotEmpty()
+    @IsOptional()
     @ApiProperty()
     public toSuperadmin?: boolean;
 
+    @IsString()
+    @IsOptional()
+    @ApiProperty()
+    public superadmin_content?: string;
+}
+
+export class SendToSuperadmin {
+
+    @IsString()
+    @IsNotEmpty()
+    @ApiProperty()
+    title: string;
+
+    @IsBoolean()
+    @IsOptional()
+    @ApiProperty()
+    has_read?: boolean;
+
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty()
+    superadmin_id: number;
 }

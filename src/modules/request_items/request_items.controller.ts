@@ -130,7 +130,7 @@ export class RequestItemsController {
 
   // Mengizinkan role admin untuk mengupdate status request
   @UseGuards(RolesGuard)
-  @Roles('ADMIN_TJKT', 'ADMIN_AK', 'ADMIN_TO', 'ADMIN_TE')
+  @Roles('SUPERADMIN')
   @UpdateStatusArriveDecorator()
   @Patch('update-status/to-arrive')
   public async arriveRequest(@Query('id', ParseIntPipe) id: number) {
