@@ -40,13 +40,16 @@ export class RequestItem extends BaseEntity {
   public is_arrive: boolean;
 
   @Column({ name: 'request_date', nullable: false })
-  public request_date: Date;
+  public request_date: Date; //waktu diminta pada
 
   @Column({ name: 'arrive_date', nullable: true })
-  public arrive_date: Date;
+  public arrive_date: Date; //waktu sampai pada
 
   @Column({ name: 'accepted_date', nullable: true })
-  public accepted_date: Date;
+  public accepted_date: Date; //waktu diterima pada
+
+  @Column({name: 'on_the_way_date', nullable: true})
+  public on_the_way_date: Date;
 
   @Column({ name: 'class_id', nullable: false })
   public class_id: number;

@@ -321,6 +321,7 @@ export class RequestItemsService implements IRequestItems {
           {
             status: RequestStatus.ON_THE_WAY,
             is_arrive: false,
+            on_the_way_date: new Date()
           },
         );
 
