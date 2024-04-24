@@ -162,7 +162,7 @@ export class RedeemCodeService implements IRedeemCodeService {
             if(!findRedeemCode) throw new NotFoundException("Redeem code tidak ditemukan");
 
             if(findRedeemCode.generated_date !== null && findRedeemCode.is_valid === false){
-                throw new BadRequestException("Redeem code telah di use");    
+                throw new BadRequestException("Redeem code telah di pakai");    
             }
 
             //changing status redeem code
