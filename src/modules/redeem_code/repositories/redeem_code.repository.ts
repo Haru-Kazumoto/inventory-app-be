@@ -38,9 +38,11 @@ export class RedeemCodeRepository extends Repository<RedeemCode> {
             } else {
                 qb.getMany()
             }
+
             qb.leftJoinAndSelect(`${queryAlias}.exitLog`, 'exitLog');
             qb.leftJoinAndSelect('exitLog.item_details', 'item_details');
-            // else qb.andWhere(`${queryAlias}.is_valid = false`);
+            
+            qb.andWhere(`${queryAlias}.redeem_code IS NOT NULL`);
         };
 
         return pagination<RedeemCode>(this, pageOptionsDto, queryAlias, whereCondition);
