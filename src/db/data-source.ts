@@ -9,12 +9,12 @@ export const dataSourceOptions: DataSourceOptions = {
     port: parseInt(process.env.DB_PORT) || 5432,
     database: process.env.DB_NAME || "database_inventorys",
     username: process.env.DB_USERNAME || "postgres",
-    password: process.env.DB_PASSWORD ||"Akbar_123",
+    password: process.env.DB_PASSWORD || "Akbar_123",
     entities: ["dist/**/*.entity.js"],
     //MIGRATIONS
     migrations: ["dist/db/migrations/*.js"],
     migrationsTableName: "migrations",
-    migrationsRun: true
+    migrationsRun: true,
 };
 
 const dataSource = new DataSource(dataSourceOptions);
