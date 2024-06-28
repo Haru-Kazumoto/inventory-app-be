@@ -7,7 +7,7 @@ import { Class } from 'src/modules/class/entitites/class.entity';
 import { BaseEntity } from 'src/entities/base.entity';
 import {
   BeforeInsert,
-  BeforeUpdate,
+  BeforeUpdate, 
   Column,
   Entity,
   JoinColumn,
@@ -28,6 +28,10 @@ export class Item extends BaseEntity {
   //item code is optional for non atk type and barang habis pakai category
   @Column({ name: 'item_code', nullable: true, unique: true })
   public item_code: string;
+
+  //new
+  @Column({name: "item_image", type: 'text', nullable: true})
+  public item_image: string;
 
   @Column({
     name: 'status_item',

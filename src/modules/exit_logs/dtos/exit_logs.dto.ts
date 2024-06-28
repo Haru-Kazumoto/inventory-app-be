@@ -1,10 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
   IsString,
+  ValidateNested,
 } from 'class-validator';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusExit } from 'src/enums/status_exit.enum';
@@ -43,13 +45,18 @@ export class CreateExitLogDto {
 
   @ApiProperty({ example: 1 })
   @IsNumber()
+  @Transform(({ value }) => parseInt(value, 10)) // Mengonversi string ke number
   @IsNotEmpty()
   total: number;
 
-  @ApiProperty({example: [{ item_id: 1 }]})
+  @ApiProperty({example: [{ item_id: 1 }], type: [CreateItemDetailsDto]})
   @IsArray()
+  @Type(() => CreateItemDetailsDto)
   @IsNotEmpty()
   item_details: CreateItemDetailsDto[];
+
+  @ApiProperty({type: 'string', format: 'binary', required: true})
+  exit_image?: any;
 }
 
 export class UpdateExitLogDto {

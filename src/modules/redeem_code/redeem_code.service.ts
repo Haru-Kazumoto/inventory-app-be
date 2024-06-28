@@ -3,7 +3,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { IRedeemCodeService } from './interfaces/redeem_code.service.interface';
 import { RedeemCodeRepository } from './repositories/redeem_code.repository';
 import { RedeemCode } from './entities/redeem_code.entity';
-import { DataSource } from 'typeorm';
+import { DataSource, QueryRunner } from 'typeorm';
 import { CreateExitLogDto, UpdateExitLogDto } from '../exit_logs/dtos/exit_logs.dto';
 import { ItemsRepository } from '../items/repository/items.repository';
 import { ExitLogsRepository } from '../exit_logs/repositories/exit_logs.repository';
@@ -75,11 +75,6 @@ export class RedeemCodeService implements IRedeemCodeService {
                         : StatusItem.SEDANG_DIPAKAI;
                 }
 
-                //initialize
-                // itemDetail.category_item = itemChoosen.category_item;
-                // itemDetail.item_name = itemChoosen.name;
-                // itemDetail.item_code = itemChoosen.item_code;
-
                 const mergingItemDetails: ItemDetails = this.itemDetailRepository.merge(itemDetail, {
                     category_item: itemChoosen.category_item,
                     item_name: itemChoosen.name,
@@ -143,6 +138,95 @@ export class RedeemCodeService implements IRedeemCodeService {
             await queryRunner.release();
         }
     }
+
+    async createRedeemCodeWithFile(body: CreateExitLogDto, file: Express.Multer.File): Promise<RedeemCode> {
+        const session: User = await this.authService.getSession();
+    
+        const queryRunner: QueryRunner = this.dataSource.createQueryRunner();
+    
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+      
+        try {
+          const createLog = this.exitlogRepository.create({
+            ...body,
+            for_major: session.role.major,
+            exit_image: file?.path, // Save the file path to the database
+          });
+          const newLog = await queryRunner.manager.save(ExitLogs, createLog);
+    
+          if(body.total !== newLog.item_details.length) throw new BadRequestException("Total item tidak sama dengan yang diinginkan.");
+    
+          await Promise.all(newLog.item_details.map(async (itemDetail: ItemDetails) => {
+            const itemChoosen: Item = await this.itemRepository.findById(itemDetail.item_id);
+            
+            if (!itemChoosen) throw new NotFoundException(`Barang dengan item id ${itemDetail.item_id} tidak ditemukan`)
+    
+            if (itemChoosen.status_item !== StatusItem.TERSEDIA) {
+              throw new BadRequestException("Barang sedang tidak tersedia di inventory.");
+            }
+    
+            if (body.item_category !== itemChoosen.category_item) {
+              throw new BadRequestException("Kategori barang tidak sama dengan yang dipilih");
+            }
+    
+            if(body.item_category === ItemCategory.BARANG_TIDAK_HABIS_PAKAI) {
+              itemChoosen.status_item = (body.status_exit === StatusExit.PEMINJAMAN)
+                ? StatusItem.SEDANG_DIPINJAM
+                : StatusItem.SEDANG_DIPAKAI;
+            }
+    
+            const mergingItemDetails: ItemDetails = this.itemDetailRepository.merge(itemDetail, {
+              category_item: itemChoosen.category_item,
+              item_name: itemChoosen.name,
+              item_code: itemChoosen.item_code
+            });
+    
+            await queryRunner.manager.save(mergingItemDetails);
+            await queryRunner.manager.save(Item, itemChoosen);
+          }));
+    
+          let newRedeemCode: RedeemCode;
+          let result: RedeemCode;
+    
+          if(body.item_category === ItemCategory.BARANG_TIDAK_HABIS_PAKAI){
+            const redeemCodeNumber: string = this.generateRedeemCode();
+    
+            newRedeemCode = this.redeemCodeRepository.create({
+              redeem_code: redeemCodeNumber,
+              generated_date: new Date(),
+              log_id: newLog.id,
+              exitLog: newLog
+            });
+    
+            result = await queryRunner.manager.save(RedeemCode, newRedeemCode);
+    
+            newLog.redeem_code = result;
+            await queryRunner.manager.save(ExitLogs, newLog);
+          } else {
+            newRedeemCode = this.redeemCodeRepository.create({
+              redeem_code: null,
+              generated_date: null,
+              is_valid: null,
+              destroyed_date: null,
+              log_id: newLog.id,
+              exitLog: newLog
+            });
+    
+            result = await queryRunner.manager.save(RedeemCode, newRedeemCode);
+          }
+    
+          await queryRunner.commitTransaction();
+      
+          return result;
+        } catch (err) {
+            await queryRunner.rollbackTransaction();
+            console.log(err.message);
+            throw err;
+        } finally {
+          await queryRunner.release();
+        }
+      }
     
     async storeRedeemCode(redeemCode: string): Promise<RedeemCode> {
         const queryRunner = this.dataSource.createQueryRunner();

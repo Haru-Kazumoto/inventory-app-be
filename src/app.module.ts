@@ -18,6 +18,9 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { ExcelService } from './utils/excel/excel.service';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { CronModule } from './modules/cron/cron.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+import { ImageHandlerModule } from './utils/image_handler/image_handler.module';
 
 @Module({
   imports: [
@@ -35,6 +38,7 @@ import { CronModule } from './modules/cron/cron.module';
     RequestItemsModule,
     DashboardModule,
     CronModule,
+    ImageHandlerModule,
   ],
   providers: [
     {

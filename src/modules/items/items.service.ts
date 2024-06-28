@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateItemDto } from './dto/create-item.dto';
+import { CreateItemDto, CreateItemDtoWithFile } from './dto/create-item.dto';
 import { IItemsService } from './interfaces/items.service.interface';
 import { ItemsRepository } from './repository/items.repository';
 import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
@@ -57,6 +57,48 @@ export class ItemsService implements IItemsService {
       const newItem = this.itemRepository.create({
         ...body,
         class: classEntity,
+      });
+      const resultData = await this.itemRepository.save(newItem);
+
+      await this.auditLogService.createReport({
+        edit_method: EditMethod.CREATE,
+        edited_by: session.id,
+        item_id: resultData.id,
+      });
+
+      await this.notificationService.sendNotification({
+        title: 'Item Baru Berhasil ditambahkan!',
+        content: itemCreateContent,
+        color: 'blue',
+        user_id: session.id,
+      });
+
+      await queryRunner.commitTransaction();
+      return resultData;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async createOneWithFile(body: CreateItemDtoWithFile, file: Express.Multer.File): Promise<Item> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const session = await this.authService.getSession();
+      const classEntity = await this.classRepository.findClassById(
+        body.class_id,
+      );
+      const newItem = this.itemRepository.create({
+        ...body,
+        class: classEntity,
+        item_image: file ? file.path : null
       });
       const resultData = await this.itemRepository.save(newItem);
 
@@ -174,10 +216,6 @@ export class ItemsService implements IItemsService {
     if (!data) throw new NotFoundException('Data tidak ditemukan');
     return data;
   }
-
-  // public async itemByStatus(status: ): Promise<any> {
-
-  // }
 
   async findAllItemCodeByItemName(
     itemName: string,

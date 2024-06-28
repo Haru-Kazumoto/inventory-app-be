@@ -7,6 +7,7 @@ import { Major } from "src/enums/majors.enum";
 
 export interface IRedeemCodeService {
     createRedeemCode(body: CreateExitLogDto): Promise<RedeemCode>;
+    createRedeemCodeWithFile(body: CreateExitLogDto, file: Express.Multer.File): Promise<RedeemCode>;
     storeRedeemCode(redeemCode: string): Promise<RedeemCode>;
     updateRedeemCode(redeemCode: string, body: UpdateExitLogDto): Promise<RedeemCode>;
     findByRedeemCode(redeemCode: string): Promise<RedeemCode>;

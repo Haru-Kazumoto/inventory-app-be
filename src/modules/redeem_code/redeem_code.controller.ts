@@ -1,7 +1,7 @@
-import { Body, Controller, Get, HttpStatus, Patch, Post, Query, Res, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Patch, Post, Query, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { RedeemCodeService } from './redeem_code.service';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
-import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateExitLogDto, UpdateExitLogDto } from '../exit_logs/dtos/exit_logs.dto';
 import { ApiPaginatedResponse } from 'src/decorator/paginate.decorator';
 import { ExitLogs } from '../exit_logs/entities/exit_logs.entity';
@@ -9,6 +9,10 @@ import { PageOptionsDto } from 'src/utils/pagination.utils';
 import { ApiGenerateRedeemCode } from './decorator/api-generate-redeem-code.decorator';
 import { StatusCode } from 'src/enums/status_code.enum';
 import { Major } from 'src/enums/majors.enum';
+import { RolesGuard } from 'src/security/guards/roles.guard';
+import { Roles } from 'src/security/decorator/roles.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from 'src/config/multer.config';
 
 @ApiTags('RedeemCode')
 @UseGuards(AuthenticatedGuard)
@@ -20,9 +24,22 @@ export class RedeemCodeController {
   @Post('generate-code')
   async createRedeemCode(@Body() body: CreateExitLogDto) {
     const data = await this.redeemCodeService.createRedeemCode(body);
-
     return { 
       [this.createRedeemCode.name]: data
+    }
+  }
+
+  @UseInterceptors(FileInterceptor('exit_image', multerConfig))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: CreateExitLogDto,
+    description: 'DTO Structure Response',
+  })
+  @Post('generate-code-with-file')
+  async createRedeemCodeWithFile(@Body() body: CreateExitLogDto, @UploadedFile() file: Express.Multer.File) {
+    const data = await this.redeemCodeService.createRedeemCodeWithFile(body, file);
+    return {
+      [this.createRedeemCodeWithFile.name]: data
     }
   }
 

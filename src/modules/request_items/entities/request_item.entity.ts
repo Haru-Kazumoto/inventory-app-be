@@ -54,6 +54,9 @@ export class RequestItem extends BaseEntity {
   @Column({ name: 'class_id', nullable: false })
   public class_id: number;
 
+  @Column({name: "request_image", type: "text", nullable: true})
+  public request_image: string;
+
   @ManyToOne(() => Class, (classEntity) => classEntity.request_item, {
     cascade: true,
     onDelete: 'CASCADE',

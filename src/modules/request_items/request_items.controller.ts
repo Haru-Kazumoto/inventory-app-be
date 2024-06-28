@@ -15,7 +15,7 @@ import { UpdateStatusAcceptDecorator } from './decorator/update-status-accept.de
 import { UpdateStatusRejectDecorator } from './decorator/update-status-reject.decorator';
 import { UpdateStatusArriveDecorator } from './decorator/update-status-arrive.decorator';
 import { UpdateStatusOnTheWayDecorator } from './decorator/update-status-on-the-way.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -30,10 +30,14 @@ import {
   UseInterceptors,
   UsePipes,
   ValidationPipe,
+  UploadedFile,
 } from '@nestjs/common';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { ItemType } from 'src/enums/item_type.enum';
 import { Major } from 'src/enums/majors.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from 'src/config/multer.config';
+import { FindOneRequestDecorator } from './decorator/find-one-request.decorator';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Request Items')
@@ -54,6 +58,30 @@ export class RequestItemsController {
     return {
       [this.createRequest.name]: data,
     };
+  }
+
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'SUPERADMIN', 'STORE')
+  @Post('create-with-file')
+  @UseInterceptors(FileInterceptor('request_image', multerConfig))
+  @ApiConsumes('multipart/form-data')
+  @CreateRequestDecorator()
+  public async createRequestWithFile(@UploadedFile() file: Express.Multer.File, @Body() body: CreateRequestItemDto){
+    const data: RequestItem = await this.requestItemsService.createRequestWithFile(body, file);
+
+    return {
+      [this.createRequest.name]: data
+    }
+  }
+
+  @Get("find-one")
+  @FindOneRequestDecorator()
+  public async findOne(@Query('request_item_id') id: number){
+    const data: RequestItem = await this.requestItemsService.findById(id);
+
+    return {
+      [this.findOne.name]: data
+    }
   }
 
   // mengizinkan semua role untuk mengakses data request items

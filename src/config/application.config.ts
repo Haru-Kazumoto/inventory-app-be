@@ -10,7 +10,7 @@ const PREFIX_API = `api/v${process.env.APP_VERSION}`;
 
 export default {
   corsOption: {
-    origin: '',
+    origin: '*',
     credential: true,
   },
   cookieOptions: {

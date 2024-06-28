@@ -72,6 +72,53 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
+  public async createRequestWithFile(body: CreateRequestItemDto, file: Express.Multer.File): Promise<RequestItem> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    queryRunner.connect();
+    queryRunner.startTransaction();
+
+    try {
+      const session = await this.authService.getSession();
+      const classEntity = await this.classRepository.findClassById(body.class_id);
+
+      const newRequest = this.requestItemRepository.create({
+        ...body,
+        class: classEntity,
+        from_major: session.role.major,
+        request_image: file ? file.path : null, // Path gambar
+      });
+      const resultData = await this.requestItemRepository.save(newRequest);
+
+      await this.notificationService.sendNotification({
+        title: 'Request Baru Berhasil Ditambahkan!',
+        content: 'Request baru telah berhasil ditambahkan.', // sesuaikan sesuai kebutuhan Anda
+        color: 'blue',
+        user_id: session.id,
+      });
+
+      await queryRunner.commitTransaction();
+
+      console.log({resultData});
+
+      return resultData;
+      // return newRequest;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+    
+  }
+
+  public async findById(request_item_id: number): Promise<RequestItem> {
+    const data = this.requestItemRepository.findById(request_item_id);
+    if(!data) throw new BadRequestException("Id not found");
+
+    return data;
+  }
+
   // Mencari semua request items, dengan filter nama class dan status request
   public findMany(
     majorName: Major,

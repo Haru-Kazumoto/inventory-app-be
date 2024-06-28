@@ -11,11 +11,13 @@ import {
   Put,
   ParseIntPipe,
   HttpException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
-import { CreateItemDto } from './dto/create-item.dto';
+import { CreateItemDto, CreateItemDtoWithFile } from './dto/create-item.dto';
 import { UpdateItemDto } from './dto/update-item.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 import { Item } from './entities/item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
@@ -40,6 +42,10 @@ import { ItemStatusCondition } from 'src/enums/item_status_condition.enum';
 import * as ExcelJs from 'exceljs';
 import { UpdateStatusItemDecorator } from './decorator/update-status-item.decorator';
 import { CountItemByMajorDecorator } from './decorator/count-item-by-major.decorator';
+import { RolesGuard } from 'src/security/guards/roles.guard';
+import { Roles } from 'src/security/decorator/roles.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { multerConfig } from 'src/config/multer.config';
 
 @UseGuards(AuthenticatedGuard)
 @ApiTags('Item')
@@ -68,6 +74,20 @@ export class ItemsController {
     return {
       [this.createOneItem.name]: data,
     };
+  }
+
+  // @UseGuards(RolesGuard)
+  // @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'STORE')
+  @Post('create-item-with-file')
+  @UseInterceptors(FileInterceptor('item_image', multerConfig))
+  @ApiConsumes('multipart/form-data')
+  @CreateItemDecorator()
+  async createOneItemWithFile(@Body() dto: CreateItemDtoWithFile, @UploadedFile() file: Express.Multer.File) {
+    const data = await this.itemsService.createOneWithFile(dto, file);
+
+    return {
+      [this.createOneItemWithFile.name]: data
+    }
   }
 
   @FindAllItemDecorator()

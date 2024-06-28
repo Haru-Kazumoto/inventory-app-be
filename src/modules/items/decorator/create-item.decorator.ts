@@ -6,7 +6,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
-import { CreateItemDto } from '../dto/create-item.dto';
+import { CreateItemDto, CreateItemDtoWithFile } from '../dto/create-item.dto';
 
 export function CreateItemDecorator() {
   return applyDecorators(
@@ -55,7 +55,7 @@ export function CreateItemDecorator() {
       },
     }),
     ApiBody({
-      type: CreateItemDto,
+      type: CreateItemDtoWithFile,
       description: 'DTO Structure response from create one item',
     })
   );

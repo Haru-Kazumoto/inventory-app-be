@@ -8,6 +8,7 @@ import { Major } from 'src/enums/majors.enum';
 
 export interface IRequestItems {
   createRequest(body: CreateRequestItemDto): Promise<RequestItem>;
+  createRequestWithFile(body: CreateRequestItemDto, file: Express.Multer.File): Promise<RequestItem>;
   findMany(
     className: string,
     // major: Major,
@@ -15,6 +16,7 @@ export interface IRequestItems {
     item_type: ItemType,
     pageOptionsDto: PageOptionsDto,
   ): Promise<PageDto<RequestItem>>;
+  findById(request_item_id: number): Promise<RequestItem>;
   updateRequest(id: number, body: UpdateRequestItemDto): Promise<RequestItem>;
   pendingRequest(
     major: Major,

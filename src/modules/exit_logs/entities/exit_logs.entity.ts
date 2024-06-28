@@ -33,6 +33,9 @@ export class ExitLogs extends BaseEntity {
     @Column({name: "for_major", nullable: true})
     public for_major: string;
 
+    @Column({name: "exit_image", nullable: true, type: 'text'})
+    public exit_image: string;
+
     // --------------- RELATIONS --------------- //
 
     @OneToOne(() => RedeemCode, (redeemCode) => redeemCode.redeem_code)
