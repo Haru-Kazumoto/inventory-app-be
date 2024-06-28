@@ -19,22 +19,27 @@ export class RoleSeeder implements Seeder {
   async seedRole(): Promise<any> {
     const roleData = [
       {
+        id: 1,
         name: 'ADMIN_TJKT',
         major: 'TJKT',
       },
       {
+        id: 2,
         name: 'ADMIN_TO',
         major: 'TO',
       },
       {
+        id: 3,
         name: 'ADMIN_TE',
         major: 'TE',
       },
       {
+        id: 4,
         name: 'ADMIN_AK',
         major: 'AK',
       },
       {
+        id: 5,
         name: 'SUPERADMIN',
         major: 'SUPERADMIN',
       },

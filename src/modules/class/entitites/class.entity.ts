@@ -4,6 +4,7 @@ import { RequestItem } from 'src/modules/request_items/entities/request_item.ent
 import {
   Column,
   Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -22,8 +23,10 @@ export class Class {
 
   // @OneToOne(() => Item, (item) => item.class)
   @OneToMany(() => Item, (item) => item.class)
+  @JoinColumn()
   public item: Item;
 
   @OneToMany(() => RequestItem, (request_item) => request_item.class)
+  @JoinColumn()
   public request_item: RequestItem;
 }

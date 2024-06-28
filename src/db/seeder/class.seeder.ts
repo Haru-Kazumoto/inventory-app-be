@@ -34,6 +34,26 @@ export class ClassSeeder implements Seeder {
             {
                 class_name: 'LAB - KKPI',
                 major: Major.TJKT
+            },
+            {
+                class_name: 'LAB - COE',
+                major: Major.TE
+            },
+            {
+                class_name: 'LAB - AK 1',
+                major: Major.AK
+            },
+            {
+                class_name: 'LAB - AK 2',
+                major: Major.AK
+            },
+            {
+                class_name: 'LAB BENGKEL',
+                major: Major.TO
+            },
+            {
+                class_name: 'GUDANG',
+                major: Major.TO
             }
         ];
         try{
