@@ -41,8 +41,8 @@ export class Item extends BaseEntity {
   })
   public status_item: StatusItem;
 
-  @Column({ name: 'source_fund', nullable: true })
-  public source_fund: string;
+  // @Column({ name: 'source_fund', nullable: true })
+  // public source_fund: string;
 
   @Column({ name: 'unit_price', nullable: false, default: 0 })
   public unit_price: number;

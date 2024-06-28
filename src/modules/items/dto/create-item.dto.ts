@@ -17,10 +17,10 @@ export class CreateItemDto {
     @ApiProperty({example: "MKT-123456789"})
     public item_code?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    @ApiProperty({example: "BOSDA"})
-    public source_fund: string;
+    // @IsString()
+    // @IsNotEmpty()
+    // @ApiProperty({example: "BOSDA"})
+    // public source_fund: string;
 
     @IsString()
     @IsNotEmpty()

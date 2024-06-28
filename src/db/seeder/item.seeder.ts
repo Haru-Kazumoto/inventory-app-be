@@ -29,7 +29,7 @@ export class ItemSeeder implements Seeder {
                 item_type: ItemType.NON_ATK,
                 category_item: ItemCategory.BARANG_HABIS_PAKAI,
                 unit_price: 50000,
-                source_fund: "BOSDA",
+                // source_fund: "BOSDA",
                 total_unit: "10 PACK",
                 class_id: 1
             },
@@ -39,7 +39,7 @@ export class ItemSeeder implements Seeder {
                 item_type: ItemType.NON_ATK,
                 category_item: ItemCategory.BARANG_HABIS_PAKAI,
                 unit_price: 150000,
-                source_fund: "BOSDA",
+                // source_fund: "BOSDA",
                 total_unit: "1 ROLL",
                 class_id: 1
             },
@@ -49,7 +49,7 @@ export class ItemSeeder implements Seeder {
                 item_type: ItemType.NON_ATK,
                 category_item: ItemCategory.BARANG_HABIS_PAKAI,
                 unit_price: 200000,
-                source_fund: "BOSDA",
+                // source_fund: "BOSDA",
                 total_unit: "2 ROLL",
                 class_id: 1
             },

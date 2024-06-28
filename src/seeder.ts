@@ -10,6 +10,11 @@ import { Class } from "./modules/class/entitites/class.entity";
 import { Item } from "./modules/items/entities/item.entity";
 import { AuditLogs } from "./modules/audit-logs/entities/audit_logs.entity";
 import { ItemSeeder } from "./db/seeder/item.seeder";
+import { RequestItem } from "./modules/request_items/entities/request_item.entity";
+import { ExitLogs } from "./modules/exit_logs/entities/exit_logs.entity";
+import { ItemDetails } from "./modules/item_details/entities/item_details.entity";
+import { RedeemCode } from "./modules/redeem_code/entities/redeem_code.entity";
+import { UserSeeder } from "./db/seeder/user.seeder";
 
 dotenv.config();
 
@@ -27,16 +32,21 @@ seeder({
             entities: [Roles, User, Notification, Item, Class, AuditLogs]
         }),
         TypeOrmModule.forFeature([
-            Roles, 
-            User, 
-            Notification,
-            Class,
-            Item, 
             AuditLogs,
+            Class,
+            ExitLogs,
+            ItemDetails,
+            Item,
+            Notification,
+            RedeemCode,
+            RequestItem,
+            Roles,
+            User,
         ])
     ]
 }).run([
+    UserSeeder,
     // RoleSeeder,
     // ClassSeeder,
-    ItemSeeder
+    // ItemSeeder
 ]);

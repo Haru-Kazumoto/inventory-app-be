@@ -22,10 +22,10 @@ export class UpdateItemDto {
   @ApiProperty({ example: StatusItem.TERSEDIA })
   public status_item: StatusItem; //lookup type STATUS
 
-  @IsString()
-  @IsNotEmpty()
-  @ApiProperty({ example: 'BOSDA' })
-  public source_fund: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // @ApiProperty({ example: 'BOSDA' })
+  // public source_fund: string;
 
   @IsString()
   @IsNotEmpty()
