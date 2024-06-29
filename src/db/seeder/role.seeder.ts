@@ -43,6 +43,11 @@ export class RoleSeeder implements Seeder {
         name: 'SUPERADMIN',
         major: 'SUPERADMIN',
       },
+      {
+        id: 6,
+        name: 'STORE',
+        major: 'STORE',
+      },
     ];
     try {
       await Promise.all(

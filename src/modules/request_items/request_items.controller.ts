@@ -48,7 +48,7 @@ export class RequestItemsController {
 
   // Menginzinkan role selain superadmin untuk membuat request
   @UseGuards(RolesGuard)
-  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'SUPERADMIN')
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'SUPERADMIN', 'STORE')
   @CreateRequestDecorator()
   @Post('create')
   public async createRequest(@Body() body: CreateRequestItemDto) {
@@ -119,7 +119,7 @@ export class RequestItemsController {
   // Mengizinkan role selain superadmin untuk mengupdate request
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(RolesGuard)
-  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'STORE')
   @UpdateRequestDecorator()
   @Patch('update')
   public async updateRequest(
@@ -135,7 +135,7 @@ export class RequestItemsController {
 
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseGuards(RolesGuard)
-  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK', 'STORE')
   @UseInterceptors(FileInterceptor('request_image', multerConfig))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
