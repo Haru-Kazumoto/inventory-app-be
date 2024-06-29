@@ -1,7 +1,7 @@
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
 import { CreateItemDto, CreateItemDtoWithFile } from '../dto/create-item.dto';
 import { Item } from '../entities/item.entity';
-import { UpdateItemDto } from '../dto/update-item.dto';
+import { UpdateItemDto, UpdateItemDtoWithFile } from '../dto/update-item.dto';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { StatusItem } from 'src/enums/status_item.enum';
 import { Major } from 'src/enums/majors.enum';
@@ -31,6 +31,7 @@ export interface IItemsService {
   ): Promise<PageDto<Item>>;
   countItemByStatus(major: Major): Promise<ItemStatusCount>;
   updateOne(id: number, body: UpdateItemDto): Promise<Item>;
+  updateOneWithFile(id: number, body: UpdateItemDtoWithFile, file: Express.Multer.File): Promise<Item>;
   deleteById(id: number): Promise<void>;
   updateStatusItem(id: number): Promise<Item>;
 }

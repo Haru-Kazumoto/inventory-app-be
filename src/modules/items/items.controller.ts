@@ -16,8 +16,8 @@ import {
 } from '@nestjs/common';
 import { ItemsService } from './items.service';
 import { CreateItemDto, CreateItemDtoWithFile } from './dto/create-item.dto';
-import { UpdateItemDto } from './dto/update-item.dto';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { UpdateItemDto, UpdateItemDtoWithFile } from './dto/update-item.dto';
+import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from 'src/security/guards/authenticated.guard';
 import { Item } from './entities/item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
@@ -81,12 +81,36 @@ export class ItemsController {
   @Post('create-item-with-file')
   @UseInterceptors(FileInterceptor('item_image', multerConfig))
   @ApiConsumes('multipart/form-data')
-  @CreateItemDecorator()
+  @ApiBody({
+    type: CreateItemDtoWithFile,
+    description: 'DTO Structure response from create one item',
+  })
   async createOneItemWithFile(@Body() dto: CreateItemDtoWithFile, @UploadedFile() file: Express.Multer.File) {
     const data = await this.itemsService.createOneWithFile(dto, file);
 
     return {
       [this.createOneItemWithFile.name]: data
+    }
+  }
+
+  @Patch('update-with-file')
+  @UseInterceptors(FileInterceptor('item_image', multerConfig))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: UpdateItemDtoWithFile,
+    description: 'DTO Structure response from create one item',
+  })
+  @ApiQuery({
+    name: 'id',
+    description: 'Id request item for update',
+    type: Number,
+    required: true,
+  })
+  async updateOneItemWithFile(@Query('id') id: number, @Body() dto: UpdateItemDtoWithFile, @UploadedFile() file: Express.Multer.File){
+    const data = await this.itemsService.updateOneWithFile(id,dto,file);
+
+    return {
+      [this.updateOneItemWithFile.name]: data
     }
   }
 

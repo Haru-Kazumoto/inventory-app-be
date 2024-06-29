@@ -55,7 +55,7 @@ export function CreateItemDecorator() {
       },
     }),
     ApiBody({
-      type: CreateItemDtoWithFile,
+      type: CreateItemDto,
       description: 'DTO Structure response from create one item',
     })
   );

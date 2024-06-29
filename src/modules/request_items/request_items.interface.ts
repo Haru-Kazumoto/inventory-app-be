@@ -1,14 +1,14 @@
 import { RequestStatus } from 'src/enums/request_status.enum';
-import { CreateRequestItemDto } from './dto/create-request_item.dto';
+import { CreateRequestItemDto, CreateRequestItemDtoWithFile } from './dto/create-request_item.dto';
 import { RequestItem } from './entities/request_item.entity';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
-import { UpdateRequestItemDto } from './dto/update-request_item.dto';
+import { UpdateRequestItemDto, UpdateRequestItemDtoWithFile } from './dto/update-request_item.dto';
 import { ItemType } from 'src/enums/item_type.enum';
 import { Major } from 'src/enums/majors.enum';
 
 export interface IRequestItems {
   createRequest(body: CreateRequestItemDto): Promise<RequestItem>;
-  createRequestWithFile(body: CreateRequestItemDto, file: Express.Multer.File): Promise<RequestItem>;
+  createRequestWithFile(body: CreateRequestItemDtoWithFile, file: Express.Multer.File): Promise<RequestItem>;
   findMany(
     className: string,
     // major: Major,
@@ -18,6 +18,7 @@ export interface IRequestItems {
   ): Promise<PageDto<RequestItem>>;
   findById(request_item_id: number): Promise<RequestItem>;
   updateRequest(id: number, body: UpdateRequestItemDto): Promise<RequestItem>;
+  updateRequestWithFile(id: number, body: UpdateRequestItemDtoWithFile, file: Express.Multer.File): Promise<RequestItem>;
   pendingRequest(
     major: Major,
     pageOptionsDto: PageOptionsDto,

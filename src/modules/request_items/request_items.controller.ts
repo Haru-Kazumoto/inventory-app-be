@@ -1,6 +1,6 @@
 import { RequestItemsService } from './request_items.service';
-import { CreateRequestItemDto } from './dto/create-request_item.dto';
-import { UpdateRequestItemDto } from './dto/update-request_item.dto';
+import { CreateRequestItemDto, CreateRequestItemDtoWithFile } from './dto/create-request_item.dto';
+import { UpdateRequestItemDto, UpdateRequestItemDtoWithFile } from './dto/update-request_item.dto';
 import { PageOptionsDto } from 'src/utils/pagination.utils';
 import { RequestStatus } from 'src/enums/request_status.enum';
 import { Roles } from 'src/security/decorator/roles.decorator';
@@ -15,7 +15,7 @@ import { UpdateStatusAcceptDecorator } from './decorator/update-status-accept.de
 import { UpdateStatusRejectDecorator } from './decorator/update-status-reject.decorator';
 import { UpdateStatusArriveDecorator } from './decorator/update-status-arrive.decorator';
 import { UpdateStatusOnTheWayDecorator } from './decorator/update-status-on-the-way.decorator';
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -31,6 +31,7 @@ import {
   UsePipes,
   ValidationPipe,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { RolesGuard } from 'src/security/guards/roles.guard';
 import { ItemType } from 'src/enums/item_type.enum';
@@ -65,8 +66,11 @@ export class RequestItemsController {
   @Post('create-with-file')
   @UseInterceptors(FileInterceptor('request_image', multerConfig))
   @ApiConsumes('multipart/form-data')
-  @CreateRequestDecorator()
-  public async createRequestWithFile(@UploadedFile() file: Express.Multer.File, @Body() body: CreateRequestItemDto){
+  @ApiBody({
+    type: CreateRequestItemDto,
+    description: 'DTO Structure response from create one item',
+  })
+  public async createRequestWithFile(@UploadedFile() file: Express.Multer.File, @Body() body: CreateRequestItemDtoWithFile){
     const data: RequestItem = await this.requestItemsService.createRequestWithFile(body, file);
 
     return {
@@ -123,6 +127,34 @@ export class RequestItemsController {
     @Body() dto: UpdateRequestItemDto,
   ) {
     const instance = await this.requestItemsService.updateRequest(id, dto);
+
+    return {
+      [this.updateRequest.name]: instance,
+    };
+  }
+
+  @UsePipes(new ValidationPipe({ transform: true }))
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN_TJKT', 'ADMIN_TO', 'ADMIN_TE', 'ADMIN_AK')
+  @UseInterceptors(FileInterceptor('request_image', multerConfig))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    type: UpdateRequestItemDtoWithFile,
+    description: "update request dto"
+  })
+  @ApiQuery({
+    name: 'id',
+    description: 'Id request item for update',
+    type: Number,
+    required: true,
+  })
+  @Patch('update-with-file')
+  public async updateRequestWithFile(
+    @Query('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateRequestItemDtoWithFile,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    const instance = await this.requestItemsService.updateRequestWithFile(id, dto, file);
 
     return {
       [this.updateRequest.name]: instance,

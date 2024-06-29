@@ -3,8 +3,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateRequestItemDto } from './dto/create-request_item.dto';
-import { UpdateRequestItemDto } from './dto/update-request_item.dto';
+import { CreateRequestItemDto, CreateRequestItemDtoWithFile } from './dto/create-request_item.dto';
+import { UpdateRequestItemDto, UpdateRequestItemDtoWithFile } from './dto/update-request_item.dto';
 import { IRequestItems } from './request_items.interface';
 import { RequestStatus } from 'src/enums/request_status.enum';
 import { PageDto, PageOptionsDto } from 'src/utils/pagination.utils';
@@ -72,7 +72,7 @@ export class RequestItemsService implements IRequestItems {
     }
   }
 
-  public async createRequestWithFile(body: CreateRequestItemDto, file: Express.Multer.File): Promise<RequestItem> {
+  public async createRequestWithFile(body: CreateRequestItemDtoWithFile, file: Express.Multer.File): Promise<RequestItem> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     queryRunner.connect();
@@ -86,7 +86,7 @@ export class RequestItemsService implements IRequestItems {
         ...body,
         class: classEntity,
         from_major: session.role.major,
-        request_image: file ? file.path : null, // Path gambar
+        request_image: file.filename
       });
       const resultData = await this.requestItemRepository.save(newRequest);
 
@@ -102,7 +102,6 @@ export class RequestItemsService implements IRequestItems {
       console.log({resultData});
 
       return resultData;
-      // return newRequest;
     } catch (error) {
       await queryRunner.rollbackTransaction();
       throw error;
@@ -154,6 +153,46 @@ export class RequestItemsService implements IRequestItems {
       const mergeData: RequestItem = this.requestItemRepository.merge(
         request,
         body,
+      );
+
+      const resultData = await this.requestItemRepository.save(mergeData);
+
+      await this.notificationService.sendNotification({
+        title: 'Request Item Berhasil Diupdate!',
+        content: requestCreateContent,
+        color: 'blue',
+        user_id: session.id,
+      });
+
+      await queryRunner.commitTransaction();
+      return resultData;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updateRequestWithFile(id: number, body: UpdateRequestItemDtoWithFile, file: Express.Multer.File): Promise<RequestItem> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const session: User = await this.authService.getSession();
+
+      const request = await this.requestItemRepository.findById(id);
+
+      if (!request) throw new NotFoundException('Request tidak ditemukan');
+
+      const mergeData: RequestItem = this.requestItemRepository.merge(
+        request,
+        {
+          ...body,
+          request_image: file.filename
+        },
       );
 
       const resultData = await this.requestItemRepository.save(mergeData);

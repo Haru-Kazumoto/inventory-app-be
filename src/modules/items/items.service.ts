@@ -8,7 +8,7 @@ import { IItemsService } from './interfaces/items.service.interface';
 import { ItemsRepository } from './repository/items.repository';
 import { PageOptionsDto, PageDto } from 'src/utils/pagination.utils';
 import { Item } from './entities/item.entity';
-import { UpdateItemDto } from './dto/update-item.dto';
+import { UpdateItemDto, UpdateItemDtoWithFile } from './dto/update-item.dto';
 import { Transactional } from 'typeorm-transactional';
 import { generateRandomNumber } from 'src/utils/modules_utils/item.utils';
 import { ClassRepository } from '../class/repositories/class.repository';
@@ -98,7 +98,7 @@ export class ItemsService implements IItemsService {
       const newItem = this.itemRepository.create({
         ...body,
         class: classEntity,
-        item_image: file ? file.path : null
+        item_image: file.filename
       });
       const resultData = await this.itemRepository.save(newItem);
 
@@ -289,6 +289,59 @@ export class ItemsService implements IItemsService {
       const mergeData: Item = this.itemRepository.merge(findItem, {
         ...body,
         class: findClass,
+      });
+
+      const resultData = await this.itemRepository.save(mergeData);
+
+      //UPDATE AUDIT LOGS
+      await this.auditLogService.createReport({
+        edit_method: EditMethod.UPDATE,
+        edited_by: session.id,
+        item_id: resultData.id,
+      });
+
+      //UPDATE NOTIFICATION
+      await this.notificationService.sendNotification({
+        title: 'Item Berhasil diupdate!',
+        content: `Item ${
+          body.name
+        } baru telah berhasil diupdate ke inventory pada waktu ${new Date()}`,
+        color: 'blue',
+        user_id: session.id,
+      });
+
+      await queryRunner.commitTransaction();
+
+      return resultData;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  async updateOneWithFile(id: number, body: UpdateItemDtoWithFile, file: Express.Multer.File): Promise<Item> {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const session: User = await this.authService.getSession();
+
+      const findItem: Item = await this.itemRepository.findById(id);
+      if (!findItem) throw new NotFoundException('Item tidak ditemukan');
+
+      const findClass: Class = await this.classRepository.findOne({
+        where: { id: body.class_id },
+      });
+      if (!findClass) throw new NotFoundException('Class id tidak ditemukan');
+
+      // Menggunakan merge untuk menggabungkan data yang baru dengan data yang ada di objek findItem
+      const mergeData: Item = this.itemRepository.merge(findItem, {
+        ...body,
+        class: findClass,
+        item_image: file.filename
       });
 
       const resultData = await this.itemRepository.save(mergeData);

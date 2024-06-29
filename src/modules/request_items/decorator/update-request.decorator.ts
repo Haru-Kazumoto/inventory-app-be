@@ -6,7 +6,7 @@ import {
   ApiOkResponse,
   ApiQuery,
 } from '@nestjs/swagger';
-import { UpdateRequestItemDto } from '../dto/update-request_item.dto';
+import { UpdateRequestItemDto, UpdateRequestItemDtoWithFile } from '../dto/update-request_item.dto';
 
 export function UpdateRequestDecorator() {
   return applyDecorators(

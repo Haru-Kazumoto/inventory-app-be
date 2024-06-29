@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ItemCategory } from 'src/enums/item_category.enum';
 import { ItemType } from 'src/enums/item_type.enum';
@@ -36,11 +37,13 @@ export class UpdateItemDto {
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ example: 1000000 })
+  @Transform(({ value }) => parseInt(value, 10)) // Mengonversi string ke number
   public unit_price: number;
 
   @IsNumber()
   @IsNotEmpty()
   @ApiProperty({ example: 1 })
+  @Transform(({ value }) => parseInt(value, 10)) // Mengonversi string ke number
   public class_id: number;
 
   @IsString()
@@ -48,4 +51,9 @@ export class UpdateItemDto {
   @IsEnum(ItemType)
   @ApiProperty({ example: ItemType.NON_ATK })
   public item_type: ItemType;
+}
+
+export class UpdateItemDtoWithFile extends UpdateItemDto {
+  @ApiProperty({type: 'string', format: 'binary', required: true})
+  public item_image: any;
 }

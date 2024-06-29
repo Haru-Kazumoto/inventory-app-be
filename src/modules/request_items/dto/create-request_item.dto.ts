@@ -35,7 +35,9 @@ export class CreateRequestItemDto {
   @Transform(({ value }) => parseInt(value, 10)) // Mengonversi string ke number
   @ApiProperty({ example: 1 })
   public class_id: number;
+}
 
+export class CreateRequestItemDtoWithFile extends CreateRequestItemDto{
   @ApiProperty({type: 'string', format: 'binary', required: true})
   public request_image: any;
 }
