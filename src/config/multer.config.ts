@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { MulterOptions } from "@nestjs/platform-express/multer/interfaces/multer-options.interface";
 import { diskStorage } from "multer";
 import { extname } from 'path';
@@ -13,7 +14,7 @@ export const multerConfig: MulterOptions = {
     limits: { fileSize: 7 * 1024 * 1024 }, //7MB
     fileFilter(req, file, callback) {
         if(!file.mimetype.match(/\/(jpg|jpeg|png)$/)){
-            return callback(new Error("Unsupported file type"), false);
+            return callback(new BadRequestException("Unsupported file type"), false);
         }
 
         callback(null, true);
