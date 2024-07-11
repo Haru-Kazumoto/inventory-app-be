@@ -52,8 +52,8 @@ export class ClassSeeder implements Seeder {
                 major: Major.TO
             },
             {
-                class_name: 'GUDANG',
-                major: Major.TO
+                class_name: 'STORE',
+                major: Major.STORE
             }
         ];
         try{
